@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Biscuit", "Biscuit\Biscuit.csproj", "{D8BBC4AF-0657-4B93-A624-A7BACBCF0C70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Biscuit.Test", "Biscuit.Test\Biscuit.Test.csproj", "{23ED5D92-2EC0-42BE-9DEF-88E2C508B16B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D8BBC4AF-0657-4B93-A624-A7BACBCF0C70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8BBC4AF-0657-4B93-A624-A7BACBCF0C70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8BBC4AF-0657-4B93-A624-A7BACBCF0C70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8BBC4AF-0657-4B93-A624-A7BACBCF0C70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23ED5D92-2EC0-42BE-9DEF-88E2C508B16B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23ED5D92-2EC0-42BE-9DEF-88E2C508B16B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23ED5D92-2EC0-42BE-9DEF-88E2C508B16B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23ED5D92-2EC0-42BE-9DEF-88E2C508B16B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6D897D80-9307-4D96-979C-C8D6746A4C39}
+	EndGlobalSection
+EndGlobal

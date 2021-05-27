@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Schema.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.16.0" />
+    <PackageReference Include="Google.Protobuf.Tools" Version="3.16.0" />
+    <PackageReference Include="Ristretto" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>
