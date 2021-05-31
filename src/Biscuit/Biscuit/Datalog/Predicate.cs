@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Biscuit.Datalog
 {
@@ -9,34 +8,35 @@ namespace Biscuit.Datalog
     public sealed class Predicate
     {
 
-        public ulong name
+        public ulong Name
         {
             get;
         }
 
-        public List<ID> ids
+        public IList<ID> Ids
         {
             get;
         }
 
-        public IEnumerator<ID> ids_iterator()
+        public IEnumerator<ID> IdsEnumerator()
         {
-            return this.ids.GetEnumerator();
+            return this.Ids.GetEnumerator();
         }
 
-        public bool match(Predicate other)
+        public bool Match(Predicate other)
         {
-            if (this.name != other.name)
+            if (this.Name != other.Name)
             {
                 return false;
             }
-            if (this.ids.Count != other.ids.Count)
+            if (this.Ids.Count != other.Ids.Count)
             {
                 return false;
             }
-            for (int i = 0; i < this.ids.Count; ++i)
+
+            for (int i = 0; i < this.Ids.Count; ++i)
             {
-                if (!this.ids[i].match(other.ids[i]))
+                if (!this.Ids[i].Match(other.Ids[i]))
                 {
                     return false;
                 }
@@ -44,17 +44,16 @@ namespace Biscuit.Datalog
             return true;
         }
 
-        public Predicate clone()
+        public Predicate Clone()
         {
-            List<ID> ids = new List<ID>();
-            ids.AddRange(this.ids);
-            return new Predicate(this.name, ids);
+            List<ID> ids = new List<ID>(this.Ids);
+            return new Predicate(this.Name, ids);
         }
 
-        public Predicate(ulong name, List<ID> ids)
+        public Predicate(ulong name, IList<ID> ids)
         {
-            this.name = name;
-            this.ids = ids;
+            this.Name = name;
+            this.Ids = ids;
         }
 
         public override bool Equals(object obj)
@@ -62,46 +61,41 @@ namespace Biscuit.Datalog
             if (this == obj) return true;
             if (obj == null || GetType() != obj.GetType()) return false;
             Predicate predicate = (Predicate)obj;
-            return name == predicate.name && ids.SequenceEqual(predicate.ids); 
+            return Name == predicate.Name && Ids.SequenceEqual(predicate.Ids); 
         }
 
         public override int GetHashCode()
         {
-            return 31 * name.GetHashCode() + ids.GetSequenceHashCode();
-            //return Objects.hash(name, ids);
+            return 31 * Name.GetHashCode() + Ids.GetSequenceHashCode();
         }
 
         public override string ToString()
         {
-            return this.name + "(" + string.Join(", ", this.ids.Select((i)=> (i == null) ? "(null)" : i.ToString()).ToList()) + ")";
+            return this.Name + "(" + string.Join(", ", this.Ids.Select((i)=> (i == null) ? "(null)" : i.ToString()).ToList()) + ")";
         }
 
-
-        public Format.Schema.PredicateV1 serialize()
+        public Format.Schema.PredicateV1 Serialize()
         {
             Format.Schema.PredicateV1 predicate = new Format.Schema.PredicateV1()
             {
-                Name = this.name
+                Name = this.Name
             };
 
-            for (int i = 0; i < this.ids.Count; i++)
-            {
-                predicate.Ids.Add(this.ids[i].serialize());
-            }
+            var serializedIds = this.Ids.Select(i => i.Serialize());
+            predicate.Ids.AddRange(serializedIds);
 
             return predicate;
         }
 
-        static public Either<Errors.FormatError, Predicate> deserializeV0(Format.Schema.PredicateV0 predicate)
+        static public Either<Errors.FormatError, Predicate> DeserializeV0(Format.Schema.PredicateV0 predicate)
         {
-            List<ID> ids = new List<ID>();
+            IList<ID> ids = new List<ID>();
             foreach (Format.Schema.IDV0 id in predicate.Ids)
             {
-                Either<Errors.FormatError, ID> res = ID.deserialize_enumV0(id);
+                Either<Errors.FormatError, ID> res = ID.DeserializeEnumV0(id);
                 if (res.IsLeft)
                 {
-                    Errors.FormatError e = res.Left;
-                    return new Left(e);
+                    return res.Left;
                 }
                 else
                 {
@@ -109,19 +103,18 @@ namespace Biscuit.Datalog
                 }
             }
 
-            return new Right(new Predicate(predicate.Name, ids));
+            return new Predicate(predicate.Name, ids);
         }
 
-        static public Either<Errors.FormatError, Predicate> deserializeV1(Format.Schema.PredicateV1 predicate)
+        static public Either<Errors.FormatError, Predicate> DeserializeV1(Format.Schema.PredicateV1 predicate)
         {
-            List<ID> ids = new List<ID>();
+            IList<ID> ids = new List<ID>();
             foreach (Format.Schema.IDV1 id in predicate.Ids)
             {
-                Either<Errors.FormatError, ID> res = ID.deserialize_enumV1(id);
+                Either<Errors.FormatError, ID> res = ID.DeserializeEnumV1(id);
                 if (res.IsLeft)
                 {
-                    Errors.FormatError e = res.Left;
-                    return new Left(e);
+                    return res.Left;
                 }
                 else
                 {
@@ -129,7 +122,7 @@ namespace Biscuit.Datalog
                 }
             }
 
-            return new Right(new Predicate(predicate.Name, ids));
+            return new Predicate(predicate.Name, ids);
         }
     }
 }

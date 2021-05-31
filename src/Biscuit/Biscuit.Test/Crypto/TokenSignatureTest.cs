@@ -45,7 +45,7 @@ namespace Biscuit.Test.Crypto
             string message2 = "world";
             KeyPair keypair2 = new KeyPair(rng);
             Biscuit.Crypto.Token token2 = token1.append(rng, keypair2, Encoding.UTF8.GetBytes(message2));
-            token2.blocks[1] = Encoding.UTF8.GetBytes("you");
+            token2.Blocks[1] = Encoding.UTF8.GetBytes("you");
             Assert.AreEqual(new Left(new Errors.InvalidSignature()), token2.Verify());
 
             string message3 = "!!";

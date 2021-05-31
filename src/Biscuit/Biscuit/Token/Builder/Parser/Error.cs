@@ -2,8 +2,8 @@
 {
     public class Error
     {
-        string input;
-        string message;
+        readonly string input;
+        readonly string message;
 
         public Error(string input, string message)
         {

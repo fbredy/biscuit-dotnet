@@ -1,28 +1,25 @@
-﻿
-using System;
-
-namespace Biscuit
+﻿namespace Biscuit
 {
     public struct Optional<T>
     {
         T Value;
 
-        internal bool isPresent()
+        internal bool IsPresent()
         {
             return Value != null;
         }
 
-        internal static Optional<T> empty()
+        internal static Optional<T> Empty()
         {
             return new Optional<T>() { Value = default };
         }
 
-        internal static Optional<T> of(T variables)
+        internal static Optional<T> Of(T variables)
         {
             return new Optional<T>() { Value = variables };
         }
 
-        internal T get()
+        internal T Get()
         {
             return Value;
         }

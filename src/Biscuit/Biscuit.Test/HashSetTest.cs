@@ -12,10 +12,10 @@ namespace Biscuit.Test
         [TestMethod]
         public void plop()
         {
-            HashSet<Fact> expected = new HashSet<Fact>(Arrays.asList<Fact>(
-                   new Fact(new Predicate(1, Arrays.asList<ID>(new ID.Str("a"), new ID.Str("c"))))
+            HashSet<Fact> expected = new HashSet<Fact>(Arrays.AsList<Fact>(
+                   new Fact(new Predicate(1, Arrays.AsList<ID>(new ID.Str("a"), new ID.Str("c"))))
                    ));
-            expected.Add(new Fact(new Predicate(1, Arrays.asList<ID>(new ID.Str("a"), new ID.Str("c")))));
+            expected.Add(new Fact(new Predicate(1, Arrays.AsList<ID>(new ID.Str("a"), new ID.Str("c")))));
 
             Assert.AreEqual(1, expected.Count);
         }

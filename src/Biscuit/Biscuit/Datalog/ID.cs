@@ -9,60 +9,61 @@ namespace Biscuit.Datalog
     [Serializable]
     public abstract class ID
     {
-        public abstract bool match(ID other);
-        public abstract Format.Schema.IDV1 serialize();
+        public abstract bool Match(ID other);
 
-        public abstract Term toTerm(SymbolTable symbols);
+        public abstract Format.Schema.IDV1 Serialize();
 
-        static public Either<Errors.FormatError, ID> deserialize_enumV0(Format.Schema.IDV0 id)
+        public abstract Term ToTerm(SymbolTable symbols);
+
+        static public Either<Errors.FormatError, ID> DeserializeEnumV0(Format.Schema.IDV0 id)
         {
             if (id.Kind == Format.Schema.IDV0.Types.Kind.Date)
             {
-                return Date.deserializeV0(id);
+                return Date.DeserializeV0(id);
             }
             else if (id.Kind == Format.Schema.IDV0.Types.Kind.Integer)
             {
-                return Integer.deserializeV0(id);
+                return Integer.DeserializeV0(id);
             }
             else if (id.Kind == Format.Schema.IDV0.Types.Kind.Str)
             {
-                return Str.deserializeV0(id);
+                return Str.DeserializeV0(id);
             }
             else if (id.Kind == Format.Schema.IDV0.Types.Kind.Bytes)
             {
-                return Bytes.deserializeV0(id);
+                return Bytes.DeserializeV0(id);
             }
             else if (id.Kind == Format.Schema.IDV0.Types.Kind.Symbol)
             {
-                return Symbol.deserializeV0(id);
+                return Symbol.DeserializeV0(id);
             }
             else if (id.Kind == Format.Schema.IDV0.Types.Kind.Variable)
             {
-                return Variable.deserializeV0(id);
+                return Variable.DeserializeV0(id);
             }
             else
             {
-                return new Left(new Errors.DeserializationError("invalid ID kind: " + id.Kind));
+                return new Errors.DeserializationError("invalid ID kind: " + id.Kind);
             }
         }
 
-        static public Either<Errors.FormatError, ID> deserialize_enumV1(Format.Schema.IDV1 id)
+        static public Either<Errors.FormatError, ID> DeserializeEnumV1(Format.Schema.IDV1 id)
         {
             if (id.HasDate)
             {
-                return Date.deserializeV1(id);
+                return Date.DeserializeV1(id);
             }
             else if (id.HasInteger)
             {
-                return Integer.deserializeV1(id);
+                return Integer.DeserializeV1(id);
             }
             else if (id.HasString)
             {
-                return Str.deserializeV1(id);
+                return Str.DeserializeV1(id);
             }
             else if (id.HasBytes)
             {
-                return Bytes.deserializeV1(id);
+                return Bytes.DeserializeV1(id);
             }
             else if (id.HasSymbol)
             {
@@ -70,28 +71,28 @@ namespace Biscuit.Datalog
             }
             else if (id.HasVariable)
             {
-                return Variable.deserializeV1(id);
+                return Variable.DeserializeV1(id);
             }
             else if (id.HasBool)
             {
-                return Bool.deserializeV1(id);
+                return Bool.DeserializeV1(id);
             }
             else if (id.Set != null)
             {
-                return Set.deserializeV1(id);
+                return Set.DeserializeV1(id);
             }
             else
             {
-                return new Left(new Errors.DeserializationError("invalid ID kind: id.Kind"));
+                return new Errors.DeserializationError("invalid ID kind: id.Kind");
             }
         }
 
         [Serializable]
         public class Date : ID
         {
-            public ulong value { get; }
+            public ulong Value { get; }
 
-            public override bool match(ID other)
+            public override bool Match(ID other)
             {
                 if (other is Variable)
                 {
@@ -105,7 +106,7 @@ namespace Biscuit.Datalog
 
             public Date(ulong value)
             {
-                this.value = value;
+                this.Value = value;
             }
 
 
@@ -116,61 +117,61 @@ namespace Biscuit.Datalog
 
                 Date date = (Date)o;
 
-                return value == date.value;
+                return Value == date.Value;
             }
 
 
             public override int GetHashCode()
             {
-                return (int)(value ^ (value >> 32));
+                return (int)(Value ^ (Value >> 32));
             }
 
 
             public override string ToString()
             {
-                return "@" + this.value.ToString();
+                return "@" + this.Value.ToString();
             }
 
-            public override Format.Schema.IDV1 serialize()
+            public override Format.Schema.IDV1 Serialize()
             {
-                return new Format.Schema.IDV1() { Date = this.value };
+                return new Format.Schema.IDV1() { Date = this.Value };
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV0(Format.Schema.IDV0 id)
+            static public Either<Errors.FormatError, ID> DeserializeV0(Format.Schema.IDV0 id)
             {
                 if (id.Kind != Format.Schema.IDV0.Types.Kind.Date)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected date"));
+                    return new Errors.DeserializationError("invalid ID kind, expected date");
                 }
                 else
                 {
-                    return new Right(new Date(id.Date));
+                    return new Date(id.Date);
                 }
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV1(Format.Schema.IDV1 id)
+            static public Either<Errors.FormatError, ID> DeserializeV1(Format.Schema.IDV1 id)
             {
                 if (!id.HasDate)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected date"));
+                    return new Errors.DeserializationError("invalid ID kind, expected date");
                 }
                 else
                 {
-                    return new Right(new Date(id.Date));
+                    return new Date(id.Date);
                 }
             }
 
-            public override Term toTerm(SymbolTable symbols)
+            public override Term ToTerm(SymbolTable symbols)
             {
-                return new Term.Date(this.value);
+                return new Term.Date(this.Value);
             }
         }
         [Serializable]
         public class Integer : ID
         {
-            public long value { get; }
+            public long Value { get; }
 
-            public override bool match(ID other)
+            public override bool Match(ID other)
             {
                 if (other is Variable)
                 {
@@ -178,14 +179,14 @@ namespace Biscuit.Datalog
                 }
                 if (other is Integer)
                 {
-                    return this.value == ((Integer)other).value;
+                    return this.Value == ((Integer)other).Value;
                 }
                 return false;
             }
 
             public Integer(long value)
             {
-                this.value = value;
+                this.Value = value;
             }
 
 
@@ -196,61 +197,62 @@ namespace Biscuit.Datalog
 
                 Integer integer = (Integer)o;
 
-                return value == integer.value;
+                return Value == integer.Value;
             }
 
 
             public override int GetHashCode()
             {
-                return (int)(value ^ (value >> 32));
+                return (int)(Value ^ (Value >> 32));
             }
 
 
             public override string ToString()
             {
-                return string.Empty + this.value.ToString();
+                return string.Empty + this.Value.ToString();
             }
 
-            public override Format.Schema.IDV1 serialize()
+            public override Format.Schema.IDV1 Serialize()
             {
-                return new Format.Schema.IDV1() { Integer = this.value };
+                return new Format.Schema.IDV1() { Integer = this.Value };
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV0(Format.Schema.IDV0 id)
+            static public Either<Errors.FormatError, ID> DeserializeV0(Format.Schema.IDV0 id)
             {
                 if (id.Kind != Format.Schema.IDV0.Types.Kind.Integer)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected integer"));
+                    return new Errors.DeserializationError("invalid ID kind, expected integer");
                 }
                 else
                 {
-                    return new Right(new Integer(id.Integer));
+                    return new Integer(id.Integer);
                 }
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV1(Format.Schema.IDV1 id)
+            static public Either<Errors.FormatError, ID> DeserializeV1(Format.Schema.IDV1 id)
             {
                 if (!id.HasInteger)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected integer"));
+                    return new Errors.DeserializationError("invalid ID kind, expected integer");
                 }
                 else
                 {
-                    return new Right(new Integer(id.Integer));
+                    return new Integer(id.Integer);
                 }
             }
 
-            public override Term toTerm(SymbolTable symbols)
+            public override Term ToTerm(SymbolTable symbols)
             {
-                return new Term.Integer(this.value);
+                return new Term.Integer(this.Value);
             }
         }
+
         [Serializable]
         public class Str : ID
         {
-            public string value { get; }
+            public string Value { get; }
 
-            public override bool match(ID other)
+            public override bool Match(ID other)
             {
                 if (other is Variable)
                 {
@@ -258,14 +260,14 @@ namespace Biscuit.Datalog
                 }
                 if (other is Str)
                 {
-                    return this.value.Equals(((Str)other).value);
+                    return this.Value.Equals(((Str)other).Value);
                 }
                 return false;
             }
 
             public Str(string value)
             {
-                this.value = value;
+                this.Value = value;
             }
 
 
@@ -276,62 +278,62 @@ namespace Biscuit.Datalog
 
                 Str str = (Str)o;
 
-                return value != null ? value.Equals(str.value) : str.value == null;
+                return Value != null ? Value.Equals(str.Value) : str.Value == null;
             }
 
 
             public override int GetHashCode()
             {
-                return value != null ? value.GetHashCode() : 0;
+                return Value != null ? Value.GetHashCode() : 0;
             }
 
 
             public override string ToString()
             {
-                return this.value.ToString();
+                return this.Value.ToString();
             }
 
-            public override Format.Schema.IDV1 serialize()
+            public override Format.Schema.IDV1 Serialize()
             {
-                return new Format.Schema.IDV1() { String = this.value };
+                return new Format.Schema.IDV1() { String = this.Value };
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV0(Format.Schema.IDV0 id)
+            static public Either<Errors.FormatError, ID> DeserializeV0(Format.Schema.IDV0 id)
             {
                 if (id.Kind != Format.Schema.IDV0.Types.Kind.Str)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected string"));
+                    return new Errors.DeserializationError("invalid ID kind, expected string");
                 }
                 else
                 {
-                    return new Right(new Str(id.Str));
+                    return new Str(id.Str);
                 }
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV1(Format.Schema.IDV1 id)
+            static public Either<Errors.FormatError, ID> DeserializeV1(Format.Schema.IDV1 id)
             {
                 if (!id.HasString)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected string"));
+                    return new Errors.DeserializationError("invalid ID kind, expected string");
                 }
                 else
                 {
-                    return new Right(new Str(id.String));
+                    return new Str(id.String);
                 }
             }
 
-            public override Term toTerm(SymbolTable symbols)
+            public override Term ToTerm(SymbolTable symbols)
             {
-                return new Term.Str(this.value);
+                return new Term.Str(this.Value);
             }
         }
 
         [Serializable]
         public class Bytes : ID
         {
-            public byte[] value { get; }
+            public byte[] Value { get; }
 
-            public override bool match(ID other)
+            public override bool Match(ID other)
             {
                 if (other is Variable)
                 {
@@ -339,14 +341,14 @@ namespace Biscuit.Datalog
                 }
                 if (other is Bytes)
                 {
-                    return this.value.Equals(((Bytes)other).value);
+                    return this.Value.Equals(((Bytes)other).Value);
                 }
                 return false;
             }
 
             public Bytes(byte[] value)
             {
-                this.value = value;
+                this.Value = value;
             }
 
 
@@ -357,67 +359,67 @@ namespace Biscuit.Datalog
 
                 Bytes bytes = (Bytes)o;
 
-                return value.SequenceEqual(bytes.value);
+                return Value.SequenceEqual(bytes.Value);
             }
 
 
             public override int GetHashCode()
             {
-                return value.GetHashCode();
+                return Value.GetHashCode();
             }
 
 
             public override string ToString()
             {
-                return this.value.ToString();
+                return this.Value.ToString();
             }
 
-            public override Format.Schema.IDV1 serialize()
+            public override Format.Schema.IDV1 Serialize()
             {
                 return new Format.Schema.IDV1()
                 {
-                    Bytes = ByteString.CopyFrom(this.value)
+                    Bytes = ByteString.CopyFrom(this.Value)
                 };
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV0(Format.Schema.IDV0 id)
+            static public Either<Errors.FormatError, ID> DeserializeV0(Format.Schema.IDV0 id)
             {
                 if (id.Kind != Format.Schema.IDV0.Types.Kind.Str)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected byte array"));
+                    return new Errors.DeserializationError("invalid ID kind, expected byte array");
                 }
                 else
                 {
-                    return new Right(new Str(id.Str));
+                    return new Str(id.Str);
                 }
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV1(Format.Schema.IDV1 id)
+            static public Either<Errors.FormatError, ID> DeserializeV1(Format.Schema.IDV1 id)
             {
                 if (!id.HasBytes)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected byte array"));
+                    return new Errors.DeserializationError("invalid ID kind, expected byte array");
                 }
                 else
                 {
-                    return new Right(new Bytes(id.Bytes.ToByteArray()));
+                    return new Bytes(id.Bytes.ToByteArray());
                 }
             }
 
-            public override Term toTerm(SymbolTable symbols)
+            public override Term ToTerm(SymbolTable symbols)
             {
-                return new Term.Bytes(this.value);
+                return new Term.Bytes(this.Value);
             }
         }
         [Serializable]
         public class Symbol : ID
         {
-            public ulong value
+            public ulong Value
             {
                 get;
             }
 
-            public override bool match(ID other)
+            public override bool Match(ID other)
             {
                 if (other is Variable)
                 {
@@ -425,14 +427,14 @@ namespace Biscuit.Datalog
                 }
                 if (other is Symbol)
                 {
-                    return this.value == ((Symbol)other).value;
+                    return this.Value == ((Symbol)other).Value;
                 }
                 return false;
             }
 
             public Symbol(ulong value)
             {
-                this.value = value;
+                this.Value = value;
             }
 
             public override bool Equals(object o)
@@ -442,35 +444,35 @@ namespace Biscuit.Datalog
 
                 Symbol symbol = (Symbol)o;
 
-                if (value != symbol.value) return false;
+                if (Value != symbol.Value) return false;
 
                 return true;
             }
 
             public override int GetHashCode()
             {
-                return (int)(value ^ (value >> 32));
+                return (int)(Value ^ (Value >> 32));
             }
 
             public override string ToString()
             {
-                return "#" + this.value;
+                return "#" + this.Value;
             }
 
-            public override Format.Schema.IDV1 serialize()
+            public override Format.Schema.IDV1 Serialize()
             {
-                return new Format.Schema.IDV1() { Symbol = this.value };
+                return new Format.Schema.IDV1() { Symbol = this.Value };
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV0(Format.Schema.IDV0 id)
+            static public Either<Errors.FormatError, ID> DeserializeV0(Format.Schema.IDV0 id)
             {
                 if (id.Kind != Format.Schema.IDV0.Types.Kind.Symbol)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected symbol"));
+                    return new Errors.DeserializationError("invalid ID kind, expected symbol");
                 }
                 else
                 {
-                    return new Right(new Symbol(id.Symbol));
+                    return new Symbol(id.Symbol);
                 }
             }
 
@@ -478,40 +480,41 @@ namespace Biscuit.Datalog
             {
                 if (!id.HasSymbol)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected symbol"));
+                    return new Errors.DeserializationError("invalid ID kind, expected symbol");
                 }
                 else
                 {
-                    return new Right(new Symbol(id.Symbol));
+                    return new Symbol(id.Symbol);
                 }
             }
 
-            public override Term toTerm(SymbolTable symbols)
+            public override Term ToTerm(SymbolTable symbols)
             {
-                return new Term.Symbol(symbols.print_symbol((int)this.value));
+                return new Term.Symbol(symbols.PrintSymbol((int)this.Value));
             }
         }
+
         [Serializable]
         public class Variable : ID
         {
-            public ulong value
+            public ulong Value
             {
                 get;
             }
 
-            public override bool match(ID other)
+            public override bool Match(ID other)
             {
                 return true;
             }
 
             public Variable(ulong value)
             {
-                this.value = value;
+                this.Value = value;
             }
 
             public Variable(long value)
             {
-                this.value = (ulong)value;
+                this.Value = (ulong)value;
             }
 
             public override bool Equals(object o)
@@ -521,62 +524,63 @@ namespace Biscuit.Datalog
 
                 Variable variable = (Variable)o;
 
-                return value == variable.value;
+                return Value == variable.Value;
             }
 
             public override int GetHashCode()
             {
-                return (int)(value ^ (value >> 32));
+                return (int)(Value ^ (Value >> 32));
             }
 
             public override string ToString()
             {
-                return this.value + "?";
+                return this.Value + "?";
             }
 
-            public override Format.Schema.IDV1 serialize()
+            public override Format.Schema.IDV1 Serialize()
             {
-                return new Format.Schema.IDV1() { Variable = (uint)this.value };
+                return new Format.Schema.IDV1() { Variable = (uint)this.Value };
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV0(Format.Schema.IDV0 id)
+            static public Either<Errors.FormatError, ID> DeserializeV0(Format.Schema.IDV0 id)
             {
                 if (id.Kind != Format.Schema.IDV0.Types.Kind.Variable)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected variable"));
+                    return new Errors.DeserializationError("invalid ID kind, expected variable");
                 }
                 else
                 {
-                    return new Right(new Variable(id.Variable));
+                    return new Variable(id.Variable);
                 }
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV1(Format.Schema.IDV1 id)
+            static public Either<Errors.FormatError, ID> DeserializeV1(Format.Schema.IDV1 id)
             {
                 if (!id.HasVariable)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected variable"));
+                    return new Errors.DeserializationError("invalid ID kind, expected variable");
                 }
                 else
                 {
-                    return new Right(new Variable(id.Variable));
+                    return new Variable(id.Variable);
                 }
             }
 
-            public override Term toTerm(SymbolTable symbols)
+            public override Term ToTerm(SymbolTable symbols)
             {
-                return new Term.Variable(symbols.print_symbol((int)this.value));
+                return new Term.Variable(symbols.PrintSymbol((int)this.Value));
             }
         }
+
         [Serializable]
         public class Bool : ID
         {
-            public bool value
+            public bool Value
             {
                 get;
             }
 
-            public override bool match(ID other)
+            public override bool Match(ID other)
             {
                 if (other is Variable)
                 {
@@ -584,14 +588,14 @@ namespace Biscuit.Datalog
                 }
                 if (other is Bool)
                 {
-                    return this.value == ((Bool)other).value;
+                    return this.Value == ((Bool)other).Value;
                 }
                 return false;
             }
 
             public Bool(bool value)
             {
-                this.value = value;
+                this.Value = value;
             }
 
 
@@ -602,67 +606,67 @@ namespace Biscuit.Datalog
 
                 Bool boolean = (Bool)o;
 
-                return value == boolean.value;
+                return Value == boolean.Value;
             }
 
             public override int GetHashCode()
             {
-                return (value ? 1 : 0);
+                return (Value ? 1 : 0);
             }
 
 
             public override string ToString()
             {
-                return "" + this.value;
+                return "" + this.Value;
             }
 
-            public override Format.Schema.IDV1 serialize()
+            public override Format.Schema.IDV1 Serialize()
             {
-                return new Format.Schema.IDV1() { Bool = this.value };
+                return new Format.Schema.IDV1() { Bool = this.Value };
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV1(Format.Schema.IDV1 id)
+            static public Either<Errors.FormatError, ID> DeserializeV1(Format.Schema.IDV1 id)
             {
                 if (!id.HasBool)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected bool"));
+                    return new Errors.DeserializationError("invalid ID kind, expected bool");
                 }
                 else
                 {
-                    return new Right(new Bool(id.Bool));
+                    return new Bool(id.Bool);
                 }
             }
 
-            public override Term toTerm(SymbolTable symbols)
+            public override Term ToTerm(SymbolTable symbols)
             {
-                return new Term.Bool(this.value);
+                return new Term.Bool(this.Value);
             }
         }
 
         [Serializable]
         public class Set : ID
         {
-            public HashSet<ID> value
+            public HashSet<ID> Value
             {
                 get;
             }
 
-            public override bool match(ID other)
+            public override bool Match(ID other)
             {
                 if (other is Variable)
                 {
                     return true;
                 }
-                if (other is Set)
+                if (other is Set set)
                 {
-                    return this.value.Equals(((Set)other).value);
+                    return this.Value.Equals(set.Value);
                 }
                 return false;
             }
 
             public Set(HashSet<ID> value)
             {
-                this.value = value;
+                this.Value = value;
             }
 
             public override bool Equals(object o)
@@ -672,35 +676,34 @@ namespace Biscuit.Datalog
 
                 Set set = (Set)o;
 
-                return value.Equals(set.value);
+                return Value.Equals(set.Value);
             }
 
 
             public override int GetHashCode()
             {
-                return value.GetHashCode();
+                return Value.GetHashCode();
             }
 
 
             public override string ToString()
             {
-                return "" +
-                        value;
+                return "" + Value;
             }
 
-            public override Format.Schema.IDV1 serialize()
+            public override Format.Schema.IDV1 Serialize()
             {
                 Format.Schema.IDSet s = new Format.Schema.IDSet();
-                s.Set.AddRange(this.value.Select(l => l.serialize()));
+                s.Set.AddRange(this.Value.Select(l => l.Serialize()));
 
                 return new Format.Schema.IDV1() { Set = s };
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV1(Format.Schema.IDV1 id)
+            static public Either<Errors.FormatError, ID> DeserializeV1(Format.Schema.IDV1 id)
             {
                 if (id.Set == null)
                 {
-                    return new Left(new Errors.DeserializationError("invalid ID kind, expected set"));
+                    return new Errors.DeserializationError("invalid ID kind, expected set");
                 }
                 else
                 {
@@ -709,11 +712,10 @@ namespace Biscuit.Datalog
 
                     foreach (Format.Schema.IDV1 l in s.Set)
                     {
-                        Either<Errors.FormatError, ID> res = ID.deserialize_enumV1(l);
+                        Either<Errors.FormatError, ID> res = ID.DeserializeEnumV1(l);
                         if (res.IsLeft)
                         {
-                            Errors.FormatError e = res.Left;
-                            return new Left(e);
+                            return res.Left;
                         }
                         else
                         {
@@ -721,7 +723,7 @@ namespace Biscuit.Datalog
 
                             if (value is Variable)
                             {
-                                return new Left(new Errors.DeserializationError("sets cannot contain variables"));
+                                return new Errors.DeserializationError("sets cannot contain variables");
                             }
 
                             values.Add(value);
@@ -730,25 +732,25 @@ namespace Biscuit.Datalog
 
                     if (values.Count == 0)
                     {
-                        return new Left(new Errors.DeserializationError("invalid Set value"));
+                        return new Errors.DeserializationError("invalid Set value");
                     }
                     else
                     {
-                        return new Right(new Set(values));
+                        return new Set(values);
                     }
                 }
             }
 
-            public override Term toTerm(SymbolTable symbols)
+            public override Term ToTerm(SymbolTable symbols)
             {
-                HashSet<Term> s = new HashSet<Term>();
+                HashSet<Term> set = new HashSet<Term>();
 
-                foreach (ID i in this.value)
+                foreach (ID i in this.Value)
                 {
-                    s.Add(i.toTerm(symbols));
+                    set.Add(i.ToTerm(symbols));
                 }
 
-                return new Term.Set(s);
+                return new Term.Set(set);
             }
         }
     }

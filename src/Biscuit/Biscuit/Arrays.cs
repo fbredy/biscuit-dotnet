@@ -5,12 +5,12 @@ namespace Biscuit
 {
     public class Arrays
     {
-        public static List<T> asList<T>(params T[] obj)
+        public static List<T> AsList<T>(params T[] obj)
         {
             return obj.ToList();
         }
 
-        public static bool equals<T>(IEnumerable<T> a, IEnumerable<T> b)
+        public static bool Equals<T>(IEnumerable<T> a, IEnumerable<T> b)
         {
             bool result = (a == null && b == null);
 

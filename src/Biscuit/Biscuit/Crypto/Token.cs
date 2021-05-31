@@ -7,34 +7,30 @@ namespace Biscuit.Crypto
 {
     public class Token
     {
-        public List<byte[]> blocks { get; }
-        public List<RistrettoElement> keys { get; }
-        public TokenSignature signature { get; }
+        public IList<byte[]> Blocks { get; }
+        public IList<RistrettoElement> Keys { get; }
+        public TokenSignature Signature { get; }
 
         public Token(RNGCryptoServiceProvider rng, KeyPair keypair, byte[] message)
         {
-            this.signature = new TokenSignature(rng, keypair, message);
-            this.blocks = new List<byte[]>();
-            this.blocks.Add(message);
-            this.keys = new List<RistrettoElement>();
-            this.keys.Add(keypair.Public_key);
+            this.Signature = new TokenSignature(rng, keypair, message);
+            this.Blocks = new List<byte[]> { message };
+            this.Keys = new List<RistrettoElement> { keypair.PublicKey };
         }
 
-        public Token(List<byte[]> blocks, List<RistrettoElement> keys, TokenSignature signature)
+        public Token(IList<byte[]> blocks, IList<RistrettoElement> keys, TokenSignature signature)
         {
-            this.signature = signature;
-            this.blocks = blocks;
-            this.keys = keys;
+            this.Signature = signature;
+            this.Blocks = blocks;
+            this.Keys = keys;
         }
 
         public Token append(RNGCryptoServiceProvider rng, KeyPair keypair, byte[] message)
         {
-            TokenSignature signature = this.signature.Sign(rng, keypair, message);
-
-
-            Token token = new Token(this.blocks, this.keys, signature);
-            token.blocks.Add(message);
-            token.keys.Add(keypair.Public_key);
+            TokenSignature signature = this.Signature.Sign(rng, keypair, message);
+            Token token = new Token(this.Blocks, this.Keys, signature);
+            token.Blocks.Add(message);
+            token.Keys.Add(keypair.PublicKey);
 
             return token;
         }
@@ -42,7 +38,7 @@ namespace Biscuit.Crypto
         // FIXME: rust version returns a Result<(), error::Signature>
         public Either<Error, Void> Verify()
         {
-            return this.signature.Verify(this.keys, this.blocks);
+            return this.Signature.Verify(this.Keys, this.Blocks);
         }
     }
 }

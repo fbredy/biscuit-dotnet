@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Biscuit.Errors;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -6,52 +6,51 @@ namespace Biscuit.Datalog.Expressions
 {
     public abstract class Op
     {
-        public abstract bool evaluate(Stack<ID> stack, Dictionary<ulong, ID> variables);
+        public abstract bool Evaluate(Stack<ID> stack, Dictionary<ulong, ID> variables);
 
-        public abstract string print(Stack<string> stack, SymbolTable symbols);
+        public abstract string Print(Stack<string> stack, SymbolTable symbols);
 
-        public abstract Format.Schema.Op serialize();
+        public abstract Format.Schema.Op Serialize();
 
-        static public Either<Errors.FormatError, Op> deserializeV1(Format.Schema.Op op)
+        static public Either<FormatError, Op> DeserializeV1(Format.Schema.Op op)
         {
             if (op.Value != null)
             {
-                return ID.deserialize_enumV1(op.Value).Select<Op>(v => new Op.Value(v));
+                return ID.DeserializeEnumV1(op.Value).Select<Op>(v => new Op.Value(v));
             }
             else if (op.Unary != null)
             {
-                return Op.Unary.deserializeV1(op.Unary);
+                return Op.Unary.DeserializeV1(op.Unary);
             }
             else if (op.Binary != null)
             {
-                return Op.Binary.deserializeV1(op.Binary);
+                return Op.Binary.DeserializeV1(op.Binary);
             }
             else
             {
-                return new Left(new Errors.DeserializationError("invalid unary operation"));
+                return new DeserializationError("invalid unary operation");
             }
         }
 
         public sealed class Value : Op
         {
-            private ID value;
+            private readonly ID value;
 
             public Value(ID value)
             {
                 this.value = value;
             }
 
-            public ID getValue()
+            public ID GetValue()
             {
                 return value;
             }
 
-            public override bool evaluate(Stack<ID> stack, Dictionary<ulong, ID> variables)
+            public override bool Evaluate(Stack<ID> stack, Dictionary<ulong, ID> variables)
             {
-                if (value is ID.Variable)
+                if (value is ID.Variable idVar)
                 {
-                    ID.Variable var = (ID.Variable)value;
-                    ID valueVar = variables[var.value];
+                    ID valueVar = variables[idVar.Value];
                     if (valueVar != null)
                     {
                         stack.Push(valueVar);
@@ -69,21 +68,22 @@ namespace Biscuit.Datalog.Expressions
                 }
             }
 
-            public override string print(Stack<string> stack, SymbolTable symbols)
+            public override string Print(Stack<string> stack, SymbolTable symbols)
             {
-                string s = symbols.print_id(value);
-                stack.Push(s);
-                return s;
+                string idPrinted = symbols.PrintId(value);
+                stack.Push(idPrinted);
+                return idPrinted;
             }
 
 
-            public override Format.Schema.Op serialize()
+            public override Format.Schema.Op Serialize()
             {
-                Format.Schema.Op b = new Format.Schema.Op();
+                Format.Schema.Op op = new Format.Schema.Op
+                {
+                    Value = this.value.Serialize()
+                };
 
-                b.Value = this.value.serialize();
-
-                return b;
+                return op;
             }
 
             public override bool Equals(object obj)
@@ -91,9 +91,9 @@ namespace Biscuit.Datalog.Expressions
                 if (this == obj) return true;
                 if (obj == null || !(obj is Value)) return false;
 
-                Value value1 = (Value)obj;
+                Value other = (Value)obj;
 
-                return value.Equals(value1.value);
+                return value.Equals(other.value);
             }
 
 
@@ -117,29 +117,28 @@ namespace Biscuit.Datalog.Expressions
 
         public sealed class Unary : Op
         {
-            private UnaryOp op;
+            private readonly UnaryOp op;
 
             public Unary(UnaryOp op)
             {
                 this.op = op;
             }
 
-            public UnaryOp getOp()
+            public UnaryOp GetOp()
             {
                 return op;
             }
 
 
-            public override bool evaluate(Stack<ID> stack, Dictionary<ulong, ID> variables)
+            public override bool Evaluate(Stack<ID> stack, Dictionary<ulong, ID> variables)
             {
                 ID value = stack.Pop();
                 switch (this.op)
                 {
                     case UnaryOp.Negate:
-                        if (value is ID.Bool)
+                        if (value is ID.Bool idBool)
                         {
-                            ID.Bool b = (ID.Bool)value;
-                            stack.Push(new ID.Bool(!b.value));
+                            stack.Push(new ID.Bool(!idBool.Value));
                         }
                         else
                         {
@@ -150,17 +149,17 @@ namespace Biscuit.Datalog.Expressions
                         stack.Push(value);
                         break;
                     case UnaryOp.Length:
-                        if (value is ID.Str)
+                        if (value is ID.Str str)
                         {
-                            stack.Push(new ID.Integer(((ID.Str)value).value.Length));
+                            stack.Push(new ID.Integer(str.Value.Length));
                         }
-                        else if (value is ID.Bytes)
+                        else if (value is ID.Bytes bytes)
                         {
-                            stack.Push(new ID.Integer(((ID.Bytes)value).value.Length));
+                            stack.Push(new ID.Integer(bytes.Value.Length));
                         }
-                        else if (value is ID.Set)
+                        else if (value is ID.Set set)
                         {
-                            stack.Push(new ID.Integer(((ID.Set)value).value.Count));
+                            stack.Push(new ID.Integer(set.Value.Count));
                         }
                         else
                         {
@@ -172,62 +171,58 @@ namespace Biscuit.Datalog.Expressions
             }
 
 
-            public override string print(Stack<string> stack, SymbolTable symbols)
+            public override string Print(Stack<string> stack, SymbolTable symbols)
             {
                 string prec = stack.Pop();
-                string _s = "";
+                string result = string.Empty;
                 switch (this.op)
                 {
                     case UnaryOp.Negate:
-                        _s = "! " + prec;
-                        stack.Push(_s);
+                        result = "! " + prec;
+                        stack.Push(result);
                         break;
                     case UnaryOp.Parens:
-                        _s = "(" + prec + ")";
-                        stack.Push(_s);
+                        result = "(" + prec + ")";
+                        stack.Push(result);
                         break;
                 }
-                return _s;
+                return result;
             }
 
 
-            public override Format.Schema.Op serialize()
+            public override Format.Schema.Op Serialize()
             {
-                Format.Schema.Op b = new Format.Schema.Op();
+                Format.Schema.Op result = new Format.Schema.Op();
 
-                Format.Schema.OpUnary b1 = new Format.Schema.OpUnary();
+                Format.Schema.OpUnary opUnary = new Format.Schema.OpUnary();
 
                 switch (this.op)
                 {
                     case UnaryOp.Negate:
-                        b1.Kind = Format.Schema.OpUnary.Types.Kind.Negate;
+                        opUnary.Kind = Format.Schema.OpUnary.Types.Kind.Negate;
                         break;
                     case UnaryOp.Parens:
-                        b1.Kind = Format.Schema.OpUnary.Types.Kind.Parens;
+                        opUnary.Kind = Format.Schema.OpUnary.Types.Kind.Parens;
                         break;
                     case UnaryOp.Length:
-                        b1.Kind = Format.Schema.OpUnary.Types.Kind.Length;
+                        opUnary.Kind = Format.Schema.OpUnary.Types.Kind.Length;
                         break;
                 }
 
-                b.Unary = b1;
+                result.Unary = opUnary;
 
-                return b;
+                return result;
             }
 
-            static public Either<Errors.FormatError, Op> deserializeV1(Format.Schema.OpUnary op)
+            static public Either<FormatError, Op> DeserializeV1(Format.Schema.OpUnary op)
             {
-                switch (op.Kind)
+                return op.Kind switch
                 {
-                    case Format.Schema.OpUnary.Types.Kind.Negate:
-                        return new Right(new Op.Unary(UnaryOp.Negate));
-                    case Format.Schema.OpUnary.Types.Kind.Parens:
-                        return new Right(new Op.Unary(UnaryOp.Parens));
-                    case Format.Schema.OpUnary.Types.Kind.Length:
-                        return new Right(new Op.Unary(UnaryOp.Length));
-                }
-
-                return new Left(new Errors.DeserializationError("invalid unary operation"));
+                    Format.Schema.OpUnary.Types.Kind.Negate => new Op.Unary(UnaryOp.Negate),
+                    Format.Schema.OpUnary.Types.Kind.Parens => new Op.Unary(UnaryOp.Parens),
+                    Format.Schema.OpUnary.Types.Kind.Length => new Op.Unary(UnaryOp.Length),
+                    _ => new DeserializationError("invalid unary operation"),
+                };
             }
 
             public override string ToString()
@@ -235,7 +230,7 @@ namespace Biscuit.Datalog.Expressions
                 return "Unary." + op;
             }
 
-            public override bool Equals(Object o)
+            public override bool Equals(object o)
             {
                 if (this == o) return true;
                 if (o == null || !(o is Unary)) return false;
@@ -274,19 +269,19 @@ namespace Biscuit.Datalog.Expressions
 
         public sealed class Binary : Op
         {
-            private BinaryOp op;
+            private readonly BinaryOp op;
 
             public Binary(BinaryOp value)
             {
                 this.op = value;
             }
 
-            public BinaryOp getOp()
+            public BinaryOp GetOp()
             {
                 return op;
             }
 
-            public override bool evaluate(Stack<ID> stack, Dictionary<ulong, ID> variables)
+            public override bool Evaluate(Stack<ID> stack, Dictionary<ulong, ID> variables)
             {
                 ID right = stack.Pop();
                 ID left = stack.Pop();
@@ -294,83 +289,83 @@ namespace Biscuit.Datalog.Expressions
                 switch (this.op)
                 {
                     case BinaryOp.LessThan:
-                        if (right is ID.Integer && left is ID.Integer)
+                        if (right is ID.Integer rightInteger && left is ID.Integer leftInteger)
                         {
-                            stack.Push(new ID.Bool(((ID.Integer)left).value < ((ID.Integer)right).value));
+                            stack.Push(new ID.Bool(leftInteger.Value < rightInteger.Value));
                             return true;
                         }
-                        if (right is ID.Date && left is ID.Date)
+                        if (right is ID.Date rightDate && left is ID.Date leftDate)
                         {
-                            stack.Push(new ID.Bool(((ID.Date)left).value < ((ID.Date)right).value));
+                            stack.Push(new ID.Bool(leftDate.Value < rightDate.Value));
                             return true;
                         }
                         break;
                     case BinaryOp.GreaterThan:
                         if (right is ID.Integer && left is ID.Integer)
                         {
-                            stack.Push(new ID.Bool(((ID.Integer)left).value > ((ID.Integer)right).value));
+                            stack.Push(new ID.Bool(((ID.Integer)left).Value > ((ID.Integer)right).Value));
                             return true;
                         }
                         if (right is ID.Date && left is ID.Date)
                         {
-                            stack.Push(new ID.Bool(((ID.Date)left).value > ((ID.Date)right).value));
+                            stack.Push(new ID.Bool(((ID.Date)left).Value > ((ID.Date)right).Value));
                             return true;
                         }
                         break;
                     case BinaryOp.LessOrEqual:
                         if (right is ID.Integer && left is ID.Integer)
                         {
-                            stack.Push(new ID.Bool(((ID.Integer)left).value <= ((ID.Integer)right).value));
+                            stack.Push(new ID.Bool(((ID.Integer)left).Value <= ((ID.Integer)right).Value));
                             return true;
                         }
                         if (right is ID.Date && left is ID.Date)
                         {
-                            stack.Push(new ID.Bool(((ID.Date)left).value <= ((ID.Date)right).value));
+                            stack.Push(new ID.Bool(((ID.Date)left).Value <= ((ID.Date)right).Value));
                             return true;
                         }
                         break;
                     case BinaryOp.GreaterOrEqual:
                         if (right is ID.Integer && left is ID.Integer)
                         {
-                            stack.Push(new ID.Bool(((ID.Integer)left).value >= ((ID.Integer)right).value));
+                            stack.Push(new ID.Bool(((ID.Integer)left).Value >= ((ID.Integer)right).Value));
                             return true;
                         }
                         if (right is ID.Date && left is ID.Date)
                         {
-                            stack.Push(new ID.Bool(((ID.Date)left).value >= ((ID.Date)right).value));
+                            stack.Push(new ID.Bool(((ID.Date)left).Value >= ((ID.Date)right).Value));
                             return true;
                         }
                         break;
                     case BinaryOp.Equal:
                         if (right is ID.Integer && left is ID.Integer)
                         {
-                            stack.Push(new ID.Bool(((ID.Integer)left).value == ((ID.Integer)right).value));
+                            stack.Push(new ID.Bool(((ID.Integer)left).Value == ((ID.Integer)right).Value));
                             return true;
                         }
                         if (right is ID.Str && left is ID.Str)
                         {
-                            stack.Push(new ID.Bool(((ID.Str)left).value.Equals(((ID.Str)right).value)));
+                            stack.Push(new ID.Bool(((ID.Str)left).Value.Equals(((ID.Str)right).Value)));
                             return true;
                         }
                         if (right is ID.Bytes && left is ID.Bytes)
                         {
-                            stack.Push(new ID.Bool(Arrays.equals(((ID.Bytes)left).value, (((ID.Bytes)right).value))));
+                            stack.Push(new ID.Bool(Arrays.Equals(((ID.Bytes)left).Value, (((ID.Bytes)right).Value))));
                             return true;
                         }
                         if (right is ID.Date && left is ID.Date)
                         {
-                            stack.Push(new ID.Bool(((ID.Date)left).value == ((ID.Date)right).value));
+                            stack.Push(new ID.Bool(((ID.Date)left).Value == ((ID.Date)right).Value));
                             return true;
                         }
                         if (right is ID.Symbol && left is ID.Symbol)
                         {
-                            stack.Push(new ID.Bool(((ID.Symbol)left).value == ((ID.Symbol)right).value));
+                            stack.Push(new ID.Bool(((ID.Symbol)left).Value == ((ID.Symbol)right).Value));
                             return true;
                         }
                         if (right is ID.Set && left is ID.Set)
                         {
-                            HashSet<ID> leftSet = ((ID.Set)left).value;
-                            HashSet<ID> rightSet = ((ID.Set)right).value;
+                            HashSet<ID> leftSet = ((ID.Set)left).Value;
+                            HashSet<ID> rightSet = ((ID.Set)right).Value;
                             stack.Push(new ID.Bool(leftSet.Count == rightSet.Count && leftSet.ContainsAll(rightSet)));
                             return true;
                         }
@@ -381,13 +376,13 @@ namespace Biscuit.Datalog.Expressions
                                 || right is ID.Bool || right is ID.Symbol))
                         {
 
-                            stack.Push(new ID.Bool(((ID.Set)left).value.Contains(right)));
+                            stack.Push(new ID.Bool(((ID.Set)left).Value.Contains(right)));
                             return true;
                         }
                         if (right is ID.Set && left is ID.Set)
                         {
-                            HashSet<ID> leftSet = ((ID.Set)left).value;
-                            HashSet<ID> rightSet = ((ID.Set)right).value;
+                            HashSet<ID> leftSet = ((ID.Set)left).Value;
+                            HashSet<ID> rightSet = ((ID.Set)right).Value;
                             stack.Push(new ID.Bool(leftSet.ContainsAll(rightSet)));
                             return true;
                         }
@@ -395,22 +390,22 @@ namespace Biscuit.Datalog.Expressions
                     case BinaryOp.Prefix:
                         if (right is ID.Str && left is ID.Str)
                         {
-                            stack.Push(new ID.Bool(((ID.Str)left).value.StartsWith(((ID.Str)right).value)));
+                            stack.Push(new ID.Bool(((ID.Str)left).Value.StartsWith(((ID.Str)right).Value)));
                             return true;
                         }
                         break;
                     case BinaryOp.Suffix:
                         if (right is ID.Str && left is ID.Str)
                         {
-                            stack.Push(new ID.Bool(((ID.Str)left).value.EndsWith(((ID.Str)right).value)));
+                            stack.Push(new ID.Bool(((ID.Str)left).Value.EndsWith(((ID.Str)right).Value)));
                             return true;
                         }
                         break;
                     case BinaryOp.Regex:
                         if (right is ID.Str && left is ID.Str)
                         {
-                            Regex regex = new Regex(((ID.Str)right).value);
-                            var found = regex.IsMatch(((ID.Str)left).value);
+                            Regex regex = new Regex(((ID.Str)right).Value);
+                            var found = regex.IsMatch(((ID.Str)left).Value);
                             stack.Push(new ID.Bool(found));
                             return true;
                         }
@@ -418,31 +413,31 @@ namespace Biscuit.Datalog.Expressions
                     case BinaryOp.Add:
                         if (right is ID.Integer && left is ID.Integer)
                         {
-                            stack.Push(new ID.Integer(((ID.Integer)left).value + ((ID.Integer)right).value));
+                            stack.Push(new ID.Integer(((ID.Integer)left).Value + ((ID.Integer)right).Value));
                             return true;
                         }
                         break;
                     case BinaryOp.Sub:
                         if (right is ID.Integer && left is ID.Integer)
                         {
-                            stack.Push(new ID.Integer(((ID.Integer)left).value - ((ID.Integer)right).value));
+                            stack.Push(new ID.Integer(((ID.Integer)left).Value - ((ID.Integer)right).Value));
                             return true;
                         }
                         break;
                     case BinaryOp.Mul:
                         if (right is ID.Integer && left is ID.Integer)
                         {
-                            stack.Push(new ID.Integer(((ID.Integer)left).value * ((ID.Integer)right).value));
+                            stack.Push(new ID.Integer(((ID.Integer)left).Value * ((ID.Integer)right).Value));
                             return true;
                         }
                         break;
                     case BinaryOp.Div:
                         if (right is ID.Integer && left is ID.Integer)
                         {
-                            long rl = ((ID.Integer)right).value;
+                            long rl = ((ID.Integer)right).Value;
                             if (rl != 0)
                             {
-                                stack.Push(new ID.Integer(((ID.Integer)left).value / rl));
+                                stack.Push(new ID.Integer(((ID.Integer)left).Value / rl));
                                 return true;
                             }
                         }
@@ -450,14 +445,14 @@ namespace Biscuit.Datalog.Expressions
                     case BinaryOp.And:
                         if (right is ID.Bool && left is ID.Bool)
                         {
-                            stack.Push(new ID.Bool(((ID.Bool)left).value && ((ID.Bool)right).value));
+                            stack.Push(new ID.Bool(((ID.Bool)left).Value && ((ID.Bool)right).Value));
                             return true;
                         }
                         break;
                     case BinaryOp.Or:
                         if (right is ID.Bool && left is ID.Bool)
                         {
-                            stack.Push(new ID.Bool(((ID.Bool)left).value || ((ID.Bool)right).value));
+                            stack.Push(new ID.Bool(((ID.Bool)left).Value || ((ID.Bool)right).Value));
                             return true;
                         }
                         break;
@@ -465,8 +460,8 @@ namespace Biscuit.Datalog.Expressions
                         if (right is ID.Set && left is ID.Set)
                         {
                             HashSet<ID> intersec = new HashSet<ID>();
-                            HashSet<ID> _right = ((ID.Set)right).value;
-                            HashSet<ID> _left = ((ID.Set)left).value;
+                            HashSet<ID> _right = ((ID.Set)right).Value;
+                            HashSet<ID> _left = ((ID.Set)left).Value;
                             foreach (ID _id in _right)
                             {
                                 if (_left.Contains(_id))
@@ -482,10 +477,10 @@ namespace Biscuit.Datalog.Expressions
                         if (right is ID.Set && left is ID.Set)
                         {
                             HashSet<ID> union = new HashSet<ID>();
-                            HashSet<ID> _right = ((ID.Set)right).value;
-                            HashSet<ID> _left = ((ID.Set)left).value;
-                            union.addAll(_right);
-                            union.addAll(_left);
+                            HashSet<ID> _right = ((ID.Set)right).Value;
+                            HashSet<ID> _left = ((ID.Set)left).Value;
+                            union.AddAll(_right);
+                            union.AddAll(_left);
                             stack.Push(new ID.Set(union));
                             return true;
                         }
@@ -497,87 +492,87 @@ namespace Biscuit.Datalog.Expressions
             }
 
 
-            public override string print(Stack<string> stack, SymbolTable symbols)
+            public override string Print(Stack<string> stack, SymbolTable symbols)
             {
                 string right = stack.Pop();
                 string left = stack.Pop();
-                string _s = "";
+                string result = string.Empty;
                 switch (this.op)
                 {
                     case BinaryOp.LessThan:
-                        _s = left + " < " + right;
-                        stack.Push(_s);
+                        result = left + " < " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.GreaterThan:
-                        _s = left + " > " + right;
-                        stack.Push(_s);
+                        result = left + " > " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.LessOrEqual:
-                        _s = left + " <= " + right;
-                        stack.Push(_s);
+                        result = left + " <= " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.GreaterOrEqual:
-                        _s = left + " >= " + right;
-                        stack.Push(_s);
+                        result = left + " >= " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.Equal:
-                        _s = left + " == " + right;
-                        stack.Push(_s);
+                        result = left + " == " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.Contains:
-                        _s = left + ".contains(" + right + ")";
-                        stack.Push(_s);
+                        result = left + ".contains(" + right + ")";
+                        stack.Push(result);
                         break;
                     case BinaryOp.Prefix:
-                        _s = left + ".starts_with(" + right + ")";
-                        stack.Push(_s);
+                        result = left + ".starts_with(" + right + ")";
+                        stack.Push(result);
                         break;
                     case BinaryOp.Suffix:
-                        _s = left + ".ends_with(" + right + ")";
-                        stack.Push(_s);
+                        result = left + ".ends_with(" + right + ")";
+                        stack.Push(result);
                         break;
                     case BinaryOp.Regex:
-                        _s = left + ".matches(" + right + ")";
-                        stack.Push(_s);
+                        result = left + ".matches(" + right + ")";
+                        stack.Push(result);
                         break;
                     case BinaryOp.Add:
-                        _s = left + " + " + right;
-                        stack.Push(_s);
+                        result = left + " + " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.Sub:
-                        _s = left + " - " + right;
-                        stack.Push(_s);
+                        result = left + " - " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.Mul:
-                        _s = left + " * " + right;
-                        stack.Push(_s);
+                        result = left + " * " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.Div:
-                        _s = left + " / " + right;
-                        stack.Push(_s);
+                        result = left + " / " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.And:
-                        _s = left + " && " + right;
-                        stack.Push(_s);
+                        result = left + " && " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.Or:
-                        _s = left + " || " + right;
-                        stack.Push(_s);
+                        result = left + " || " + right;
+                        stack.Push(result);
                         break;
                     case BinaryOp.Intersection:
-                        _s = left + ".intersection(" + right + ")";
-                        stack.Push(_s);
+                        result = left + ".intersection(" + right + ")";
+                        stack.Push(result);
                         break;
                     case BinaryOp.Union:
-                        _s = left + ".union(" + right + ")";
-                        stack.Push(_s);
+                        result = left + ".union(" + right + ")";
+                        stack.Push(result);
                         break;
                 }
 
-                return _s;
+                return result;
             }
 
-            public override Format.Schema.Op serialize()
+            public override Format.Schema.Op Serialize()
             {
                 Format.Schema.Op b = new Format.Schema.Op();
 
@@ -643,47 +638,29 @@ namespace Biscuit.Datalog.Expressions
                 return b;
             }
 
-            static public Either<Errors.FormatError, Op> deserializeV1(Format.Schema.OpBinary op)
+            static public Either<Errors.FormatError, Op> DeserializeV1(Format.Schema.OpBinary op)
             {
-                switch (op.Kind)
+                return op.Kind switch
                 {
-                    case Format.Schema.OpBinary.Types.Kind.LessThan:
-                        return new Right(new Op.Binary(BinaryOp.LessThan));
-                    case Format.Schema.OpBinary.Types.Kind.GreaterThan:
-                        return new Right(new Op.Binary(BinaryOp.GreaterThan));
-                    case Format.Schema.OpBinary.Types.Kind.LessOrEqual:
-                        return new Right(new Op.Binary(BinaryOp.LessOrEqual));
-                    case Format.Schema.OpBinary.Types.Kind.GreaterOrEqual:
-                        return new Right(new Op.Binary(BinaryOp.GreaterOrEqual));
-                    case Format.Schema.OpBinary.Types.Kind.Equal:
-                        return new Right(new Op.Binary(BinaryOp.Equal));
-                    case Format.Schema.OpBinary.Types.Kind.Contains:
-                        return new Right(new Op.Binary(BinaryOp.Contains));
-                    case Format.Schema.OpBinary.Types.Kind.Prefix:
-                        return new Right(new Op.Binary(BinaryOp.Prefix));
-                    case Format.Schema.OpBinary.Types.Kind.Suffix:
-                        return new Right(new Op.Binary(BinaryOp.Suffix));
-                    case Format.Schema.OpBinary.Types.Kind.Regex:
-                        return new Right(new Op.Binary(BinaryOp.Regex));
-                    case Format.Schema.OpBinary.Types.Kind.Add:
-                        return new Right(new Op.Binary(BinaryOp.Add));
-                    case Format.Schema.OpBinary.Types.Kind.Sub:
-                        return new Right(new Op.Binary(BinaryOp.Sub));
-                    case Format.Schema.OpBinary.Types.Kind.Mul:
-                        return new Right(new Op.Binary(BinaryOp.Mul));
-                    case Format.Schema.OpBinary.Types.Kind.Div:
-                        return new Right(new Op.Binary(BinaryOp.Div));
-                    case Format.Schema.OpBinary.Types.Kind.And:
-                        return new Right(new Op.Binary(BinaryOp.And));
-                    case Format.Schema.OpBinary.Types.Kind.Or:
-                        return new Right(new Op.Binary(BinaryOp.Or));
-                    case Format.Schema.OpBinary.Types.Kind.Intersection:
-                        return new Right(new Op.Binary(BinaryOp.Intersection));
-                    case Format.Schema.OpBinary.Types.Kind.Union:
-                        return new Right(new Op.Binary(BinaryOp.Union));
-                }
-
-                return new Left(new Errors.DeserializationError("invalid binary operation"));
+                    Format.Schema.OpBinary.Types.Kind.LessThan => new Op.Binary(BinaryOp.LessThan),
+                    Format.Schema.OpBinary.Types.Kind.GreaterThan => new Op.Binary(BinaryOp.GreaterThan),
+                    Format.Schema.OpBinary.Types.Kind.LessOrEqual => new Op.Binary(BinaryOp.LessOrEqual),
+                    Format.Schema.OpBinary.Types.Kind.GreaterOrEqual => new Op.Binary(BinaryOp.GreaterOrEqual),
+                    Format.Schema.OpBinary.Types.Kind.Equal => new Op.Binary(BinaryOp.Equal),
+                    Format.Schema.OpBinary.Types.Kind.Contains => new Op.Binary(BinaryOp.Contains),
+                    Format.Schema.OpBinary.Types.Kind.Prefix => new Op.Binary(BinaryOp.Prefix),
+                    Format.Schema.OpBinary.Types.Kind.Suffix => new Op.Binary(BinaryOp.Suffix),
+                    Format.Schema.OpBinary.Types.Kind.Regex => new Op.Binary(BinaryOp.Regex),
+                    Format.Schema.OpBinary.Types.Kind.Add => new Op.Binary(BinaryOp.Add),
+                    Format.Schema.OpBinary.Types.Kind.Sub => new Op.Binary(BinaryOp.Sub),
+                    Format.Schema.OpBinary.Types.Kind.Mul => new Op.Binary(BinaryOp.Mul),
+                    Format.Schema.OpBinary.Types.Kind.Div => new Op.Binary(BinaryOp.Div),
+                    Format.Schema.OpBinary.Types.Kind.And => new Op.Binary(BinaryOp.And),
+                    Format.Schema.OpBinary.Types.Kind.Or => new Op.Binary(BinaryOp.Or),
+                    Format.Schema.OpBinary.Types.Kind.Intersection => new Op.Binary(BinaryOp.Intersection),
+                    Format.Schema.OpBinary.Types.Kind.Union => new Op.Binary(BinaryOp.Union),
+                    _ => new DeserializationError("invalid binary operation"),
+                };
             }
 
             public override string ToString()
@@ -691,7 +668,7 @@ namespace Biscuit.Datalog.Expressions
                 return "Binary." + op;
             }
 
-            public override bool Equals(Object o)
+            public override bool Equals(object o)
             {
                 if (this == o) return true;
                 if (o == null || !(o is Binary)) return false;

@@ -6,9 +6,9 @@ namespace Biscuit.Errors
 {
     public class LogicError
     {
-        public Option<List<FailedCheck>> failed_checks()
+        public Option<List<FailedCheck>> GetFailedChecks()
         {
-            return Option<List<FailedCheck>>.some(new List<FailedCheck>());
+            return Option<List<FailedCheck>>.Some(new List<FailedCheck>());
         }
 
         public class InvalidAuthorityFact : LogicError
@@ -87,7 +87,7 @@ namespace Biscuit.Errors
 
             public override int GetHashCode()
             {
-                return Objects.hash(id, e);
+                return Objects.Hash(id, e);
             }
 
             public override string ToString()
@@ -106,7 +106,7 @@ namespace Biscuit.Errors
 
             public Option<List<FailedCheck>> failed_checks()
             {
-                return Option.some(errors);
+                return Option.Some(errors);
             }
 
             public override bool Equals(object o)
@@ -130,7 +130,7 @@ namespace Biscuit.Errors
 
             public override int GetHashCode()
             {
-                return Objects.hash(errors);
+                return Objects.Hash(errors);
             }
 
             public override string ToString()

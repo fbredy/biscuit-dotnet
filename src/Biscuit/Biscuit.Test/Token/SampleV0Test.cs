@@ -24,21 +24,21 @@ namespace Biscuit.Test.Token
 
             Console.WriteLine("a");
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var v1 = token.verify(root).Right;
-            v1.add_resource("file1");
-            v1.add_operation("read");
-            v1.allow();
-            var res = v1.verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
+            var v1 = token.Verify(root).Right;
+            v1.AddResource("file1");
+            v1.AddOperation("read");
+            v1.Allow();
+            var res = v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
             if (res.IsLeft)
             {
                 Console.WriteLine("error: " + res.Left);
             }
             Assert.IsTrue(res.IsRight);
 
-            byte[] serialized = token.serialize().Right;
+            byte[] serialized = token.Serialize().Right;
 
             Assert.AreEqual(data.Length, serialized.Length);
 
@@ -56,8 +56,8 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test2_different_root_key;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Error e = token.check_root_key(root).Left;
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Error e = token.CheckRootKey(root).Left;
             Console.WriteLine("got error: " + e);
             Assert.AreEqual(new UnknownPublicKey(), e);
         }
@@ -70,7 +70,7 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test3_invalid_signature_format;
 
-            Error e = Biscuit.Token.Biscuit.from_bytes(data).Left;
+            Error e = Biscuit.Token.Biscuit.FromBytes(data).Left;
             Console.WriteLine("got error: " + e);
             Assert.IsTrue(e is DeserializationError);
             DeserializationError errorDeserialized = (DeserializationError)e;
@@ -86,7 +86,7 @@ namespace Biscuit.Test.Token
                     resources.ResourceTestV0.test4_random_block;
 
 
-            Error e = Biscuit.Token.Biscuit.from_bytes(data).Left;
+            Error e = Biscuit.Token.Biscuit.FromBytes(data).Left;
             Console.WriteLine("got error: " + e);
             Assert.AreEqual(new InvalidSignature(), e);
         }
@@ -99,7 +99,7 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test5_invalid_signature;
 
-            Error e = Biscuit.Token.Biscuit.from_bytes(data).Left;
+            Error e = Biscuit.Token.Biscuit.FromBytes(data).Left;
             Console.WriteLine("got error: " + e);
             Assert.AreEqual(new InvalidSignature(), e);
         }
@@ -112,10 +112,10 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test6_reordered_blocks;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
 
-            var res = token.verify(root);
-            Console.WriteLine(token.print());
+            var res = token.Verify(root);
+            Console.WriteLine(token.Print());
             Console.WriteLine(res);
             if (res.IsLeft)
             {
@@ -133,10 +133,10 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test7_invalid_block_fact_authority;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var res = token.verify(root);
+            var res = token.Verify(root);
             if (res.IsLeft)
             {
                 Console.WriteLine("error: " + res.Left);
@@ -152,10 +152,10 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test8_invalid_block_fact_ambient;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var res = token.verify(root);
+            var res = token.Verify(root);
             if (res.IsLeft)
             {
                 Console.WriteLine("error: " + res.Left);
@@ -171,18 +171,18 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test9_expired_token;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var v1 = token.verify(root).Right;
-            v1.add_resource("file1");
-            v1.add_operation("read");
-            v1.set_time();
+            var v1 = token.Verify(root).Right;
+            v1.AddResource("file1");
+            v1.AddOperation("read");
+            v1.SetTime();
             Console.WriteLine(v1.print_world());
 
-            Error e = v1.verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).Left;
+            Error e = v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).Left;
             Assert.AreEqual(
-            new FailedLogic(new LogicError.FailedChecks(Arrays.asList<FailedCheck>(
+            new FailedLogic(new LogicError.FailedChecks(Arrays.AsList<FailedCheck>(
                     new FailedCheck.FailedBlock(1, 1, "check if time(#ambient, $date), $date <= 2018-12-20T00:00:00Z")
             ))),
             e);
@@ -196,15 +196,15 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test10_authority_rules;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var v1 = token.verify(root).Right;
-            v1.add_resource("file1");
-            v1.add_operation("read");
-            v1.add_fact(Utils.fact("owner", Arrays.asList(Utils.s("ambient"), Utils.s("alice"), Utils.strings("file1"))));
-            v1.allow();
-            var res = v1.verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
+            var v1 = token.Verify(root).Right;
+            v1.AddResource("file1");
+            v1.AddOperation("read");
+            v1.AddFact(Utils.Fact("owner", Arrays.AsList(Utils.Symbol("ambient"), Utils.Symbol("alice"), Utils.Strings("file1"))));
+            v1.Allow();
+            var res = v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
             Console.WriteLine(res);
             Assert.IsTrue(res.IsRight);
         }
@@ -217,27 +217,27 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test11_verifier_authority_caveats;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var v1 = token.verify(root).Right;
-            v1.add_resource("file2");
-            v1.add_operation("read");
-            v1.add_check(Utils.check(Utils.rule(
+            var v1 = token.Verify(root).Right;
+            v1.AddResource("file2");
+            v1.AddOperation("read");
+            v1.AddCheck(Utils.Check(Utils.Rule(
                     "caveat1",
-                    Arrays.asList(Utils.var("0")),
-                    Arrays.asList(
-                            Utils.pred("resource", Arrays.asList(Utils.s("ambient"), Utils.var("0"))),
-                            Utils.pred("operation", Arrays.asList(Utils.s("ambient"), Utils.var("1"))),
-                            Utils.pred("right", Arrays.asList(Utils.s("authority"), Utils.var("0"), Utils.var("1")))
+                    Arrays.AsList(Utils.Var("0")),
+                    Arrays.AsList(
+                            Utils.Pred("resource", Arrays.AsList(Utils.Symbol("ambient"), Utils.Var("0"))),
+                            Utils.Pred("operation", Arrays.AsList(Utils.Symbol("ambient"), Utils.Var("1"))),
+                            Utils.Pred("right", Arrays.AsList(Utils.Symbol("authority"), Utils.Var("0"), Utils.Var("1")))
                     )
             )));
-            v1.allow();
-            var res = v1.verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
+            v1.Allow();
+            var res = v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
             Console.WriteLine(res);
             Error e = res.Left;
             Assert.AreEqual(
-            new FailedLogic(new LogicError.FailedChecks(Arrays.asList<FailedCheck>(
+            new FailedLogic(new LogicError.FailedChecks(Arrays.AsList<FailedCheck>(
                     new FailedCheck.FailedVerifier(0, "check if resource(#ambient, $0), operation(#ambient, $1), right(#authority, $0, $1)")
             ))),
             e);
@@ -251,25 +251,25 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test12_authority_caveats;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var v1 = token.verify(root).Right;
-            v1.add_resource("file1");
-            v1.add_operation("read");
-            v1.allow();
-            Assert.IsTrue(v1.verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).IsRight);
+            var v1 = token.Verify(root).Right;
+            v1.AddResource("file1");
+            v1.AddOperation("read");
+            v1.Allow();
+            Assert.IsTrue(v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).IsRight);
 
-            var v2 = token.verify(root).Right;
-            v2.add_resource("file2");
-            v2.add_operation("read");
-            v2.allow();
+            var v2 = token.Verify(root).Right;
+            v2.AddResource("file2");
+            v2.AddOperation("read");
+            v2.Allow();
 
-            var res = v2.verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
+            var res = v2.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
             Console.WriteLine(res);
             Error e = res.Left;
             Assert.AreEqual(
-                new FailedLogic(new LogicError.FailedChecks(Arrays.asList<FailedCheck>(
+                new FailedLogic(new LogicError.FailedChecks(Arrays.AsList<FailedCheck>(
                         new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, \"file1\")")
                 ))),
                 e);
@@ -283,25 +283,25 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test13_block_rules;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var v1 = token.verify(root).Right;
-            v1.add_resource("file1");
-            v1.set_time();
-            v1.allow();
-            Assert.IsTrue(v1.verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).IsRight);
+            var v1 = token.Verify(root).Right;
+            v1.AddResource("file1");
+            v1.SetTime();
+            v1.Allow();
+            Assert.IsTrue(v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).IsRight);
 
-            var v2 = token.verify(root).Right;
-            v2.add_resource("file2");
-            v2.set_time();
-            v2.allow();
+            var v2 = token.Verify(root).Right;
+            v2.AddResource("file2");
+            v2.SetTime();
+            v2.Allow();
 
-            var res = v2.verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
+            var res = v2.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
             Console.WriteLine(res);
             Error e = res.Left;
             Assert.AreEqual(
-            new FailedLogic(new LogicError.FailedChecks(Arrays.asList<FailedCheck>(
+            new FailedLogic(new LogicError.FailedChecks(Arrays.AsList<FailedCheck>(
                     new FailedCheck.FailedBlock(1, 0, "check if valid_date($0), resource(#ambient, $0)")
             ))),
             e);
@@ -315,28 +315,28 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test14_regex_constraint;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var v1 = token.verify(root).Right;
-            v1.add_resource("file1");
-            v1.set_time();
-            v1.allow();
+            var v1 = token.Verify(root).Right;
+            v1.AddResource("file1");
+            v1.SetTime();
+            v1.Allow();
 
-            var res = v1.verify(new RunLimits(1000, 100, TimeSpan.FromMilliseconds(30)));
+            var res = v1.Verify(new RunLimits(1000, 100, TimeSpan.FromMilliseconds(30)));
             Console.WriteLine(res);
             Error e = res.Left;
             Assert.AreEqual(
-                new FailedLogic(new LogicError.FailedChecks(Arrays.asList<FailedCheck>(
+                new FailedLogic(new LogicError.FailedChecks(Arrays.AsList<FailedCheck>(
                         new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, $0), $0.matches(\"file[0-9]+.txt\")")
                 ))),
                 e);
 
-            var v2 = token.verify(root).Right;
-            v2.add_resource("file123.txt");
-            v2.set_time();
-            v2.allow();
-            Assert.IsTrue(v2.verify(new RunLimits(1000, 100, TimeSpan.FromMilliseconds(30))).IsRight);
+            var v2 = token.Verify(root).Right;
+            v2.AddResource("file123.txt");
+            v2.SetTime();
+            v2.Allow();
+            Assert.IsTrue(v2.Verify(new RunLimits(1000, 100, TimeSpan.FromMilliseconds(30))).IsRight);
 
         }
 
@@ -348,29 +348,29 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test15_multi_queries_caveats;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var v1 = token.verify(root).Right;
-            var queries = new List<Biscuit.Token.Builder.Rule>();
-            queries.Add(Utils.rule(
+            var v1 = token.Verify(root).Right;
+            var queries = new List<Biscuit.Token.Builder.RuleBuilder>();
+            queries.Add(Utils.Rule(
                     "test_must_be_present_authority",
-                    Arrays.asList(Utils.var("0")),
-                    Arrays.asList(
-                            Utils.pred("must_be_present", Arrays.asList(Utils.s("authority"), Utils.var("0")))
+                    Arrays.AsList(Utils.Var("0")),
+                    Arrays.AsList(
+                            Utils.Pred("must_be_present", Arrays.AsList(Utils.Symbol("authority"), Utils.Var("0")))
                     )
                     ));
-            queries.Add(Utils.rule(
+            queries.Add(Utils.Rule(
                     "test_must_be_present",
-                    Arrays.asList(Utils.var("0")),
-                    Arrays.asList(
-                            Utils.pred("mst_be_present", Arrays.asList(Utils.var("0")))
+                    Arrays.AsList(Utils.Var("0")),
+                    Arrays.AsList(
+                            Utils.Pred("mst_be_present", Arrays.AsList(Utils.Var("0")))
                     )
             ));
-            v1.add_check(new Biscuit.Token.Builder.Check(queries));
-            v1.allow();
+            v1.AddCheck(new Biscuit.Token.Builder.CheckBuilder(queries));
+            v1.Allow();
 
-            Assert.IsTrue(v1.verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).IsRight);
+            Assert.IsTrue(v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).IsRight);
         }
 
         [TestMethod]
@@ -381,18 +381,18 @@ namespace Biscuit.Test.Token
             byte[] data =
                     resources.ResourceTestV0.test16_caveat_head_name;
 
-            var token = Biscuit.Token.Biscuit.from_bytes(data).Right;
-            Console.WriteLine(token.print());
+            var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
+            Console.WriteLine(token.Print());
 
-            var v1 = token.verify(root).Right;
-            v1.allow();
+            var v1 = token.Verify(root).Right;
+            v1.Allow();
 
 
-            var res = v1.verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
+            var res = v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500)));
             Console.WriteLine(res);
             Error e = res.Left;
             Assert.AreEqual(
-                    new FailedLogic(new LogicError.FailedChecks(Arrays.asList<FailedCheck>(
+                    new FailedLogic(new LogicError.FailedChecks(Arrays.AsList<FailedCheck>(
                             new FailedCheck.FailedBlock(0, 0, "check if resource(#ambient, #hello)")
                     ))),
                     e);

@@ -13,7 +13,7 @@ namespace Biscuit
         /// <param name="collection1"></param>
         /// <param name="colletion2"></param>
         /// <returns>true if the two specified collections have no elements in common.</returns>
-        public static bool disjoint<T>(IEnumerable<T> collection1, IEnumerable<T> colletion2)
+        public static bool Disjoint<T>(IEnumerable<T> collection1, IEnumerable<T> colletion2)
         {
             if(collection1 == null)
             {
@@ -35,7 +35,7 @@ namespace Biscuit
             return true;
         }
 
-        public static bool isEmpty<T>(this IEnumerable<T> collection)
+        public static bool IsEmpty<T>(this IEnumerable<T> collection)
         {
             return collection.Count() == 0;
         }        

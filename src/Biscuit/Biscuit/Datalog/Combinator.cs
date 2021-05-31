@@ -9,38 +9,38 @@ namespace Biscuit.Datalog
     public sealed class Combinator
     {
         private readonly MatchedVariables variables;
-        private readonly List<Predicate> next_predicates;
-        private readonly List<Expression> expressions;
-        private readonly HashSet<Fact> all_facts;
+        private readonly IList<Predicate> nextPredicates;
+        private readonly IList<Expression> expressions;
+        private readonly HashSet<Fact> allFacts;
         private readonly Predicate pred;
         private readonly IEnumerator<Fact> fit;
-        private Combinator current_it;
+        private Combinator currentIt;
 
 
-        public Option<MatchedVariables> next()
+        public Option<MatchedVariables> Next()
         {
             while (true)
             {
-                if (this.current_it != null)
+                if (this.currentIt != null)
                 {
-                    Option<MatchedVariables> next_vars_opt = this.current_it.next();
+                    Option<MatchedVariables> next_vars_opt = this.currentIt.Next();
                     // the iterator is empty, try with the next fact
-                    if (next_vars_opt.isEmpty())
+                    if (next_vars_opt.IsEmpty())
                     {
-                        this.current_it = null;
+                        this.currentIt = null;
                         continue;
                     }
 
-                    MatchedVariables next_vars = next_vars_opt.get();
+                    MatchedVariables nextVars = next_vars_opt.Get();
 
-                    Option<Dictionary<ulong, ID>> v_opt = next_vars.check_expressions(this.expressions);
-                    if (v_opt.isEmpty())
+                    Option<Dictionary<ulong, ID>> v_opt = nextVars.CheckExpressions(this.expressions);
+                    if (v_opt.IsEmpty())
                     {
                         continue;
                     }
                     else
                     {
-                        return Option<MatchedVariables>.some(next_vars);
+                        return Option<MatchedVariables>.Some(nextVars);
                     }
                 }
 
@@ -50,20 +50,20 @@ namespace Biscuit.Datalog
                     Fact current_fact = this.fit.Current;
 
                     // create a new MatchedVariables in which we fix variables we could unify from our first predicate and the current fact
-                    MatchedVariables vars = this.variables.clone();
+                    MatchedVariables vars = this.variables.Clone();
                     bool match_ids = true;
 
                     // we know the fact matches the predicate's format so they have the same number of terms
                     // fill the MatchedVariables before creating the next combinator
-                    for (int i = 0; i < pred.ids.Count; ++i)
+                    for (int i = 0; i < pred.Ids.Count; ++i)
                     {
-                        ID id = pred.ids[i];
-                        if (id is ID.Variable)
+                        ID id = pred.Ids[i];
+                        if (id is ID.Variable idVariable)
                         {
-                            ulong key = ((ID.Variable)id).value;
-                            ID value = current_fact.predicate.ids[i];
+                            ulong key = idVariable.Value;
+                            ID value = current_fact.predicate.Ids[i];
 
-                            if (!vars.insert(key, value))
+                            if (!vars.Insert(key, value))
                             {
                                 match_ids = false;
                             }
@@ -80,23 +80,23 @@ namespace Biscuit.Datalog
                     }
 
                     // there are no more predicates to check
-                    if (!next_predicates.Any())
+                    if (!nextPredicates.Any())
                     {
-                        Option<Dictionary<ulong, ID>> v_opt = vars.check_expressions(this.expressions);
-                        if (v_opt.isEmpty())
+                        Option<Dictionary<ulong, ID>> v_opt = vars.CheckExpressions(this.expressions);
+                        if (v_opt.IsEmpty())
                         {
                             continue;
                         }
                         else
                         {
-                            return Option<MatchedVariables>.some(vars);
+                            return Option<MatchedVariables>.Some(vars);
                         }
                     }
                     else
                     {
                         // we found a matching fact, we create a new combinator over the rest of the predicates
                         // no need to copy all of the expressions at all levels
-                        this.current_it = new Combinator(vars, next_predicates, new List<Expression>(), this.all_facts);
+                        this.currentIt = new Combinator(vars, nextPredicates, new List<Expression>(), this.allFacts);
                     }
                 }
                 else
@@ -105,43 +105,43 @@ namespace Biscuit.Datalog
                 }
             }
 
-            return Option<MatchedVariables>.none();
+            return Option<MatchedVariables>.None();
         }
 
-        public List<Dictionary<ulong, ID>> combine()
+        public IList<Dictionary<ulong, ID>> Combine()
         {
-            List<Dictionary<ulong, ID>> variables = new List<Dictionary<ulong, ID>>();
+            IList<Dictionary<ulong, ID>> variables = new List<Dictionary<ulong, ID>>();
 
             while (true)
             {
-                Option<MatchedVariables> res = this.next();
+                Option<MatchedVariables> res = this.Next();
 
-                if (res.isEmpty())
+                if (res.IsEmpty())
                 {
                     return variables;
                 }
 
-                Optional<Dictionary<ulong, ID>> vars = res.get().complete();
-                if (vars.isPresent())
+                Optional<Dictionary<ulong, ID>> vars = res.Get().Complete();
+                if (vars.IsPresent())
                 {
-                    variables.Add(vars.get());
+                    variables.Add(vars.Get());
                 }
             }
         }
 
-        public Combinator(MatchedVariables variables, List<Predicate> predicates,
-            List<Expression> expressions, HashSet<Fact> all_facts)
+        public Combinator(MatchedVariables variables, IList<Predicate> predicates,
+            IList<Expression> expressions, HashSet<Fact> all_facts)
         {
             this.variables = variables;
             this.expressions = expressions;
-            this.all_facts = all_facts;
-            this.current_it = null;
+            this.allFacts = all_facts;
+            this.currentIt = null;
             this.pred = predicates.FirstOrDefault();
             this.fit = all_facts.Where(fact => fact.match_predicate(this.pred)).GetEnumerator();
 
-            List<Predicate> next_predicates = predicates.Skip(1).ToList();
+            IList<Predicate> next_predicates = predicates.Skip(1).ToList();
 
-            this.next_predicates = next_predicates;
+            this.nextPredicates = next_predicates;
         }
     }
 }

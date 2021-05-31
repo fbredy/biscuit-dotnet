@@ -19,12 +19,12 @@ namespace Biscuit.Token.Formatter
 
         public static uint MAX_SCHEMA_VERSION = 1;
 
-        /**
-         * Deserializes a SerializedBiscuit from a byte array
-         * @param slice
-         * @return
-         */
-        static public Either<Errors.Error, SerializedBiscuit> from_bytes(byte[] slice)
+        /// <summary>
+        /// Deserializes a SerializedBiscuit from a byte array
+        /// </summary>
+        /// <param name="slice"></param>
+        /// <returns></returns>
+        static public Either<Errors.Error, SerializedBiscuit> FromBytes(byte[] slice)
         {
             try
             {
@@ -44,23 +44,21 @@ namespace Biscuit.Token.Formatter
                     blocks.Add(block.ToByteArray());
                 }
 
-                Either<Error, TokenSignature> signatureRes = TokenSignature.deserialize(data.Signature);
+                Either<Error, TokenSignature> signatureRes = TokenSignature.Deserialize(data.Signature);
 
                 if (signatureRes.IsLeft)
                 {
-                    Error e = signatureRes.Left;
-                    return new Left(e);
+                    return signatureRes.Left;
                 }
 
                 TokenSignature signature = signatureRes.Right;
 
                 SerializedBiscuit b = new SerializedBiscuit(authority, blocks, keys, signature);
 
-                Either<Error, Void> res = b.verify();
+                Either<Error, Void> res = b.Verify();
                 if (res.IsLeft)
                 {
-                    Error e = res.Left;
-                    return new Left(e);
+                    return res.Left;
                 }
                 else
                 {
@@ -77,15 +75,15 @@ namespace Biscuit.Token.Formatter
             }
         }
 
-        /**
-         * Serializes a SerializedBiscuit to a byte array
-         * @return
-         */
-        public Either<Error, byte[]> serialize()
+        /// <summary>
+        /// Serializes a SerializedBiscuit to a byte array
+        /// </summary>
+        /// <returns></returns>
+        public Either<Error, byte[]> Serialize()
         {
             Format.Schema.Biscuit biscuit = new Format.Schema.Biscuit()
             {
-                Signature = signature.serialize()
+                Signature = signature.Serialize()
             };
 
             for (int i = 0; i < keys.Count; i++)
@@ -99,8 +97,6 @@ namespace Biscuit.Token.Formatter
             {
                 biscuit.Blocks.Add(ByteString.CopyFrom(blocks[i]));
             }
-
-
 
             try
             {
@@ -118,7 +114,7 @@ namespace Biscuit.Token.Formatter
 
         }
 
-        static public Either<FormatError, SerializedBiscuit> make(RNGCryptoServiceProvider rng, KeyPair root, Block authority)
+        static public Either<FormatError, SerializedBiscuit> Make(RNGCryptoServiceProvider rng, KeyPair root, Block authority)
         {
             Format.Schema.Block b = authority.serialize();
             try
@@ -130,9 +126,9 @@ namespace Biscuit.Token.Formatter
 
                     TokenSignature signature = new TokenSignature(rng, root, data);
                     List<RistrettoElement> keys = new List<RistrettoElement>();
-                    keys.Add(root.Public_key);
+                    keys.Add(root.PublicKey);
 
-                    return new Right(new SerializedBiscuit(data, new List<byte[]>(), keys, signature));
+                    return new SerializedBiscuit(data, new List<byte[]>(), keys, signature);
                 }
             }
             catch (IOException e)
@@ -141,7 +137,7 @@ namespace Biscuit.Token.Formatter
             }
         }
 
-        public Either<FormatError, SerializedBiscuit> append(RNGCryptoServiceProvider rng, KeyPair keypair, Block block)
+        public Either<FormatError, SerializedBiscuit> Append(RNGCryptoServiceProvider rng, KeyPair keypair, Block block)
         {
             Format.Schema.Block b = block.serialize();
             try
@@ -153,17 +149,11 @@ namespace Biscuit.Token.Formatter
                 TokenSignature signature = this.signature.Sign(rng, keypair, data);
 
                 List<RistrettoElement> keys = new List<RistrettoElement>();
-                foreach (RistrettoElement key in this.keys)
-                {
-                    keys.Add(key);
-                }
-                keys.Add(keypair.Public_key);
+                keys.AddRange(this.keys);
+                keys.Add(keypair.PublicKey);
 
                 List<byte[]> blocks = new List<byte[]>();
-                foreach (byte[] bl in this.blocks)
-                {
-                    blocks.Add(bl);
-                }
+                blocks.AddRange(this.blocks);
                 blocks.Add(data);
 
                 return new Right(new SerializedBiscuit(authority, blocks, keys, signature));
@@ -174,24 +164,23 @@ namespace Biscuit.Token.Formatter
             }
         }
 
-        public Either<Error, Void> verify()
+        public Either<Error, Void> Verify()
         {
             if (keys.Count == 0)
             {
                 return new Left(new EmptyKeys());
             }
 
-            List<byte[]> blocks = new List<byte[]>();
-            blocks.Add(authority);
-            foreach (byte[] bl in this.blocks)
+            List<byte[]> blocks = new List<byte[]>
             {
-                blocks.Add(bl);
-            }
+                authority
+            };
+            blocks.AddRange(this.blocks);
 
             return signature.Verify(keys, blocks);
         }
 
-        public Either<Error, Void> check_root_key(PublicKey public_key)
+        public Either<Error, Void> CheckRootKey(PublicKey public_key)
         {
             if (keys.Count == 0)
             {
@@ -206,9 +195,9 @@ namespace Biscuit.Token.Formatter
             return new Right(null);
         }
 
-        public List<byte[]> revocation_identifiers()
+        public List<byte[]> RevocationIdentifiers()
         {
-            List<byte[]> l = new List<byte[]>();
+            List<byte[]> result = new List<byte[]>();
 
             try
             {
@@ -217,17 +206,9 @@ namespace Biscuit.Token.Formatter
                 using (var sha = SHA256.Create())
                 {
                     var computedHash = sha.ComputeHash(dataToCompute);
-                    l.Add(computedHash);
+                    result.Add(computedHash);
                 }
                 
-                //MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                //digest.update(authority);
-                //digest.update(keys[0].Compress().ToByteArray());
-                //MessageDigest cloned = (MessageDigest)digest.clone();
-                //l.Add(digest.digest());
-
-                //digest = cloned;
-
                 for (int i = 0; i < blocks.Count; i++)
                 {
                     dataToCompute = dataToCompute
@@ -236,15 +217,8 @@ namespace Biscuit.Token.Formatter
 
                     using (var sha = SHA256.Create())
                     {
-                        l.Add(sha.ComputeHash(dataToCompute));
+                        result.Add(sha.ComputeHash(dataToCompute));
                     }
-                    //byte[] block = blocks[i];
-                    //digest.update(block);
-                    //digest.update(keys[i + 1].Compress().ToByteArray());
-                    //cloned = (MessageDigest)digest.clone();
-                    //l.Add(digest.digest());
-
-                    //digest = cloned;
                 }
             }
             catch (Exception e)
@@ -252,7 +226,7 @@ namespace Biscuit.Token.Formatter
                 Console.WriteLine(e.StackTrace.ToString());
             }
 
-            return l;
+            return result;
         }
 
         SerializedBiscuit(byte[] authority, List<byte[]> blocks, List<RistrettoElement> keys, TokenSignature signature)

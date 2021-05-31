@@ -4,453 +4,454 @@ namespace Biscuit.Token.Builder.Parser
 {
     public class ExpressionParser
     {
-        public static Either<Error, Tuple<string, Expression>> parse(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder>> Parse(string s)
         {
-            return expr(Parser.space(s));
+            return Expr(Parser.Space(s));
         }
 
-        public static Either<Error, Tuple<string, Expression>> expr(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder>> Expr(string str)
         {
-            Either<Error, Tuple<string, Expression>> res1 = expr1(s);
+            Either<Error, Tuple<string, ExpressionBuilder>> res1 = Expr1(str);
             if (res1.IsLeft)
             {
-                return new Left(res1.Left);
+                return res1.Left;
             }
-            Tuple<string, Expression> t1 = res1.Right;
 
-            s = t1.Item1;
-            Expression e = t1.Item2;
+            var t1 = res1.Right;
+
+            str = t1.Item1;
+            ExpressionBuilder builder = t1.Item2;
 
             while (true)
             {
-                s = Parser.space(s);
+                str = Parser.Space(str);
+                if (str.IsEmpty())
+                {
+                    break;
+                }
+
+                Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp(str);
+                if (res2.IsLeft)
+                {
+                    break;
+                }
+                Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
+                str = t2.Item1;
+                ExpressionBuilder.Op op = t2.Item2;
+
+                str = Parser.Space(str);
+
+                Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr1(str);
+                if (res3.IsLeft)
+                {
+                    return res3.Left;
+                }
+                Tuple<string, ExpressionBuilder> t3 = res3.Right;
+
+                str = t3.Item1;
+                ExpressionBuilder e2 = t3.Item2;
+
+                builder = new ExpressionBuilder.Binary(op, builder, e2);
+            }
+
+            return new Tuple<string, ExpressionBuilder>(str, builder);
+        }
+
+        public static Either<Error, Tuple<string, ExpressionBuilder>> Expr1(string s)
+        {
+            Either<Error, Tuple<string, ExpressionBuilder>> res1 = Expr2(s);
+            if (res1.IsLeft)
+            {
+                return res1.Left;
+            }
+            Tuple<string, ExpressionBuilder> t1 = res1.Right;
+
+            s = t1.Item1;
+            ExpressionBuilder e = t1.Item2;
+
+            while (true)
+            {
+                s = Parser.Space(s);
                 if (s.Length == 0)
                 {
                     break;
                 }
 
-                Either<Error, Tuple<string, Expression.Op>> res2 = binary_op0(s);
+                Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp1(s);
                 if (res2.IsLeft)
                 {
                     break;
                 }
-                Tuple<string, Expression.Op> t2 = res2.Right;
+                Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
                 s = t2.Item1;
-                Expression.Op op = t2.Item2;
+                ExpressionBuilder.Op op = t2.Item2;
 
-                s = Parser.space(s);
+                s = Parser.Space(s);
 
-                Either<Error, Tuple<string, Expression>> res3 = expr1(s);
+                Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr2(s);
                 if (res3.IsLeft)
                 {
-                    return new Left(res3.Left);
+                    return res3.Left;
                 }
-                Tuple<string, Expression> t3 = res3.Right;
+                Tuple<string, ExpressionBuilder> t3 = res3.Right;
 
                 s = t3.Item1;
-                Expression e2 = t3.Item2;
+                ExpressionBuilder e2 = t3.Item2;
 
-                e = new Expression.Binary(op, e, e2);
+                e = new ExpressionBuilder.Binary(op, e, e2);
             }
 
-            return new Right(new Tuple<string, Expression>(s, e));
+            return new Tuple<string, ExpressionBuilder>(s, e);
         }
 
-        public static Either<Error, Tuple<string, Expression>> expr1(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder>> Expr2(string s)
         {
-            Either<Error, Tuple<string, Expression>> res1 = expr2(s);
+            Either<Error, Tuple<string, ExpressionBuilder>> res1 = Expr3(s);
             if (res1.IsLeft)
             {
-                return new Left(res1.Left);
+                return res1.Left;
             }
-            Tuple<string, Expression> t1 = res1.Right;
+            Tuple<string, ExpressionBuilder> t1 = res1.Right;
 
             s = t1.Item1;
-            Expression e = t1.Item2;
+            ExpressionBuilder e = t1.Item2;
 
             while (true)
             {
-                s = Parser.space(s);
+                s = Parser.Space(s);
                 if (s.Length == 0)
                 {
                     break;
                 }
 
-                Either<Error, Tuple<string, Expression.Op>> res2 = binary_op1(s);
+                Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp2(s);
                 if (res2.IsLeft)
                 {
                     break;
                 }
-                Tuple<string, Expression.Op> t2 = res2.Right;
+                Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
                 s = t2.Item1;
-                Expression.Op op = t2.Item2;
+                ExpressionBuilder.Op op = t2.Item2;
 
-                s = Parser.space(s);
+                s = Parser.Space(s);
 
-                Either<Error, Tuple<string, Expression>> res3 = expr2(s);
+                Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr3(s);
                 if (res3.IsLeft)
                 {
-                    return new Left(res3.Left);
+                    return res3.Left;
                 }
-                Tuple<string, Expression> t3 = res3.Right;
+                Tuple<string, ExpressionBuilder> t3 = res3.Right;
 
                 s = t3.Item1;
-                Expression e2 = t3.Item2;
+                ExpressionBuilder e2 = t3.Item2;
 
-                e = new Expression.Binary(op, e, e2);
+                e = new ExpressionBuilder.Binary(op, e, e2);
             }
 
-            return new Right(new Tuple<string, Expression>(s, e));
+            return new Tuple<string, ExpressionBuilder>(s, e);
         }
 
-        public static Either<Error, Tuple<string, Expression>> expr2(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder>> Expr3(string s)
         {
-            Either<Error, Tuple<string, Expression>> res1 = expr3(s);
+            Either<Error, Tuple<string, ExpressionBuilder>> res1 = Expr4(s);
             if (res1.IsLeft)
             {
-                return new Left(res1.Left);
+                return res1.Left;
             }
-            Tuple<string, Expression> t1 = res1.Right;
+            Tuple<string, ExpressionBuilder> t1 = res1.Right;
 
             s = t1.Item1;
-            Expression e = t1.Item2;
+            ExpressionBuilder e = t1.Item2;
 
             while (true)
             {
-                s = Parser.space(s);
+                s = Parser.Space(s);
                 if (s.Length == 0)
                 {
                     break;
                 }
 
-                Either<Error, Tuple<string, Expression.Op>> res2 = binary_op2(s);
+                Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp3(s);
                 if (res2.IsLeft)
                 {
                     break;
                 }
-                Tuple<string, Expression.Op> t2 = res2.Right;
+                Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
                 s = t2.Item1;
-                Expression.Op op = t2.Item2;
+                ExpressionBuilder.Op op = t2.Item2;
 
-                s = Parser.space(s);
+                s = Parser.Space(s);
 
-                Either<Error, Tuple<string, Expression>> res3 = expr3(s);
+                Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr4(s);
                 if (res3.IsLeft)
                 {
-                    return new Left(res3.Left);
+                    return res3.Left;
                 }
-                Tuple<string, Expression> t3 = res3.Right;
+                Tuple<string, ExpressionBuilder> t3 = res3.Right;
 
                 s = t3.Item1;
-                Expression e2 = t3.Item2;
+                ExpressionBuilder e2 = t3.Item2;
 
-                e = new Expression.Binary(op, e, e2);
+                e = new ExpressionBuilder.Binary(op, e, e2);
             }
 
-            return new Right(new Tuple<string, Expression>(s, e));
+            return new Tuple<string, ExpressionBuilder>(s, e);
         }
 
-        public static Either<Error, Tuple<string, Expression>> expr3(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder>> Expr4(string s)
         {
-            Either<Error, Tuple<string, Expression>> res1 = expr4(s);
+            Either<Error, Tuple<string, ExpressionBuilder>> res1 = ExprTerm(s);
             if (res1.IsLeft)
             {
-                return new Left(res1.Left);
+                return res1.Left;
             }
-            Tuple<string, Expression> t1 = res1.Right;
-
-            s = t1.Item1;
-            Expression e = t1.Item2;
-
-            while (true)
-            {
-                s = Parser.space(s);
-                if (s.Length == 0)
-                {
-                    break;
-                }
-
-                Either<Error, Tuple<string, Expression.Op>> res2 = binary_op3(s);
-                if (res2.IsLeft)
-                {
-                    break;
-                }
-                Tuple<string, Expression.Op> t2 = res2.Right;
-                s = t2.Item1;
-                Expression.Op op = t2.Item2;
-
-                s = Parser.space(s);
-
-                Either<Error, Tuple<string, Expression>> res3 = expr4(s);
-                if (res3.IsLeft)
-                {
-                    return new Left(res3.Left);
-                }
-                Tuple<string, Expression> t3 = res3.Right;
-
-                s = t3.Item1;
-                Expression e2 = t3.Item2;
-
-                e = new Expression.Binary(op, e, e2);
-            }
-
-            return new Right(new Tuple<string, Expression>(s, e));
-        }
-
-        public static Either<Error, Tuple<string, Expression>> expr4(String s)
-        {
-            Either<Error, Tuple<string, Expression>> res1 = expr_term(s);
-            if (res1.IsLeft)
-            {
-                return new Left(res1.Left);
-            }
-            Tuple<string, Expression> t1 = res1.Right;
-            s = Parser.space(t1.Item1);
-            Expression e1 = t1.Item2;
+            Tuple<string, ExpressionBuilder> t1 = res1.Right;
+            s = Parser.Space(t1.Item1);
+            ExpressionBuilder e1 = t1.Item2;
 
             if (!s.StartsWith("."))
             {
-                return new Right(new Tuple<string, Expression>(s, e1));
+                return new Tuple<string, ExpressionBuilder>(s, e1);
             }
             s = s.Substring(1);
 
-            Either<Error, Tuple<string, Expression.Op>> res2 = binary_op4(s);
+            Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp4(s);
             if (res2.IsLeft)
             {
-                return new Left(res2.Left);
+                return res2.Left;
             }
-            Tuple<string, Expression.Op> t2 = res2.Right;
-            s = Parser.space(t2.Item1);
-            Expression.Op op = t2.Item2;
+            Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
+            s = Parser.Space(t2.Item1);
+            ExpressionBuilder.Op op = t2.Item2;
 
             if (!s.StartsWith("("))
             {
-                return new Left(new Error(s, "missing ("));
+                return new Error(s, "missing (");
             }
 
-            s = Parser.space(s.Substring(1));
+            s = Parser.Space(s.Substring(1));
 
-            Either<Error, Tuple<string, Expression>> res3 = expr(s);
+            Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr(s);
             if (res3.IsLeft)
             {
-                return new Left(res3.Left);
+                return res3.Left;
             }
 
-            Tuple<string, Expression> t3 = res3.Right;
+            Tuple<string, ExpressionBuilder> t3 = res3.Right;
 
-            s = Parser.space(t3.Item1);
+            s = Parser.Space(t3.Item1);
             if (!s.StartsWith(")"))
             {
-                return new Left(new Error(s, "missing )"));
+                return new Error(s, "missing )");
             }
-            s = Parser.space(s.Substring(1));
-            Expression e2 = t3.Item2;
+            s = Parser.Space(s.Substring(1));
+            ExpressionBuilder e2 = t3.Item2;
 
-            return new Right(new Tuple<string, Expression>(s, new Expression.Binary(op, e1, e2)));
+            return new Tuple<string, ExpressionBuilder>(s, new ExpressionBuilder.Binary(op, e1, e2));
         }
 
-        public static Either<Error, Tuple<string, Expression>> expr_term(string s)
+        public static Either<Error, Tuple<string, ExpressionBuilder>> ExprTerm(string s)
         {
-            Either<Error, Tuple<string, Expression>> res1 = unary(s);
+            Either<Error, Tuple<string, ExpressionBuilder>> res1 = Unary(s);
             if (res1.IsRight)
             {
                 return res1;
             }
 
-            Either<Error, Tuple<string, Term>> res2 = Parser.term(s);
+            Either<Error, Tuple<string, Term>> res2 = Parser.Term(s);
             if (res2.IsLeft)
             {
-                return new Left(res2.Left);
+                return res2.Left;
             }
             Tuple<string, Term> t2 = res2.Right;
-            Expression e = new Expression.Value(t2.Item2);
+            ExpressionBuilder e = new ExpressionBuilder.Value(t2.Item2);
 
-            return new Right(new Tuple<string, Expression>(t2.Item1, e));
+            return new Tuple<string, ExpressionBuilder>(t2.Item1, e);
         }
 
-        public static Either<Error, Tuple<string, Expression>> unary(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder>> Unary(string s)
         {
-            s = Parser.space(s);
+            s = Parser.Space(s);
 
             if (s.StartsWith("!"))
             {
-                s = Parser.space(s.Substring(1));
+                s = Parser.Space(s.Substring(1));
 
-                Either<Error, Tuple<string, Expression>> resultExpression = expr(s);
+                Either<Error, Tuple<string, ExpressionBuilder>> resultExpression = Expr(s);
                 if (resultExpression.IsLeft)
                 {
-                    return new Left(resultExpression.Left);
+                    return resultExpression.Left;
                 }
 
-                Tuple<string, Expression> t = resultExpression.Right;
-                return new Right(new Tuple<string, Expression>(t.Item1, new Expression.Unary(Expression.Op.Negate, t.Item2)));
+                Tuple<string, ExpressionBuilder> t = resultExpression.Right;
+                return new Tuple<string, ExpressionBuilder>(t.Item1, new ExpressionBuilder.Unary(ExpressionBuilder.Op.Negate, t.Item2));
             }
 
 
             if (s.StartsWith("("))
             {
-                Either<Error, Tuple<string, Expression>> unaryParens = unary_parens(s);
+                Either<Error, Tuple<string, ExpressionBuilder>> unaryParens = UnaryParens(s);
                 if (unaryParens.IsLeft)
                 {
-                    return new Left(unaryParens.Left);
+                    return unaryParens.Left;
                 }
 
-                Tuple<string, Expression> t = unaryParens.Right;
+                Tuple<string, ExpressionBuilder> t = unaryParens.Right;
 
-                s = Parser.space(s.Substring(1));
-                return new Right(new Tuple<string, Expression>(t.Item1, t.Item2));
+                s = Parser.Space(s.Substring(1));
+                return new Tuple<string, ExpressionBuilder>(t.Item1, t.Item2);
             }
 
-            Expression e;
-            Either<Error, Tuple<string, Term>> res = Parser.term(s);
+            ExpressionBuilder e;
+            Either<Error, Tuple<string, Term>> res = Parser.Term(s);
             if (res.IsRight)
             {
                 Tuple<string, Term> t = res.Right;
-                s = Parser.space(t.Item1);
-                e = new Expression.Value(t.Item2);
+                s = Parser.Space(t.Item1);
+                e = new ExpressionBuilder.Value(t.Item2);
             }
             else
             {
-                Either<Error, Tuple<string, Expression>> res2 = unary_parens(s);
+                Either<Error, Tuple<string, ExpressionBuilder>> res2 = UnaryParens(s);
                 if (res2.IsLeft)
                 {
-                    return new Left(res2.Left);
+                    return res2.Left;
                 }
 
-                Tuple<string, Expression> t = res2.Right;
-                s = Parser.space(t.Item1);
+                Tuple<string, ExpressionBuilder> t = res2.Right;
+                s = Parser.Space(t.Item1);
                 e = t.Item2;
             }
 
             if (s.StartsWith(".Length"))
             {
-                s = Parser.space(s.Substring(9));
-                return new Right(new Tuple<string, Expression>(s, new Expression.Unary(Expression.Op.Length, e)));
+                s = Parser.Space(s.Substring(9));
+                return new Tuple<string, ExpressionBuilder>(s, new ExpressionBuilder.Unary(ExpressionBuilder.Op.Length, e));
             }
             else
             {
-                return new Left(new Error(s, "unexpected token"));
+                return new Error(s, "unexpected token");
             }
         }
 
-        public static Either<Error, Tuple<string, Expression>> unary_parens(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder>> UnaryParens(string s)
         {
             if (s.StartsWith("("))
             {
-                s = Parser.space(s.Substring(1));
+                s = Parser.Space(s.Substring(1));
 
-                Either<Error, Tuple<string, Expression>> res = expr(s);
+                Either<Error, Tuple<string, ExpressionBuilder>> res = Expr(s);
                 if (res.IsLeft)
                 {
-                    return new Left(res.Left);
+                    return res.Left;
                 }
 
-                Tuple<string, Expression> t = res.Right;
+                Tuple<string, ExpressionBuilder> t = res.Right;
 
-                s = Parser.space(t.Item1);
+                s = Parser.Space(t.Item1);
                 if (!s.StartsWith(")"))
                 {
-                    return new Left(new Error(s, "missing )"));
+                    return new Error(s, "missing )");
                 }
 
-                s = Parser.space(s.Substring(1));
-                return new Right(new Tuple<string, Expression>(s, new Expression.Unary(Expression.Op.Parens, t.Item2)));
+                s = Parser.Space(s.Substring(1));
+                return new Tuple<string, ExpressionBuilder>(s, new ExpressionBuilder.Unary(ExpressionBuilder.Op.Parens, t.Item2));
             }
             else
             {
-                return new Left(new Error(s, "missing ("));
+                return new Error(s, "missing (");
             }
         }
 
-        public static Either<Error, Tuple<string, Expression.Op>> binary_op0(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder.Op>> BinaryOp(string s)
         {
             if (s.StartsWith("&&"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(2), Expression.Op.And));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(2), ExpressionBuilder.Op.And);
             }
             if (s.StartsWith("||"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(2), Expression.Op.Or));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(2), ExpressionBuilder.Op.Or);
             }
 
-            return new Left(new Error(s, "unrecognized op"));
+            return new Error(s, "unrecognized op");
         }
 
-        public static Either<Error, Tuple<string, Expression.Op>> binary_op1(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder.Op>> BinaryOp1(string s)
         {
             if (s.StartsWith("<="))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(2), Expression.Op.LessOrEqual));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(2), ExpressionBuilder.Op.LessOrEqual);
             }
             if (s.StartsWith(">="))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(2), Expression.Op.GreaterOrEqual));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(2), ExpressionBuilder.Op.GreaterOrEqual);
             }
             if (s.StartsWith("<"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(1), Expression.Op.LessThan));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(1), ExpressionBuilder.Op.LessThan);
             }
             if (s.StartsWith(">"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(1), Expression.Op.GreaterThan));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(1), ExpressionBuilder.Op.GreaterThan);
             }
             if (s.StartsWith("=="))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(2), Expression.Op.Equal));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(2), ExpressionBuilder.Op.Equal);
             }
 
-            return new Left(new Error(s, "unrecognized op"));
+            return new Error(s, "unrecognized op");
         }
 
-        public static Either<Error, Tuple<string, Expression.Op>> binary_op2(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder.Op>> BinaryOp2(string s)
         {
 
             if (s.StartsWith("+"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(1), Expression.Op.Add));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(1), ExpressionBuilder.Op.Add);
             }
             if (s.StartsWith("-"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(1), Expression.Op.Sub));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(1), ExpressionBuilder.Op.Sub);
             }
 
-            return new Left(new Error(s, "unrecognized op"));
+            return new Error(s, "unrecognized op");
         }
 
-        public static Either<Error, Tuple<string, Expression.Op>> binary_op3(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder.Op>> BinaryOp3(string s)
         {
             if (s.StartsWith("*"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(1), Expression.Op.Mul));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(1), ExpressionBuilder.Op.Mul);
             }
             if (s.StartsWith("/"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(1), Expression.Op.Div));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(1), ExpressionBuilder.Op.Div);
             }
 
-            return new Left(new Error(s, "unrecognized op"));
+            return new Error(s, "unrecognized op");
         }
 
-        public static Either<Error, Tuple<string, Expression.Op>> binary_op4(String s)
+        public static Either<Error, Tuple<string, ExpressionBuilder.Op>> BinaryOp4(string s)
         {
             if (s.StartsWith("contains"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(8), Expression.Op.Contains));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(8), ExpressionBuilder.Op.Contains);
             }
             if (s.StartsWith("starts_with"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(11), Expression.Op.Prefix));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(11), ExpressionBuilder.Op.Prefix);
             }
             if (s.StartsWith("ends_with"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(9), Expression.Op.Suffix));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(9), ExpressionBuilder.Op.Suffix);
             }
             if (s.StartsWith("matches"))
             {
-                return new Right(new Tuple<string, Expression.Op>(s.Substring(7), Expression.Op.Regex));
+                return new Tuple<string, ExpressionBuilder.Op>(s.Substring(7), ExpressionBuilder.Op.Regex);
             }
 
-            return new Left(new Error(s, "unrecognized op"));
+            return new Error(s, "unrecognized op");
         }
     }
 

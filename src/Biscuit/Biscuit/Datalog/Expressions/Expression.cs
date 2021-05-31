@@ -1,90 +1,88 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Biscuit.Datalog.Expressions
 {
     public class Expression
     {
-        private List<Op> ops;
+        private readonly List<Op> ops;
 
         public Expression(List<Op> ops)
         {
             this.ops = ops;
         }
 
-        public List<Op> getOps()
+        public List<Op> GetOps()
         {
             return ops;
         }
 
-        public Option<ID> evaluate(Dictionary<ulong, ID> variables)
+        public Option<ID> Evaluate(Dictionary<ulong, ID> variables)
         {
             Stack<ID> stack = new Stack<ID>(16); //Default value
             foreach (Op op in ops)
             {
-                if (!op.evaluate(stack, variables))
+                if (!op.Evaluate(stack, variables))
                 {
-                    return Option<ID>.none();
+                    return Option<ID>.None();
                 }
             }
             if (stack.Count == 1)
             {
-                return Option<ID>.some(stack.Pop());
+                return Option<ID>.Some(stack.Pop());
             }
             else
             {
-                return Option<ID>.none();
+                return Option<ID>.None();
             }
         }
 
-        public Option<string> print(SymbolTable symbols)
+        public Option<string> Print(SymbolTable symbols)
         {
             Stack<string> stack = new Stack<string>();
             foreach (Op op in ops)
             {
-                op.print(stack, symbols);
+                op.Print(stack, symbols);
             }
             if (stack.Count == 1)
             {
-                return Option<string>.some(stack.Pop());
+                return Option<string>.Some(stack.Pop());
             }
             else
             {
-                return Option<string>.none();
+                return Option<string>.None();
             }
         }
 
-        public Format.Schema.ExpressionV1 serialize()
+        public Format.Schema.ExpressionV1 Serialize()
         {
-            Format.Schema.ExpressionV1  b = new Format.Schema.ExpressionV1();
+            Format.Schema.ExpressionV1  expression = new Format.Schema.ExpressionV1();
             
-            foreach (Op op in this.ops)
-            {
-                b.Ops.Add(op.serialize());
-            }
+            var serializedOps = this.ops.Select(op => op.Serialize());
+            expression.Ops.AddRange(serializedOps);
 
-            return b;
+            return expression;
         }
 
-        static public Either<Errors.FormatError, Expression> deserializeV1(Format.Schema.ExpressionV1 e)
+        static public Either<Errors.FormatError, Expression> DeserializeV1(Format.Schema.ExpressionV1 expression)
         {
             List<Op> ops = new List<Op>();
 
-            foreach (Format.Schema.Op op in e.Ops)
+            foreach (Format.Schema.Op op in expression.Ops)
             {
-                Either<Errors.FormatError, Op> res = Op.deserializeV1(op);
+                Either<Errors.FormatError, Op> deserialized = Op.DeserializeV1(op);
 
-                if (res.IsLeft)
+                if (deserialized.IsLeft)
                 {
-                    Errors.FormatError err = res.Left;
-                    return new Left(err);
+                    return deserialized.Left;
                 }
                 else
                 {
-                    ops.Add(res.Right);
+                    ops.Add(deserialized.Right);
                 }
             }
 
-            return new Right(new Expression(ops));
+            return new Expression(ops);
         }
     }
 }

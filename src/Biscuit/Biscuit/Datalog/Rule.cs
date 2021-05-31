@@ -9,66 +9,67 @@ namespace Biscuit.Datalog
     [Serializable]
     public class Rule
     {
-        public Predicate head
+        public Predicate Head
         {
             get;
         }
 
-        public List<Predicate> body
+        public IList<Predicate> Body
         {
             get;
         }
 
-        public List<Expression> expressions
+        public IList<Expression> Expressions
         {
             get;
         }
 
-        public void apply(HashSet<Fact> facts, HashSet<Fact> new_facts, HashSet<ulong> restricted_symbols)
+        public void Apply(HashSet<Fact> facts, HashSet<Fact> newFacts, HashSet<ulong> restrictedSymbols)
         {
-            HashSet<ulong> variables_set = new HashSet<ulong>();
-            foreach (Predicate pred in this.body)
+            HashSet<ulong> variablesSet = new HashSet<ulong>();
+            foreach (Predicate pred in this.Body)
             {
-                variables_set.addAll(pred.ids.Where(id=>id is ID.Variable).Select(id=> ((ID.Variable)id).value));
+                variablesSet.AddAll(pred.Ids.Where(id => id is ID.Variable).Select(id => ((ID.Variable)id).Value));
             }
-            MatchedVariables variables = new MatchedVariables(variables_set);
+            MatchedVariables variables = new MatchedVariables(variablesSet);
 
-            if (!this.body.Any())
+            if (!this.Body.Any())
             {
-                Option<Dictionary<ulong, ID>> h_opt = variables.check_expressions(this.expressions);
-                if (h_opt.isDefined())
+                Option<Dictionary<ulong, ID>> h_opt = variables.CheckExpressions(this.Expressions);
+                if (h_opt.IsDefined())
                 {
-                    Dictionary<ulong, ID> h = h_opt.get();
-                    Predicate p = this.head.clone(); 
+                    Dictionary<ulong, ID> h = h_opt.Get();
+                    Predicate predicate = this.Head.Clone(); 
 
-                    for (int i = 0;i<p.ids.Count; i++)
+                    for (int i = 0; i < predicate.Ids.Count; i++)
                     {
-                        ID id = p.ids[i];
+                        ID id = predicate.Ids[i];
                         if (id is ID.Variable)
                         {
-                            ID value = h[((ID.Variable)id).value];
-                            p.ids[i] = value;
-                            
+                            ID value = h[((ID.Variable)id).Value];
+                            predicate.Ids[i] = value;
                         }
                     }
                     
-                    new_facts.Add(new Fact(p));                                        
+                    newFacts.Add(new Fact(predicate));                                        
                 }
             }
 
-            foreach (Dictionary<ulong, ID> h in new Combinator(variables, this.body, this.expressions, facts).combine())
+            var combined = new Combinator(variables, this.Body, this.Expressions, facts).Combine();
+
+            foreach (Dictionary<ulong, ID> h in combined)
             {
-                Predicate p = this.head.clone();
+                Predicate predicate = this.Head.Clone();
                 bool unbound_variable = false;
 
-                for (int i=0; i<p.ids.Count; i++)
+                for (int i=0; i < predicate.Ids.Count; i++)
                 {
-                    ID id = p.ids[i];
+                    ID id = predicate.Ids[i];
                     if (id is ID.Variable)
                     {
-                        bool isInDictionnary = h.TryGetValue(((ID.Variable)id).value, out ID value);
-                        //ID value = h[((ID.Variable)id).value];
-                        p.ids[i] = value;
+                        bool isInDictionnary = h.TryGetValue(((ID.Variable)id).Value, out ID value);
+                        
+                        predicate.Ids[i] = value;
                         // variables that appear in the head should appear in the body and constraints as well
                         if (value == null)
                         {
@@ -78,75 +79,74 @@ namespace Biscuit.Datalog
                 }
                 // if the generated fact has #authority or #ambient as first element and we're n ot in a privileged rule
                 // do not generate it
-                ID first = p.ids.FirstOrDefault();
+                ID first = predicate.Ids.FirstOrDefault();
                 if (first != null && first is ID.Symbol)
                 {
-                    if (restricted_symbols.Contains(((ID.Symbol)first).value))
+                    if (restrictedSymbols.Contains(((ID.Symbol)first).Value))
                     {
                         continue;
                     }
                 }
                 if (!unbound_variable)
                 {
-                    new_facts.Add(new Fact(p));
+                    newFacts.Add(new Fact(predicate));
                 }
             }
         }
 
         // do not produce new facts, only find one matching set of facts
-        public bool test(HashSet<Fact> facts)
+        public bool Test(HashSet<Fact> facts)
         {
             HashSet<ulong> variables_set = new HashSet<ulong>();
-            foreach (Predicate pred in this.body)
+            foreach (Predicate pred in this.Body)
             {
-                variables_set.addAll(pred.ids.Where((id)=>id is ID.Variable).Select(id => ((ID.Variable)id).value));
+                variables_set.AddAll(pred.Ids.Where((id)=>id is ID.Variable).Select(id => ((ID.Variable)id).Value));
             }
             MatchedVariables variables = new MatchedVariables(variables_set);
 
-            if (!this.body.Any())
+            if (!this.Body.Any())
             {
-                return variables.check_expressions(this.expressions).isDefined();
+                return variables.CheckExpressions(this.Expressions).IsDefined();
             }
 
-            Combinator c = new Combinator(variables, this.body, this.expressions, facts);
+            Combinator c = new Combinator(variables, this.Body, this.Expressions, facts);
 
-            return c.next().isDefined();
+            return c.Next().IsDefined();
         }
 
         public Rule(Predicate head, List<Predicate> body, List<Expression> expressions)
         {
-            this.head = head;
-            this.body = body;
-            this.expressions = expressions;
+            this.Head = head;
+            this.Body = body;
+            this.Expressions = expressions;
         }
 
-        public Format.Schema.RuleV1 serialize()
+        public Format.Schema.RuleV1 Serialize()
         {
-            Format.Schema.RuleV1 b = new Format.Schema.RuleV1(){ Head = this.head.serialize() };
+            Format.Schema.RuleV1 b = new Format.Schema.RuleV1(){ Head = this.Head.Serialize() };
 
-            for (int i = 0; i < this.body.Count; i++)
+            for (int i = 0; i < this.Body.Count; i++)
             {
-                b.Body.Add(this.body[i].serialize());
+                b.Body.Add(this.Body[i].Serialize());
             }
 
-            for (int i = 0; i < this.expressions.Count; i++)
+            for (int i = 0; i < this.Expressions.Count; i++)
             {
-                b.Expressions.Add(this.expressions[i].serialize());
+                b.Expressions.Add(this.Expressions[i].Serialize());
             }
 
             return b;
         }
 
-        static public Either<Errors.FormatError, Rule> deserializeV0(Format.Schema.RuleV0 rule)
+        static public Either<Errors.FormatError, Rule> DeserializeV0(Format.Schema.RuleV0 rule)
         {
             List<Predicate> body = new List<Predicate>();
             foreach (Format.Schema.PredicateV0 predicate in rule.Body)
             {
-                Either<Errors.FormatError, Predicate> result = Predicate.deserializeV0(predicate);
+                Either<Errors.FormatError, Predicate> result = Predicate.DeserializeV0(predicate);
                 if (result.IsLeft)
                 {
-                    Errors.FormatError e = result.Left;
-                    return new Left(e);
+                    return result.Left;
                 }
                 else
                 {
@@ -157,11 +157,10 @@ namespace Biscuit.Datalog
             List<Expression> expressions = new List<Expression>();
             foreach (Format.Schema.ConstraintV0 constraint in rule.Constraints)
             {
-                Either<Errors.FormatError, Expression> result = Constraint.deserializeV0(constraint);
+                Either<Errors.FormatError, Expression> result = Constraint.DeserializeV0(constraint);
                 if (result.IsLeft)
                 {
-                    Errors.FormatError e = result.Left;
-                    return new Left(e);
+                    return result.Left;
                 }
                 else
                 {
@@ -169,28 +168,26 @@ namespace Biscuit.Datalog
                 }
             }
 
-            Either<Errors.FormatError, Predicate> res = Predicate.deserializeV0(rule.Head);
+            Either<Errors.FormatError, Predicate> res = Predicate.DeserializeV0(rule.Head);
             if (res.IsLeft)
             {
-                Errors.FormatError e = res.Left;
-                return new Left(e);
+                return res.Left;
             }
             else
             {
-                return new Right(new Rule(res.Right, body, expressions));
+                return new Rule(res.Right, body, expressions);
             }
         }
 
-        static public Either<Errors.FormatError, Rule> deserializeV1(Format.Schema.RuleV1 rule)
+        static public Either<Errors.FormatError, Rule> DeserializeV1(Format.Schema.RuleV1 rule)
         {
             List<Predicate> body = new List<Predicate>();
             foreach (Format.Schema.PredicateV1 predicate in rule.Body)
             {
-                Either<Errors.FormatError, Predicate> result = Predicate.deserializeV1(predicate);
+                Either<Errors.FormatError, Predicate> result = Predicate.DeserializeV1(predicate);
                 if (result.IsLeft)
                 {
-                    Errors.FormatError e = result.Left;
-                    return new Left(e);
+                    return result.Left;
                 }
                 else
                 {
@@ -201,11 +198,10 @@ namespace Biscuit.Datalog
             List<Expression> expressions = new List<Expression>();
             foreach (Format.Schema.ExpressionV1 expression in rule.Expressions)
             {
-                Either<Errors.FormatError, Expression> result = Expression.deserializeV1(expression);
+                Either<Errors.FormatError, Expression> result = Expression.DeserializeV1(expression);
                 if (result.IsLeft)
                 {
-                    Errors.FormatError e = result.Left;
-                    return new Left(e);
+                    return result.Left;
                 }
                 else
                 {
@@ -213,15 +209,14 @@ namespace Biscuit.Datalog
                 }
             }
 
-            Either<Errors.FormatError, Predicate> res = Predicate.deserializeV1(rule.Head);
+            Either<Errors.FormatError, Predicate> res = Predicate.DeserializeV1(rule.Head);
             if (res.IsLeft)
             {
-                Errors.FormatError e = res.Left;
-                return new Left(e);
+                return res.Left;
             }
             else
             {
-                return new Right(new Rule(res.Right, body, expressions));
+                return new Rule(res.Right, body, expressions);
             }
         }
     }

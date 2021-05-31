@@ -8,104 +8,104 @@ namespace Biscuit.Datalog
     [Serializable]
     public sealed class World
     {
-        public void add_fact(Fact fact)
+        public void AddFact(Fact fact)
         {
-            this.facts.Add(fact);
+            this.Facts.Add(fact);
         }
 
-        public void add_rule(Rule rule)
+        public void AddRule(Rule rule)
         {
-            this.rules.Add(rule);
+            this.Rules.Add(rule);
         }
 
-        public void add_privileged_rule(Rule rule)
+        public void AddPrivilegedRule(Rule rule)
         {
-            this.privileged_rules.Add(rule);
+            this.PrivilegedRules.Add(rule);
         }
 
-        public void add_check(Check check) { this.checks.Add(check); }
+        public void AddCheck(Check check) { this.Checks.Add(check); }
 
-        public void clearRules()
+        public void ClearRules()
         {
-            this.rules.Clear();
+            this.Rules.Clear();
         }
 
-        public Either<Errors.Error, Void> run(HashSet<ulong> restricted_symbols)
+        public Either<Errors.Error, Void> Run(HashSet<ulong> restrictedSymbols)
         {
-            return this.run(new RunLimits(), restricted_symbols);
+            return this.Run(new RunLimits(), restrictedSymbols);
         }
 
-        public Either<Errors.Error, Void> run(RunLimits limits, HashSet<ulong> restricted_symbols)
+        public Either<Errors.Error, Void> Run(RunLimits limits, HashSet<ulong> restrictedSymbols)
         {
             int iterations = 0;
             DateTime limit = DateTime.Now.Add(limits.MaxTime);
 
             while (true)
             {
-                HashSet<Fact> new_facts = new HashSet<Fact>();
+                HashSet<Fact> newFacts = new HashSet<Fact>();
 
-                foreach (Rule rule in this.privileged_rules)
+                foreach (Rule rule in this.PrivilegedRules)
                 {
-                    rule.apply(this.facts, new_facts, new HashSet<ulong>());
+                    rule.Apply(this.Facts, newFacts, new HashSet<ulong>());
 
                     if (DateTime.Now.CompareTo(limit) >= 0)
                     {
-                        return new Errors.Timeout();
+                        return new Errors.TimeoutError();
                     }
                 }
 
-                foreach (Rule rule in this.rules)
+                foreach (Rule rule in this.Rules)
                 {
-                    rule.apply(this.facts, new_facts, restricted_symbols);
+                    rule.Apply(this.Facts, newFacts, restrictedSymbols);
 
                     if (DateTime.Now.CompareTo(limit) >= 0)
                     {
-                        return new Errors.Timeout();
+                        return new Errors.TimeoutError();
                     }
                 }
 
-                int len = this.facts.Count;
-                this.facts.addAll(new_facts);
-                if (this.facts.Count == len)
+                int len = this.Facts.Count;
+                this.Facts.AddAll(newFacts);
+                if (this.Facts.Count == len)
                 {
                     return new Right(null);
                 }
 
-                if (this.facts.Count >= limits.MaxFacts)
+                if (this.Facts.Count >= limits.MaxFacts)
                 {
-                    return new Left(new Errors.TooManyFacts());
+                    return new Errors.TooManyFacts();
                 }
 
                 iterations += 1;
                 if (iterations >= limits.MaxIterations)
                 {
-                    return new Left(new Errors.TooManyIterations());
+                    return new Errors.TooManyIterationsError();
                 }
             }
         }
 
-        public HashSet<Fact> facts { get; }
+        public HashSet<Fact> Facts { get; }
 
-        public List<Rule> rules { get; }
+        public List<Rule> Rules { get; }
 
-        public List<Check> checks { get; }
+        public List<Check> Checks { get; }
 
-        public List<Rule> privileged_rules { get; }
+        public List<Rule> PrivilegedRules { get; }
 
 
-        public HashSet<Fact> query(Predicate pred)
+        public HashSet<Fact> Query(Predicate predicate)
         {
-            var result = this.facts.Where(f =>
+            var result = this.Facts.Where(f =>
             {
-                if (f.predicate.name != pred.name)
+                if (f.predicate.Name != predicate.Name)
                 {
                     return false;
                 }
-                int min_size = Math.Min(f.predicate.ids.Count, pred.ids.Count);
-                for (int i = 0; i < min_size; ++i)
+                int minSize = Math.Min(f.predicate.Ids.Count, predicate.Ids.Count);
+                for (int i = 0; i < minSize; ++i)
                 {
-                    ID fid = f.predicate.ids[i];
-                    ID pid = pred.ids[i];
+                    ID fid = f.predicate.Ids[i];
+                    ID pid = predicate.Ids[i];
                     if ((fid is ID.Symbol || fid is ID.Integer || fid is ID.Str || fid is ID.Date)
                     && fid.GetType() == pid.GetType())
                     {
@@ -125,87 +125,87 @@ namespace Biscuit.Datalog
             return new HashSet<Fact>(result);
         }
 
-        public HashSet<Fact> query_rule(Rule rule)
+        public HashSet<Fact> QueryRule(Rule rule)
         {
-            HashSet<Fact> new_facts = new HashSet<Fact>();
-            rule.apply(this.facts, new_facts, new HashSet<ulong>());
-            return new_facts;
+            HashSet<Fact> newFacts = new HashSet<Fact>();
+            rule.Apply(this.Facts, newFacts, new HashSet<ulong>());
+            return newFacts;
         }
 
-        public bool test_rule(Rule rule)
+        public bool TestRule(Rule rule)
         {
-            return rule.test(this.facts);
+            return rule.Test(this.Facts);
         }
 
         public World()
         {
-            this.facts = new HashSet<Fact>();
-            this.rules = new List<Rule>();
-            this.checks = new List<Check>();
-            this.privileged_rules = new List<Rule>();
+            this.Facts = new HashSet<Fact>();
+            this.Rules = new List<Rule>();
+            this.Checks = new List<Check>();
+            this.PrivilegedRules = new List<Rule>();
         }
 
         public World(HashSet<Fact> facts, List<Rule> privileged_rules, List<Rule> rules)
         {
-            this.facts = facts;
-            this.rules = rules;
-            this.checks = new List<Check>();
-            this.privileged_rules = privileged_rules;
+            this.Facts = facts;
+            this.Rules = rules;
+            this.Checks = new List<Check>();
+            this.PrivilegedRules = privileged_rules;
         }
 
         public World(HashSet<Fact> facts, List<Rule> privileged_rules, List<Rule> rules, List<Check> checks)
         {
-            this.facts = facts;
-            this.rules = rules;
-            this.checks = checks;
-            this.privileged_rules = privileged_rules;
+            this.Facts = facts;
+            this.Rules = rules;
+            this.Checks = checks;
+            this.PrivilegedRules = privileged_rules;
         }
 
-        public World(World w)
+        public World(World world)
         {
-            this.facts = new HashSet<Fact>();
-            foreach (Fact fact in w.facts)
+            this.Facts = new HashSet<Fact>();
+            foreach (Fact fact in world.Facts)
             {
-                this.facts.Add(fact);
+                this.Facts.Add(fact);
             }
             
-            this.rules = new List<Rule>();
-            this.rules.AddRange(w.rules);
+            this.Rules = new List<Rule>();
+            this.Rules.AddRange(world.Rules);
 
-            this.privileged_rules = new List<Rule>();
-            this.privileged_rules.AddRange(w.privileged_rules);
+            this.PrivilegedRules = new List<Rule>();
+            this.PrivilegedRules.AddRange(world.PrivilegedRules);
 
-            this.checks = new List<Check>();
-            this.checks.AddRange(w.checks);
+            this.Checks = new List<Check>();
+            this.Checks.AddRange(world.Checks);
         }
 
-        public string print(SymbolTable symbol_table)
+        public string Print(SymbolTable symbol_table)
         {
             StringBuilder s = new StringBuilder();
 
             s.Append("World {\n\t\tfacts: [");
-            foreach (Fact f in this.facts)
+            foreach (Fact f in this.Facts)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.print_fact(f));
+                s.Append(symbol_table.PrintFact(f));
             }
             s.Append("\n\t\t]\n\t\tprivileged rules: [");
-            foreach (Rule r in this.privileged_rules)
+            foreach (Rule r in this.PrivilegedRules)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.print_rule(r));
+                s.Append(symbol_table.PrintRule(r));
             }
             s.Append("\n\t\t]\n\t\trules: [");
-            foreach (Rule r in this.rules)
+            foreach (Rule r in this.Rules)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.print_rule(r));
+                s.Append(symbol_table.PrintRule(r));
             }
             s.Append("\n\t\t]\n\t\tchecks: [");
-            foreach (Check c in this.checks)
+            foreach (Check c in this.Checks)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.print_check(c));
+                s.Append(symbol_table.PrintCheck(c));
             }
             s.Append("\n\t\t]\n\t}");
 

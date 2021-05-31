@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace Biscuit
+﻿namespace Biscuit
 {
     public class Option
     {
-        public static Option<T> some<T>(T p)
+        public static Option<T> Some<T>(T p)
         {
             return new Option<T>() { Value = p };
         }
@@ -14,27 +12,27 @@ namespace Biscuit
     {
         public T Value { get; set; }
 
-        public static Option<T> none()
+        public static Option<T> None()
         {
             return new Option<T>();
         }
 
-        public static Option<T> some(T p)
+        public static Option<T> Some(T p)
         {
             return new Option<T>() { Value = p };
         }
 
-        public bool isEmpty()
+        public bool IsEmpty()
         {
             return Value == null;
         }
 
-        public T get()
+        public T Get()
         {
             return this.Value;
         }
 
-        public bool isDefined()
+        public bool IsDefined()
         {
             return Value != null;
         }
@@ -48,7 +46,7 @@ namespace Biscuit
                 ///obj.GetType().GenericTypeArguments[0].IsAssignableFrom(this.Value.GetType())
                 if (isSubclass)
                 {
-                    object valueOfObj = obj.GetType().GetMethod("get").Invoke(obj, null);
+                    object valueOfObj = obj.GetType().GetMethod("Get").Invoke(obj, null);
                     // T == 
                     if (valueOfObj != null)
                     {

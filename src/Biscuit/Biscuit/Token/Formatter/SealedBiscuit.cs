@@ -3,23 +3,24 @@ using Google.Protobuf;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 
 namespace Biscuit.Token.Formatter
 {
     public class SealedBiscuit
     {
-        public byte[] authority;
-        public List<byte[]> blocks;
-        public byte[] signature;
+        public byte[] Authority { get; }
+        public List<byte[]> Blocks { get; }
 
-        /**
-         * Deserializes a SealedBiscuit from a byte array
-         * @param slice
-         * @return
-         */
-        static public Either<Error, SealedBiscuit> from_bytes(byte[] slice, byte[] secret)
+        private readonly byte[] signature;
+
+        /// <summary>
+        /// Deserializes a SealedBiscuit from a byte array
+        /// </summary>
+        /// <param name="slice"></param>
+        /// <param name="secret"></param>
+        /// <returns></returns>
+        static public Either<Error, SealedBiscuit> FromBytes(byte[] slice, byte[] secret)
         {
             try
             {
@@ -30,18 +31,12 @@ namespace Biscuit.Token.Formatter
 
                     List<byte> toHash = new List<byte>(authority);
 
-                    //Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-                    //SecretKeySpec secret_key = new SecretKeySpec(secret, "HmacSHA256");
-                    //sha256_HMAC.init(secret_key);
-                    //sha256_HMAC.update(authority);
-
                     List<byte[]> blocks = new List<byte[]>();
                     foreach (ByteString block in data.Blocks)
                     {
                         byte[] byteBlock = block.ToByteArray();
                         blocks.Add(byteBlock);
                         toHash.AddRange(byteBlock);
-                        //sha256_HMAC.update(byteBlock);
                     }
 
                     byte[] calculated = hmac.ComputeHash(toHash.ToArray());
@@ -49,7 +44,7 @@ namespace Biscuit.Token.Formatter
 
                     if (calculated.Length != signature.Length)
                     {
-                        return new Left(new InvalidFormat());
+                        return new InvalidFormat();
                     }
 
                     int result = 0;
@@ -60,32 +55,31 @@ namespace Biscuit.Token.Formatter
 
                     if (result != 0)
                     {
-                        return new Left(new SealedSignature());
+                        return new SealedSignature();
                     }
 
-                    SealedBiscuit sealedBiscuit = new SealedBiscuit(authority, blocks, signature);
-                    return new Right(sealedBiscuit);
+                    return new SealedBiscuit(authority, blocks, signature);
                 }
             }
             catch (Exception e)
             {
-                return new Left(new DeserializationError(e.ToString()));
+                return new DeserializationError(e.ToString());
             }
         }
 
-        /**
-         * Serializes a SealedBiscuit to a byte array
-         * @return
-         */
-        public Either<FormatError, byte[]> serialize()
+        /// <summary>
+        /// Serializes a SealedBiscuit to a byte array
+        /// </summary>
+        /// <returns></returns>
+        public Either<FormatError, byte[]> Serialize()
         {
             Format.Schema.SealedBiscuit biscuit = new Format.Schema.SealedBiscuit()
             {
                 Signature = ByteString.CopyFrom(signature),
-                Authority = ByteString.CopyFrom(authority)
+                Authority = ByteString.CopyFrom(Authority)
             };
 
-            foreach (var block in blocks)
+            foreach (var block in Blocks)
             {
                 biscuit.Blocks.Add(ByteString.CopyFrom(block));
             }
@@ -96,26 +90,25 @@ namespace Biscuit.Token.Formatter
                 {
                     biscuit.WriteTo(stream);
                     byte[] data = stream.ToArray();
-                    return new Right(data);
+                    return data;
                 }
             }
             catch (IOException e)
             {
-                return new Left(new SerializationError(e.ToString()));
+                return new SerializationError(e.ToString());
             }
 
         }
 
         SealedBiscuit(byte[] authority, List<byte[]> blocks, byte[] signature)
         {
-            this.authority = authority;
-            this.blocks = blocks;
+            this.Authority = authority;
+            this.Blocks = blocks;
             this.signature = signature;
         }
 
-        public static Either<FormatError, SealedBiscuit> make(Block authority, List<Block> blocks, byte[] secret)
+        public static Either<FormatError, SealedBiscuit> Make(Block authority, List<Block> blocks, byte[] secret)
         {
-
             try
             {
                 using (HMACSHA256 hmac = new HMACSHA256(secret))
@@ -151,13 +144,13 @@ namespace Biscuit.Token.Formatter
             }
         }
 
-        public List<byte[]> revocation_identifiers()
+        public List<byte[]> RevocationIdentifiers()
         {
             List<byte[]> l = new List<byte[]>();
 
             try
             {
-                var dataToCompute = new List<byte>(this.authority);
+                var dataToCompute = new List<byte>(this.Authority);
 
                 using (var sha = SHA256.Create())
                 {
@@ -165,9 +158,8 @@ namespace Biscuit.Token.Formatter
                     l.Add(computedHash);
                 }
 
-                for (int i = 0; i < this.blocks.Count; i++)
+                foreach (byte[] block in this.Blocks)
                 {
-                    byte[] block = this.blocks[i];
                     dataToCompute.AddRange(block);
 
                     using (var sha = SHA256.Create())
@@ -180,7 +172,6 @@ namespace Biscuit.Token.Formatter
             catch (Exception e)
             {
                 Console.WriteLine(e.StackTrace.ToString());
-                //e.printStackTrace();
             }
 
             return l;

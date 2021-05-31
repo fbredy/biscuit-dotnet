@@ -1,4 +1,5 @@
-﻿using Google.Protobuf;
+﻿using Biscuit.Errors;
+using Google.Protobuf;
 using Ristretto;
 using System;
 using System.Collections.Generic;
@@ -12,36 +13,36 @@ namespace Biscuit.Crypto
     /// </summary>
     public class TokenSignature
     {
-        List<RistrettoElement> parameters { get; }
-        Scalar z { get; }
+        private List<RistrettoElement> Parameters { get; }
+        private Scalar z { get; }
 
         /// <summary>
         /// Generates a new valid signature for a message and a private key
         /// </summary>
-        /// <param name="rng"></param>
+        /// <param name="rng">random number generator</param>
         /// <param name="keypair"></param>
         /// <param name="message"></param>
         public TokenSignature(RNGCryptoServiceProvider rng, KeyPair keypair, byte[] message)
         {
-            byte[] b = new byte[64];
-            rng.GetBytes(b);
-            Scalar r = Scalar.FromBytesModOrderWide(b);
+            byte[] randomData = new byte[64];
+            rng.GetBytes(randomData);
+            Scalar r = Scalar.FromBytesModOrderWide(randomData);
 
-            RistrettoElement A = Constants.RISTRETTO_GENERATOR.Multiply(r);
-            List<RistrettoElement> l = new List<RistrettoElement>();
-            l.Add(A);
-            Scalar d = Hash_points(l);
-            Scalar e = hash_message(keypair.Public_key, message);
+            var ristrettoElements = new List<RistrettoElement>
+            {
+                Constants.RISTRETTO_GENERATOR.Multiply(r)
+            };
+            Scalar d = HashPoints(ristrettoElements);
+            Scalar e = HashMessage(keypair.PublicKey, message);
+            Scalar z = r.Multiply(d).Subtract(e.Multiply(keypair.PrivateKey));
 
-            Scalar z = r.Multiply(d).Subtract(e.Multiply(keypair.Private_key));
-
-            this.parameters = l;
+            this.Parameters = ristrettoElements;
             this.z = z;
         }
 
         TokenSignature(List<RistrettoElement> parameters, Scalar z)
         {
-            this.parameters = parameters;
+            this.Parameters = parameters;
             this.z = z;
         }
 
@@ -54,20 +55,18 @@ namespace Biscuit.Crypto
         /// <returns></returns>
         public TokenSignature Sign(RNGCryptoServiceProvider rng, KeyPair keypair, byte[] message)
         {
-            byte[] b = new byte[64];
-            rng.GetBytes(b);
-            Scalar r = Scalar.FromBytesModOrderWide(b);
+            byte[] randomData = new byte[64];
+            rng.GetBytes(randomData);
+            Scalar r = Scalar.FromBytesModOrderWide(randomData);
 
-            RistrettoElement A = Constants.RISTRETTO_GENERATOR.Multiply(r);
-            List<RistrettoElement> l = new List<RistrettoElement>();
-            l.Add(A);
-            Scalar d = Hash_points(l);
-            Scalar e = hash_message(keypair.Public_key, message);
+            var ristretto = Constants.RISTRETTO_GENERATOR.Multiply(r);
+            var ristrettoElements = new List<RistrettoElement> { ristretto };
+            Scalar d = HashPoints(ristrettoElements);
+            Scalar e = HashMessage(keypair.PublicKey, message);
+            Scalar z = r.Multiply(d).Subtract(e.Multiply(keypair.PrivateKey));
 
-            Scalar z = r.Multiply(d).Subtract(e.Multiply(keypair.Private_key));
-
-            TokenSignature sig = new TokenSignature(this.parameters, this.z.Add(z));
-            sig.parameters.Add(A);
+            TokenSignature sig = new TokenSignature(this.Parameters, this.z.Add(z));
+            sig.Parameters.Add(ristretto);
 
             return sig;
         }
@@ -75,94 +74,72 @@ namespace Biscuit.Crypto
         /// <summary>
         /// checks that a signature is valid for a set of public keys and messages
         /// </summary>
-        /// <param name="public_keys"></param>
+        /// <param name="publicKeys"></param>
         /// <param name="messages"></param>
         /// <returns></returns>
-        public Either<Errors.Error, Void> Verify(List<RistrettoElement> public_keys, List<byte[]> messages)
+        public Either<Error, Void> Verify(IList<RistrettoElement> publicKeys, IList<byte[]> messages)
         {
-            if (!(public_keys.Count() == messages.Count() && public_keys.Count() == this.parameters.Count()))
+            if (!(publicKeys.Count() == messages.Count() && publicKeys.Count() == this.Parameters.Count()))
             {
-                Console.WriteLine(("lists are not the same size"));
-                return new Either<Errors.Error, Void>(new Errors.InvalidFormat());
+                return new Either<Error, Void>(new InvalidFormat());
             }
 
-            //System.out.println("z, zp");
             RistrettoElement zP = Constants.RISTRETTO_GENERATOR.Multiply(this.z);
-            //System.out.println(hex(z.toByteArray()));
-            //System.out.println(hex(zP.compress().toByteArray()));
 
-
-            //System.out.println("eiXi");
             RistrettoElement eiXi = RistrettoElement.IDENTITY;
-            for (int i = 0; i < public_keys.Count(); i++)
+            for (int i = 0; i < publicKeys.Count(); i++)
             {
-                Scalar e = hash_message(public_keys[i], messages[i]);
-                //System.out.println(hex(e.toByteArray()));
-                //System.out.println(hex((public_keys.get(i).multiply(e)).compress().toByteArray()));
-
-
-                eiXi = eiXi.Add(public_keys[i].Multiply(e));
-                //System.out.println(hex(eiXi.compress().toByteArray()));
-
+                Scalar e = HashMessage(publicKeys[i], messages[i]);
+                eiXi = eiXi.Add(publicKeys[i].Multiply(e));
             }
 
-            //System.out.println("diAi");
             RistrettoElement diAi = RistrettoElement.IDENTITY;
-            foreach (RistrettoElement A in parameters)
+            foreach (RistrettoElement item in Parameters)
             {
-                List<RistrettoElement> l = new List<RistrettoElement>();
-                l.Add(A);
-                Scalar d = Hash_points(l);
+                List<RistrettoElement> ristrettoElements = new List<RistrettoElement> { item };
+                
+                Scalar d = HashPoints(ristrettoElements);
 
-                diAi = diAi.Add(A.Multiply(d));
+                diAi = diAi.Add(item.Multiply(d));
             }
-
-            //System.out.println(hex(eiXi.compress().toByteArray()));
-            //System.out.println(hex(diAi.compress().toByteArray()));
-
-
 
             RistrettoElement res = zP.Add(eiXi).Subtract(diAi);
 
-            //System.out.println(hex(RistrettoElement.IDENTITY.compress().toByteArray()));
-            //System.out.println(hex(res.compress().toByteArray()));
-
             if (res.Equals(RistrettoElement.IDENTITY))
             {
-                return new Either<Errors.Error, Void>((Void)null);
+                return new Right((Void)null);
             }
             else
             {
-                return new Either<Errors.Error, Void>(new Errors.InvalidSignature());
+                return new InvalidSignature();
             }
         }
 
-        /**
-         * Serializes a signature to its Protobuf representation
-         * @return
-         */
-        public Format.Schema.Signature serialize()
+        /// <summary>
+        /// Serializes a signature to its Protobuf representation
+        /// </summary>
+        /// <returns></returns>
+        public Format.Schema.Signature Serialize()
         {
             Format.Schema.Signature sig = new Format.Schema.Signature()
             {
                 Z = ByteString.CopyFrom(this.z.ToByteArray())
             };
 
-            //System.out.println(this.parameters.size());
-            for (int i = 0; i < this.parameters.Count; i++)
+            foreach (RistrettoElement element in this.Parameters)
             {
-                //System.out.println(i);
-                sig.Parameters.Add(ByteString.CopyFrom(this.parameters[i].Compress().ToByteArray()));
+                sig.Parameters.Add(ByteString.CopyFrom(element.Compress().ToByteArray()));
             }
 
             return sig;
         }
-        /**
-         * Deserializes a signature from its Protobuf representation
-         * @param sig
-         * @return
-         */
-        static public Either<Errors.Error, TokenSignature> deserialize(Format.Schema.Signature sig)
+
+        /// <summary>
+        /// Deserializes a signature from its Protobuf representation
+        /// </summary>
+        /// <param name="sig"></param>
+        /// <returns></returns>
+        static public Either<Error, TokenSignature> Deserialize(Format.Schema.Signature sig)
         {
             try
             {
@@ -172,31 +149,27 @@ namespace Biscuit.Crypto
                     parameters.Add((new CompressedRistretto(parameter.ToByteArray())).Decompress());
                 }
 
-                //System.out.println(hex(sig.getZ().toByteArray()));
-                //System.out.println(sig.getZ().toByteArray().length);
-
                 Scalar z = Scalar.FromBytesModOrder(sig.Z.ToByteArray());
 
                 return new Right(new TokenSignature(parameters, z));
             }
             catch (InvalidEncodingException)
             {
-                return new Left(new Errors.InvalidFormat());
+                return new InvalidFormat();
             }
             catch (ArgumentException e)
             {
-                return new Left(new Errors.DeserializationError(e.ToString()));
+                return new DeserializationError(e.ToString());
             }
         }
 
-        static Scalar Hash_points(List<RistrettoElement> points)
+        static Scalar HashPoints(List<RistrettoElement> points)
         {
             try
             {
                 using (var sha = SHA512.Create())
                 {
                     sha.Initialize();
-                    
                     var compressed = points.SelectMany(point => point.Compress().ToByteArray()).ToArray();
                     byte[] hashed = sha.ComputeHash(compressed);
                     return Scalar.FromBytesModOrderWide(hashed);
@@ -209,7 +182,7 @@ namespace Biscuit.Crypto
             return null;
         }
 
-        static Scalar hash_message(RistrettoElement point, byte[] data)
+        static Scalar HashMessage(RistrettoElement point, byte[] data)
         {
             try
             {
@@ -228,27 +201,5 @@ namespace Biscuit.Crypto
             }
             return null;
         }
-
-        //public static string Hex(byte[] byteArray)
-        //{
-        //    StringBuilder result = new StringBuilder();
-        //    foreach (byte bb in byteArray)
-        //    {
-        //        result.Append(string.format("%02X", bb));
-        //    }
-        //    return result.ToString();
-        //}
-
-        //public static byte[] FromHex(string s)
-        //{
-        //    int len = s.Length;
-        //    byte[] data = new byte[len / 2];
-        //    for (int i = 0; i < len; i += 2)
-        //    {
-        //        data[i / 2] = (byte)((Character.digit(s.charAt(i), 16) << 4)
-        //                + Character.digit(s.charAt(i + 1), 16));
-        //    }
-        //    return data;
-        //}
     }
 }

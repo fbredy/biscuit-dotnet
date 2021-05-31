@@ -22,7 +22,7 @@ namespace Biscuit.Token.Builder
         {
             this.rng = rng;
             this.root = root;
-            this.symbol_start = base_symbols.symbols.Count;
+            this.symbol_start = base_symbols.Symbols.Count;
             this.symbols = new SymbolTable(base_symbols);
             this.context = "";
             this.facts = new List<Datalog.Fact>();
@@ -30,83 +30,83 @@ namespace Biscuit.Token.Builder
             this.checks = new List<Datalog.Check>();
         }
 
-        public void add_authority_fact(Fact f)
+        public void add_authority_fact(FactBuilder f)
         {
             Term.Symbol authority_symbol = new Term.Symbol("authority");
-            if (f.predicate.ids.Count == 0 || !(f.predicate.ids[0].Equals(authority_symbol)))
+            if (f.Predicate.Ids.Count == 0 || !(f.Predicate.Ids[0].Equals(authority_symbol)))
             {
                 List<Term> ids = new List<Term>();
                 ids.Add(authority_symbol);
-                foreach (Term id in f.predicate.ids)
+                foreach (Term id in f.Predicate.Ids)
                 {
                     ids.Add(id);
                 }
-                f.predicate.ids = ids;
+                f.Predicate.Ids = ids;
             }
 
-            this.facts.Add(f.convert(this.symbols));
+            this.facts.Add(f.Convert(this.symbols));
         }
 
         public Either<Error, Void> add_authority_fact(string s)
         {
-            Either<Parser.Error, Tuple<string, Fact>> res = Parser.Parser.fact(s);
+            Either<Parser.Error, Tuple<string, FactBuilder>> res = Parser.Parser.Fact(s);
 
             if (res.IsLeft)
             {
-                return new Left(new Errors.Parser(res.Left));
+                return new Left(new Errors.ParserError(res.Left));
             }
 
-            Tuple<string, Token.Builder.Fact> t = res.Right;
+            Tuple<string, Token.Builder.FactBuilder> t = res.Right;
 
             add_authority_fact(t.Item2);
 
             return new Right(null);
         }
 
-        public void add_authority_rule(Builder.Rule rule)
+        public void add_authority_rule(Builder.RuleBuilder rule)
         {
             Term.Symbol authority_symbol = new Term.Symbol("authority");
-            if (rule.head.ids.Count == 0 || !(rule.head.ids[0].Equals(authority_symbol)))
+            if (rule.Head.Ids.Count == 0 || !(rule.Head.Ids[0].Equals(authority_symbol)))
             {
-                rule.head.ids.Insert(0, authority_symbol);
+                rule.Head.Ids.Insert(0, authority_symbol);
             }
 
-            this.rules.Add(rule.convert(this.symbols));
+            this.rules.Add(rule.Convert(this.symbols));
         }
 
         public Either<Error, Void> add_authority_rule(String s)
         {
-            Either<Builder.Parser.Error, Tuple<String, Token.Builder.Rule>> res =
-                    Token.Builder.Parser.Parser.rule(s);
+            Either<Builder.Parser.Error, Tuple<String, Token.Builder.RuleBuilder>> res =
+                    Token.Builder.Parser.Parser.Rule(s);
 
             if (res.IsLeft)
             {
-                return new Left(new Errors.Parser(res.Left));
+                return new Left(new Errors.ParserError(res.Left));
             }
 
-            Tuple<String, Token.Builder.Rule> t = res.Right;
+            Tuple<String, Token.Builder.RuleBuilder> t = res.Right;
 
             add_authority_rule(t.Item2);
 
             return new Right(null);
         }
 
-        public void add_authority_check(Token.Builder.Check c)
+        public void add_authority_check(Token.Builder.CheckBuilder c)
         {
             this.checks.Add(c.convert(this.symbols));
         }
 
         public Either<Error, Void> add_authority_check(String s)
         {
-            Either<Parser.Error, Tuple<string, Token.Builder.Check>> res =
+            Either<Parser.Error, Tuple<string, Token.Builder.CheckBuilder>> res =
                     Parser.Parser.Check(s);
 
             if (res.IsLeft)
             {
-                return new Left(new Errors.Parser(res.Left));
+                return new Left(new Errors.ParserError(res.Left));
             }
 
-            Tuple<string, Token.Builder.Check> t = res.Right;
+            Tuple<string, Token.Builder.CheckBuilder> t = res.Right;
 
             add_authority_check(t.Item2);
 
@@ -125,21 +125,21 @@ namespace Biscuit.Token.Builder
 
             for (int i = 0; i < this.symbol_start; i++)
             {
-                base_symbols.Add(this.symbols.symbols[i]);
+                base_symbols.Add(this.symbols.Symbols[i]);
             }
 
-            for (int i = this.symbol_start; i < this.symbols.symbols.Count; i++)
+            for (int i = this.symbol_start; i < this.symbols.Symbols.Count; i++)
             {
-                symbols.Add(this.symbols.symbols[i]);
+                symbols.Add(this.symbols.Symbols[i]);
             }
 
             Token.Block authority_block = new Token.Block(0, symbols, context, this.facts, this.rules, this.checks);
-            return Biscuit.make(this.rng, this.root, base_symbols, authority_block);
+            return Biscuit.Make(this.rng, this.root, base_symbols, authority_block);
         }
 
         public void add_right(string resource, string right)
         {
-            this.add_authority_fact(Utils.fact("right", Arrays.asList(Utils.s("authority"), Utils.strings(resource), Utils.s(right))));
+            this.add_authority_fact(Utils.Fact("right", Arrays.AsList(Utils.Symbol("authority"), Utils.Strings(resource), Utils.Symbol(right))));
         }
     }
 

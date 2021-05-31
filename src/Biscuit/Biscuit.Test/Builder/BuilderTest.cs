@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Biscuit.Test.Builder
 {
@@ -17,40 +16,40 @@ namespace Biscuit.Test.Builder
         {
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
             KeyPair root = new KeyPair(rng);
-            SymbolTable symbols = Biscuit.Token.Biscuit.default_symbol_table();
+            SymbolTable symbols = Biscuit.Token.Biscuit.DefaultSymbolTable();
 
-            Block authority_builder = new Block(0, symbols);
-            authority_builder.add_fact(Utils.fact("revocation_id", Arrays.asList(Utils.date(DateTime.Now))));
-            authority_builder.add_fact(Utils.fact("right", Arrays.asList(Utils.s("authority"), Utils.s("admin"))));
-            authority_builder.add_rule(Utils.constrained_rule("right",
-                    Arrays.asList(Utils.s("authority"), Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")),
-                    Arrays.asList(Utils.pred("ns_operation", Arrays.asList(Utils.s("authority"), Utils.s("namespace"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("operation")))),
-                    Arrays.asList<Expression>(
-                            new Expression.Binary(
-                                    Expression.Op.Contains,
-                                    new Expression.Value(Utils.var("operation")),
-                                    new Expression.Value(new Term.Set(new HashSet<Term>(Arrays.asList<Term>(
-                                            Utils.s("create_topic"),
-                                            Utils.s("get_topic"),
-                                            Utils.s("get_topics")
+            BlockBuilder authority_builder = new BlockBuilder(0, symbols);
+            authority_builder.AddFact(Utils.Fact("revocation_id", Arrays.AsList(Utils.Date(DateTime.Now))));
+            authority_builder.AddFact(Utils.Fact("right", Arrays.AsList(Utils.Symbol("authority"), Utils.Symbol("admin"))));
+            authority_builder.AddRule(Utils.ConstrainedRule("right",
+                    Arrays.AsList(Utils.Symbol("authority"), Utils.Symbol("namespace"), Utils.Var("tenant"), Utils.Var("namespace"), Utils.Var("operation")),
+                    Arrays.AsList(Utils.Pred("ns_operation", Arrays.AsList(Utils.Symbol("authority"), Utils.Symbol("namespace"), Utils.Var("tenant"), Utils.Var("namespace"), Utils.Var("operation")))),
+                    Arrays.AsList<ExpressionBuilder>(
+                            new ExpressionBuilder.Binary(
+                                    ExpressionBuilder.Op.Contains,
+                                    new ExpressionBuilder.Value(Utils.Var("operation")),
+                                    new ExpressionBuilder.Value(new Term.Set(new HashSet<Term>(Arrays.AsList<Term>(
+                                            Utils.Symbol("create_topic"),
+                                            Utils.Symbol("get_topic"),
+                                            Utils.Symbol("get_topics")
                                     )))))
                     )
             ));
-            authority_builder.add_rule(Utils.constrained_rule("right",
-                    Arrays.asList(Utils.s("authority"), Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")),
-                    Arrays.asList(Utils.pred("topic_operation", Arrays.asList(Utils.s("authority"), Utils.s("topic"), Utils.var("tenant"), Utils.var("namespace"), Utils.var("topic"), Utils.var("operation")))),
-                    Arrays.asList<Expression>(
-                            new Expression.Binary(
-                                    Expression.Op.Contains,
-                                    new Expression.Value(Utils.var("operation")),
-                                    new Expression.Value(new Term.Set(new HashSet<Term>(Arrays.asList(
-                                            Utils.s("lookup")
+            authority_builder.AddRule(Utils.ConstrainedRule("right",
+                    Arrays.AsList(Utils.Symbol("authority"), Utils.Symbol("topic"), Utils.Var("tenant"), Utils.Var("namespace"), Utils.Var("topic"), Utils.Var("operation")),
+                    Arrays.AsList(Utils.Pred("topic_operation", Arrays.AsList(Utils.Symbol("authority"), Utils.Symbol("topic"), Utils.Var("tenant"), Utils.Var("namespace"), Utils.Var("topic"), Utils.Var("operation")))),
+                    Arrays.AsList<ExpressionBuilder>(
+                            new ExpressionBuilder.Binary(
+                                    ExpressionBuilder.Op.Contains,
+                                    new ExpressionBuilder.Value(Utils.Var("operation")),
+                                    new ExpressionBuilder.Value(new Term.Set(new HashSet<Term>(Arrays.AsList(
+                                            Utils.Symbol("lookup")
                                     )))))
                     )
             ));
-            Biscuit.Token.Biscuit rootBiscuit = Biscuit.Token.Biscuit.make(rng, root, symbols, authority_builder.build()).Right;
+            Biscuit.Token.Biscuit rootBiscuit = Biscuit.Token.Biscuit.Make(rng, root, symbols, authority_builder.Build()).Right;
 
-            Console.WriteLine(rootBiscuit.print());
+            Console.WriteLine(rootBiscuit.Print());
 
             Assert.IsNotNull(rootBiscuit);
         }

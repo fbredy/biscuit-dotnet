@@ -1,43 +1,44 @@
-﻿using System.Collections.Generic;
+﻿using Biscuit.Datalog.Expressions;
+using System.Collections.Generic;
 
 namespace Biscuit.Token.Builder
 {
-    public abstract class Expression
+    public abstract class ExpressionBuilder
     {
-        public Datalog.Expressions.Expression convert(Datalog.SymbolTable symbols)
+        public Expression Convert(Datalog.SymbolTable symbols)
         {
             List<Datalog.Expressions.Op> ops = new List<Datalog.Expressions.Op>();
-            this.toOpcodes(symbols, ops);
+            this.ToOpcodes(symbols, ops);
 
-            return new Datalog.Expressions.Expression(ops);
+            return new Expression(ops);
         }
 
-        public static Expression convert_from(Datalog.Expressions.Expression e, Datalog.SymbolTable symbols)
+        public static ExpressionBuilder ConvertFrom(Expression e, Datalog.SymbolTable symbols)
         {
             List<Op> ops = new List<Op>();
-            Stack<Expression> stack = new Stack<Expression>(16);
-            foreach (Datalog.Expressions.Op op in e.getOps())
+            Stack<ExpressionBuilder> stack = new Stack<ExpressionBuilder>(16);
+            foreach (Datalog.Expressions.Op op in e.GetOps())
             {
                 if (op is Datalog.Expressions.Op.Value)
                 {
                     Datalog.Expressions.Op.Value v = (Datalog.Expressions.Op.Value)op;
-                    stack.Push(new Expression.Value(Term.convert_from(v.getValue(), symbols)));
+                    stack.Push(new ExpressionBuilder.Value(Term.convert_from(v.GetValue(), symbols)));
                 }
                 else if (op is Datalog.Expressions.Op.Unary)
                 {
                     Datalog.Expressions.Op.Unary v = (Datalog.Expressions.Op.Unary)op;
-                    Expression e1 = stack.Pop();
+                    ExpressionBuilder e1 = stack.Pop();
 
-                    switch (v.getOp())
+                    switch (v.GetOp())
                     {
                         case Datalog.Expressions.Op.UnaryOp.Length:
-                            stack.Push(new Expression.Unary(Op.Length, e1));
+                            stack.Push(new ExpressionBuilder.Unary(Op.Length, e1));
                             break;
                         case Datalog.Expressions.Op.UnaryOp.Negate:
-                            stack.Push(new Expression.Unary(Op.Negate, e1));
+                            stack.Push(new ExpressionBuilder.Unary(Op.Negate, e1));
                             break;
                         case Datalog.Expressions.Op.UnaryOp.Parens:
-                            stack.Push(new Expression.Unary(Op.Parens, e1));
+                            stack.Push(new ExpressionBuilder.Unary(Op.Parens, e1));
                             break;
                         default:
                             return null;
@@ -46,61 +47,61 @@ namespace Biscuit.Token.Builder
                 else if (op is Datalog.Expressions.Op.Binary)
                 {
                     Datalog.Expressions.Op.Binary v = (Datalog.Expressions.Op.Binary)op;
-                    Expression e1 = stack.Pop();
-                    Expression e2 = stack.Pop();
+                    ExpressionBuilder e1 = stack.Pop();
+                    ExpressionBuilder e2 = stack.Pop();
 
-                    switch (v.getOp())
+                    switch (v.GetOp())
                     {
                         case Datalog.Expressions.Op.BinaryOp.LessThan:
-                            stack.Push(new Expression.Binary(Op.LessThan, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.LessThan, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.GreaterThan:
-                            stack.Push(new Expression.Binary(Op.GreaterThan, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.GreaterThan, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.LessOrEqual:
-                            stack.Push(new Expression.Binary(Op.LessOrEqual, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.LessOrEqual, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.GreaterOrEqual:
-                            stack.Push(new Expression.Binary(Op.GreaterOrEqual, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.GreaterOrEqual, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Equal:
-                            stack.Push(new Expression.Binary(Op.Equal, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Equal, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Contains:
-                            stack.Push(new Expression.Binary(Op.Contains, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Contains, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Prefix:
-                            stack.Push(new Expression.Binary(Op.Prefix, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Prefix, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Suffix:
-                            stack.Push(new Expression.Binary(Op.Suffix, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Suffix, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Regex:
-                            stack.Push(new Expression.Binary(Op.Regex, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Regex, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Add:
-                            stack.Push(new Expression.Binary(Op.Add, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Add, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Sub:
-                            stack.Push(new Expression.Binary(Op.Sub, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Sub, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Mul:
-                            stack.Push(new Expression.Binary(Op.Mul, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Mul, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Div:
-                            stack.Push(new Expression.Binary(Op.Div, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Div, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.And:
-                            stack.Push(new Expression.Binary(Op.And, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.And, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Or:
-                            stack.Push(new Expression.Binary(Op.Or, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Or, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Intersection:
-                            stack.Push(new Expression.Binary(Op.Intersection, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Intersection, e1, e2));
                             break;
                         case Datalog.Expressions.Op.BinaryOp.Union:
-                            stack.Push(new Expression.Binary(Op.Union, e1, e2));
+                            stack.Push(new ExpressionBuilder.Binary(Op.Union, e1, e2));
                             break;
                         default:
                             return null;
@@ -111,7 +112,7 @@ namespace Biscuit.Token.Builder
             return stack.Pop();
         }
 
-        public abstract void toOpcodes(Datalog.SymbolTable symbols, List<Datalog.Expressions.Op> ops);
+        public abstract void ToOpcodes(Datalog.SymbolTable symbols, List<Datalog.Expressions.Op> ops);
 
         public enum Op
         {
@@ -137,16 +138,16 @@ namespace Biscuit.Token.Builder
             Union,
         }
 
-        public class Value : Expression
+        public class Value : ExpressionBuilder
         {
-            private Term value;
+            private readonly Term value;
 
             public Value(Term value)
             {
                 this.value = value;
             }
 
-            public override void toOpcodes(Datalog.SymbolTable symbols, List<Datalog.Expressions.Op> ops)
+            public override void ToOpcodes(Datalog.SymbolTable symbols, List<Datalog.Expressions.Op> ops)
             {
                 ops.Add(new Datalog.Expressions.Op.Value(this.value.convert(symbols)));
             }
@@ -174,20 +175,20 @@ namespace Biscuit.Token.Builder
             }
         }
 
-        public class Unary : Expression
+        public class Unary : ExpressionBuilder
         {
-            private Op op;
-            private Expression arg1;
+            private readonly Op op;
+            private readonly ExpressionBuilder arg1;
 
-            public Unary(Op op, Expression arg1)
+            public Unary(Op op, ExpressionBuilder arg1)
             {
                 this.op = op;
                 this.arg1 = arg1;
             }
 
-            public override void toOpcodes(Datalog.SymbolTable symbols, List<Datalog.Expressions.Op> ops)
+            public override void ToOpcodes(Datalog.SymbolTable symbols, List<Datalog.Expressions.Op> ops)
             {
-                this.arg1.toOpcodes(symbols, ops);
+                this.arg1.ToOpcodes(symbols, ops);
 
                 switch (this.op)
                 {
@@ -228,23 +229,23 @@ namespace Biscuit.Token.Builder
             }
         }
 
-        public class Binary : Expression
+        public class Binary : ExpressionBuilder
         {
-            private Op op;
-            private Expression arg1;
-            private Expression arg2;
+            private readonly Op op;
+            private readonly ExpressionBuilder arg1;
+            private readonly ExpressionBuilder arg2;
 
-            public Binary(Op op, Expression arg1, Expression arg2)
+            public Binary(Op op, ExpressionBuilder arg1, ExpressionBuilder arg2)
             {
                 this.op = op;
                 this.arg1 = arg1;
                 this.arg2 = arg2;
             }
 
-            public override void toOpcodes(Datalog.SymbolTable symbols, List<Datalog.Expressions.Op> ops)
+            public override void ToOpcodes(Datalog.SymbolTable symbols, List<Datalog.Expressions.Op> ops)
             {
-                this.arg1.toOpcodes(symbols, ops);
-                this.arg2.toOpcodes(symbols, ops);
+                this.arg1.ToOpcodes(symbols, ops);
+                this.arg2.ToOpcodes(symbols, ops);
 
                 switch (this.op)
                 {

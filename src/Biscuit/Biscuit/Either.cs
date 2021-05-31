@@ -46,26 +46,10 @@ namespace Biscuit
                 if (x.IsLeft && this.IsLeft)
                 {
                     res = Equals(x.Left, this.Left);
-                    //if (x.Left == null && this.Left == null)
-                    //{
-                    //    res = true;
-                    //}
-                    //else if (x.Left != null && this.Left != null)
-                    //{
-                    //    res = x.Left.Equals(Left);
-                    //}
                 }
                 else if (x.IsRight && this.IsRight)
                 {
                     res = Equals(x.Right, this.Right);
-                    //if (x.Right == null && this.Right == null)
-                    //{
-                    //    res = true;
-                    //}
-                    //else if (x.Right != null && this.Right != null)
-                    //{
-                    //    res = x.Right.Equals(this.Right);
-                    //}                    
                 }
             }
             return res;
@@ -172,7 +156,7 @@ namespace Biscuit
                     {
                         result = true;
                     }
-                    else //if (this.Value.GetType()  valueType)
+                    else 
                     {
                         result = Value.Equals(leftValue);
                     }

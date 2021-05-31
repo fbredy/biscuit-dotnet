@@ -3,12 +3,11 @@ using System.Collections.Generic;
 
 namespace Biscuit.Errors
 {
-    //TODO : add and refacto
     public class Error
     {
         public virtual Option<List<FailedCheck>> FailedCheck()
         {
-            return Option<List<FailedCheck>>.some(new List<FailedCheck>());
+            return Option<List<FailedCheck>>.Some(new List<FailedCheck>());
         }
 
         public override bool Equals(object o)
@@ -142,7 +141,7 @@ namespace Biscuit.Errors
     {
         public readonly string e;
 
-        public BlockSerializationError(String e)
+        public BlockSerializationError(string e)
         {
             this.e = e;
         }
@@ -258,7 +257,7 @@ namespace Biscuit.Errors
 
         public override int GetHashCode()
         {
-            return Objects.hash(expected, found);
+            return Objects.Hash(expected, found);
         }
 
 
@@ -318,7 +317,7 @@ namespace Biscuit.Errors
 
         public override int GetHashCode()
         {
-            return Objects.hash(error);
+            return Objects.Hash(error);
         }
 
 
@@ -330,7 +329,7 @@ namespace Biscuit.Errors
         
         public override Option<List<FailedCheck>> FailedCheck()
         {
-            return this.error.failed_checks();
+            return this.error.GetFailedChecks();
         }
 
     }
@@ -346,33 +345,32 @@ namespace Biscuit.Errors
         }
     }
 
-    public class TooManyIterations : Error
+    public class TooManyIterationsError : Error
     {
 
         public override bool Equals(object o)
         {
             if (this == o) return true;
-            if (o == null || !(o is TooManyIterations)) return false;
+            if (o == null || !(o is TooManyIterationsError)) return false;
             return true;
         }
     }
 
-    public class Timeout : Error
+    public class TimeoutError : Error
     {
-
         public override bool Equals(object o)
         {
             if (this == o) return true;
-            if (o == null || !(o is Timeout)) return false;
+            if (o == null || !(o is TimeoutError)) return false;
             return true;
         }
     }
 
-    public class Parser : Error
+    public class ParserError : Error
     {
         public Token.Builder.Parser.Error error;
 
-        public Parser(Token.Builder.Parser.Error error)
+        public ParserError(Token.Builder.Parser.Error error)
         {
             this.error = error;
         }
@@ -381,9 +379,9 @@ namespace Biscuit.Errors
         public override bool Equals(object o)
         {
             if (this == o) return true;
-            if (o == null || !(o is Parser)) return false;
+            if (o == null || !(o is ParserError)) return false;
 
-            Parser parser = (Parser)o;
+            ParserError parser = (ParserError)o;
 
             return error.Equals(parser.error);
         }
@@ -397,9 +395,7 @@ namespace Biscuit.Errors
 
         public override string ToString()
         {
-            return "Parser{" +
-                    "error=" + error +
-                    '}';
+            return $"Parser{{error={error}}}";
         }
     }
 }

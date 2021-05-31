@@ -9,7 +9,7 @@ namespace Biscuit.Datalog
 
         public bool match_predicate(Predicate predicate)
         {
-            return this.predicate.match(predicate);
+            return this.predicate.Match(predicate);
         }
 
         public Fact(Predicate predicate)
@@ -38,13 +38,13 @@ namespace Biscuit.Datalog
         {
             return new Format.Schema.FactV1
             {
-                Predicate = this.predicate.serialize()
+                Predicate = this.predicate.Serialize()
             };
         }
 
         static public Either<Errors.FormatError, Fact> deserializeV0(Format.Schema.FactV0 fact)
         {
-            Either<Errors.FormatError, Predicate> res = Predicate.deserializeV0(fact.Predicate);
+            Either<Errors.FormatError, Predicate> res = Predicate.DeserializeV0(fact.Predicate);
             if (res.IsLeft)
             {
                 Errors.FormatError e = res.Left;
@@ -58,7 +58,7 @@ namespace Biscuit.Datalog
 
         static public Either<Errors.FormatError, Fact> deserializeV1(Format.Schema.FactV1 fact)
         {
-            Either<Errors.FormatError, Predicate> res = Predicate.deserializeV1(fact.Predicate);
+            Either<Errors.FormatError, Predicate> res = Predicate.DeserializeV1(fact.Predicate);
             if (res.IsLeft)
             {
                 Errors.FormatError e = res.Left;

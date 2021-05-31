@@ -10,12 +10,12 @@ namespace Biscuit.Token.Builder
 
         static public Term convert_from(ID id, SymbolTable symbols)
         {
-            return id.toTerm(symbols);
+            return id.ToTerm(symbols);
         }
 
         public class Symbol : Term
         {
-            string value;
+            readonly string value;
 
             public Symbol(string value)
             {
@@ -25,7 +25,7 @@ namespace Biscuit.Token.Builder
 
             public override ID convert(SymbolTable symbols)
             {
-                return new ID.Symbol(symbols.insert(this.value));
+                return new ID.Symbol(symbols.Insert(this.value));
             }
 
 
@@ -61,7 +61,7 @@ namespace Biscuit.Token.Builder
 
             public override ID convert(SymbolTable symbols)
             {
-                return new ID.Variable(symbols.insert(this.value));
+                return new ID.Variable(symbols.Insert(this.value));
             }
 
 

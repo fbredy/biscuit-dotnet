@@ -10,14 +10,15 @@ namespace Biscuit.Datalog
     [Serializable]
     public sealed class SymbolTable
     {
-        public List<string> symbols { get; }
-        public ulong insert(string symbol)
+        public List<string> Symbols { get; }
+
+        public ulong Insert(string symbol)
         {
-            int index = this.symbols.IndexOf(symbol);
+            int index = this.Symbols.IndexOf(symbol);
             if (index == -1)
             {
-                this.symbols.Add(symbol);
-                return (ulong)(this.symbols.Count - 1);
+                this.Symbols.Add(symbol);
+                return (ulong)(this.Symbols.Count - 1);
             }
             else
             {
@@ -27,64 +28,81 @@ namespace Biscuit.Datalog
 
         public ID Add(string symbol)
         {
-            return new ID.Symbol(this.insert(symbol));
+            return new ID.Symbol(this.Insert(symbol));
         }
 
-        public Option<ulong> get(string symbol)
+        public Option<ulong> Get(string symbol)
         {
-            long index = this.symbols.IndexOf(symbol);
+            long index = this.Symbols.IndexOf(symbol);
             if (index == -1)
             {
-                return Option<ulong>.none();
+                return Option<ulong>.None();
             }
             else
             {
-                return Option<ulong>.some((ulong)index);
+                return Option<ulong>.Some((ulong)index);
             }
         }
 
-        public string print_id(ID value)
+        public string PrintId(ID value)
         {
-            string _s = string.Empty;
-            if (value is ID.Bool) {
-                _s = ((ID.Bool)value).value.ToString();
-            } else if (value is ID.Bytes) {
-                _s = StrUtils.bytesToHex(((ID.Bytes)value).value);
-            } else if (value is ID.Date) {
-                DateTime d = DateTime.UnixEpoch.AddSeconds(((ID.Date)value).value);
-                _s = d.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ssZ");
-            } else if (value is ID.Integer) {
-                _s = ((ID.Integer)value).value.ToString();
-            } else if (value is ID.Set) {
-                ID.Set idset = (ID.Set)value;
-                if (idset.value.Count > 0)
-                {
-                    _s = "[ ";
-                    _s += string.Join(", ", idset.value.Select((id)=>print_id(id)).ToList());
-                    _s += " ]";
-                }
-            } else if (value is ID.Str) {
-                _s = "\"" + ((ID.Str)value).value + "\"";
-            } else if (value is ID.Symbol) {
-                _s = "#" + print_symbol((int)((ID.Symbol)value).value);
-            } else if (value is ID.Variable) {
-                _s = "$" + print_symbol((int)((ID.Variable)value).value);
+            string result = string.Empty;
+            switch (value)
+            {
+                case ID.Bool _:
+                    result = ((ID.Bool)value).Value.ToString();
+                    break;
+                case ID.Bytes _:
+                    result = StrUtils.bytesToHex(((ID.Bytes)value).Value);
+                    break;
+                case ID.Date _:
+                    {
+                        DateTime d = DateTime.UnixEpoch.AddSeconds(((ID.Date)value).Value);
+                        result = d.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ssZ");
+                        break;
+                    }
+
+                case ID.Integer _:
+                    result = ((ID.Integer)value).Value.ToString();
+                    break;
+                case ID.Set _:
+                    {
+                        ID.Set idset = (ID.Set)value;
+                        if (idset.Value.Count > 0)
+                        {
+                            result = "[ " + string.Join(", ", idset.Value.Select((id) => PrintId(id)).ToList()) + " ]";
+                        }
+                        break;
+                    }
+
+                case ID.Str _:
+                    result = "\"" + ((ID.Str)value).Value + "\"";
+                    break;
+                case ID.Symbol _:
+                    result = "#" + PrintSymbol((int)((ID.Symbol)value).Value);
+                    break;
+                case ID.Variable _:
+                    result = "$" + PrintSymbol((int)((ID.Variable)value).Value);
+                    break;
+                default:
+                    result = string.Empty;
+                    break;
             }
-            return _s;
+            return result;
         }
 
-        public string print_rule(Rule r)
+        public string PrintRule(Rule r)
         {
-            string res = this.print_predicate(r.head);
-            res += " <- " + this.print_rule_body(r);
+            string res = this.PrintPredicate(r.Head);
+            res += " <- " + this.PrintRuleBody(r);
 
             return res;
         }
 
-        public string print_rule_body(Rule r)
+        public string PrintRuleBody(Rule r)
         {
-            List<string> preds = r.body.Select(p=> this.print_predicate(p)).ToList();
-            List<string> expressions = r.expressions.Select(c => this.print_expression(c)).ToList();
+            List<string> preds = r.Body.Select(p=> this.PrintPredicate(p)).ToList();
+            List<string> expressions = r.Expressions.Select(c => this.PrintExpression(c)).ToList();
 
             string res = string.Join(", ", preds);
             if (expressions.Any())
@@ -98,55 +116,55 @@ namespace Biscuit.Datalog
             return res;
         }
 
-        public string print_expression(Expression e)
+        public string PrintExpression(Expression e)
         {
-            return e.print(this).get();
+            return e.Print(this).Get();
         }
 
 
-        public string print_predicate(Predicate p)
+        public string PrintPredicate(Predicate p)
         {
-            List<string> ids = p.ids.Select(i => { 
+            List<string> ids = p.Ids.Select(i => { 
                 if (i is ID.Variable) {
-                    return "$" + this.print_symbol((int)((ID.Variable)i).value);
+                    return "$" + this.PrintSymbol((int)((ID.Variable)i).Value);
                 } else if (i is ID.Symbol) {
-                    return "#" + this.print_symbol((int)((ID.Symbol)i).value);
+                    return "#" + this.PrintSymbol((int)((ID.Symbol)i).Value);
                 } else if (i is ID.Date) {
-                    return DateTime.UnixEpoch.AddSeconds(((ID.Date)i).value).ToString();
+                    return DateTime.UnixEpoch.AddSeconds(((ID.Date)i).Value).ToString();
                 } else if (i is ID.Integer) {
-                    return "" + ((ID.Integer)i).value;
+                    return "" + ((ID.Integer)i).Value;
                 } else if (i is ID.Str) {
-                    return "\"" + ((ID.Str)i).value + "\"";
+                    return "\"" + ((ID.Str)i).Value + "\"";
                 } else if (i is ID.Bytes) {
-                    return "hex:" + StrUtils.bytesToHex(((ID.Bytes)i).value);
+                    return "hex:" + StrUtils.bytesToHex(((ID.Bytes)i).Value);
                 } else
                 {
                     return "???";
                 }
             }).ToList();
 
-            var result = this.print_symbol((int)p.name);
+            var result = this.PrintSymbol((int)p.Name);
 
             return (result ?? "<?>") + "(" + string.Join(", ", ids) + ")";
         }
 
-        public string print_fact(Fact f)
+        public string PrintFact(Fact f)
         {
-            return this.print_predicate(f.predicate);
+            return this.PrintPredicate(f.predicate);
         }
 
-        public string print_check(Check c)
+        public string PrintCheck(Check c)
         {
             string res = "check if ";
-            List<string> queries = c.queries.Select((q)=> this.print_rule_body(q)).ToList();
+            List<string> queries = c.Queries.Select((q)=> this.PrintRuleBody(q)).ToList();
             return res + string.Join(" or ", queries);
         }
 
-        public string print_world(World w)
+        public string PrintWorld(World w)
         {
-            List<string> facts = w.facts.Select((f)=> this.print_fact(f)).ToList();
-            List<string> rules = w.rules.Select((r)=> this.print_rule(r)).ToList();
-            List<string> checksStr = w.checks.Select((c)=> this.print_check(c)).ToList();
+            List<string> facts = w.Facts.Select((f)=> this.PrintFact(f)).ToList();
+            List<string> rules = w.Rules.Select((r)=> this.PrintRule(r)).ToList();
+            List<string> checksStr = w.Checks.Select((c)=> this.PrintCheck(c)).ToList();
 
             StringBuilder b = new StringBuilder();
             b.Append("World {\n\tfacts: [\n\t\t");
@@ -160,11 +178,11 @@ namespace Biscuit.Datalog
             return b.ToString();
         }
 
-        public string print_symbol(int i)
+        public string PrintSymbol(int i)
         {
-            if (i >= 0 && i < this.symbols.Count)
+            if (i >= 0 && i < this.Symbols.Count)
             {
-                return this.symbols[i];
+                return this.Symbols[i];
             }
             else
             {
@@ -174,12 +192,12 @@ namespace Biscuit.Datalog
 
         public SymbolTable()
         {
-            this.symbols = new List<string>();
+            this.Symbols = new List<string>();
         }
         public SymbolTable(SymbolTable s)
         {
-            this.symbols = new List<string>();
-            this.symbols.AddRange(s.symbols);
+            this.Symbols = new List<string>();
+            this.Symbols.AddRange(s.Symbols);
         }
     }
 }

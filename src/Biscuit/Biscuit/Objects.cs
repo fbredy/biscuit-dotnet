@@ -6,7 +6,7 @@ namespace Biscuit
 {
     public static class Objects
     {
-        public static int hash(params object[] a)
+        public static int Hash(params object[] a)
         {
             if (a == null)
             { return 0; }

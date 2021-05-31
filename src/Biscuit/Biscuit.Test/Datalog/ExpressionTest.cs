@@ -17,7 +17,7 @@ namespace Biscuit.Test.Datalog
             symbols.Add("b");
             symbols.Add("var");
 
-            Expression e = new Expression(Arrays.asList<Op>(
+            Expression e = new Expression(Arrays.AsList<Op>(
                     new Op.Value(new ID.Integer(1)),
                     new Op.Value(new ID.Variable(2)),
                     new Op.Binary(Op.BinaryOp.LessThan),
@@ -26,7 +26,7 @@ namespace Biscuit.Test.Datalog
 
             Assert.AreEqual(
                     "! 1 < $var",
-                    e.print(symbols).get()
+                    e.Print(symbols).Get()
             );
 
             Dictionary<ulong, ID> variables = new Dictionary<ulong, ID>();
@@ -34,7 +34,7 @@ namespace Biscuit.Test.Datalog
 
             Assert.AreEqual(
                     new ID.Bool(true),
-                    e.evaluate(variables).get()
+                    e.Evaluate(variables).Get()
             );
         }
     }

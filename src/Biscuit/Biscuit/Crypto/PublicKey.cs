@@ -6,22 +6,22 @@ namespace Biscuit.Crypto
     {
         public RistrettoElement Key { get; }
 
-        public PublicKey(RistrettoElement public_key)
+        public PublicKey(RistrettoElement publicKey)
         {
-            this.Key = public_key;
+            this.Key = publicKey;
         }
 
         public PublicKey(byte[] data)
         {
-            CompressedRistretto c = new CompressedRistretto(data);
-            this.Key = c.Decompress();
+            CompressedRistretto compressed = new CompressedRistretto(data);
+            this.Key = compressed.Decompress();
         }
 
         public PublicKey(string hex)
         {
             byte[] data = StrUtils.hexToBytes(hex);
-            CompressedRistretto c = new CompressedRistretto(data);
-            this.Key = c.Decompress();
+            CompressedRistretto compressed = new CompressedRistretto(data);
+            this.Key = compressed.Decompress();
         }
 
         public byte[] ToBytes()

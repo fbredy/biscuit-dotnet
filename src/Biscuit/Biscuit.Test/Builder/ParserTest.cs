@@ -5,10 +5,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Check = Biscuit.Token.Builder.Check;
-using Fact = Biscuit.Token.Builder.Fact;
+using CheckBuilder = Biscuit.Token.Builder.CheckBuilder;
+using FactBuilder = Biscuit.Token.Builder.FactBuilder;
 using Parser = Biscuit.Token.Builder.Parser.Parser;
-using Rule = Biscuit.Token.Builder.Rule;
+using RuleBuilder = Biscuit.Token.Builder.RuleBuilder;
 
 namespace Biscuit.Test.Builder
 {
@@ -19,46 +19,46 @@ namespace Biscuit.Test.Builder
         [TestMethod]
         public void testName()
         {
-            Either<Error, Tuple<string, string>> res = Parser.name("operation(#ambient, #read)");
+            Either<Error, Tuple<string, string>> res = Parser.Name("operation(#ambient, #read)");
             Assert.AreEqual(new Right(new Tuple<string, string>("(#ambient, #read)", "operation")), res);
         }
 
         [TestMethod]
         public void testSymbol()
         {
-            Either<Error, Tuple<string, Term.Symbol>> res = Parser.symbol("#ambient");
-            Assert.AreEqual(new Right(new Tuple<string, Term.Symbol>("", (Term.Symbol)Utils.s("ambient"))), res);
+            Either<Error, Tuple<string, Term.Symbol>> res = Parser.Symbol("#ambient");
+            Assert.AreEqual(new Right(new Tuple<string, Term.Symbol>("", (Term.Symbol)Utils.Symbol("ambient"))), res);
         }
 
         [TestMethod]
         public void testString()
         {
-            Either<Error, Tuple<string, Term.Str>> res = Parser.strings("\"file1 a hello - 123_\"");
-            Assert.AreEqual(new Right(new Tuple<string, Term.Str>("", (Term.Str)Utils.strings("file1 a hello - 123_"))), res);
+            Either<Error, Tuple<string, Term.Str>> res = Parser.Strings("\"file1 a hello - 123_\"");
+            Assert.AreEqual(new Right(new Tuple<string, Term.Str>("", (Term.Str)Utils.Strings("file1 a hello - 123_"))), res);
         }
 
         [TestMethod]
         public void testInteger()
         {
-            Either<Error, Tuple<string, Term.Integer>> res = Parser.integer("123");
-            Assert.AreEqual(new Right(new Tuple<string, Term.Integer>("", (Term.Integer)Utils.integer(123))), res);
+            Either<Error, Tuple<string, Term.Integer>> res = Parser.Integer("123");
+            Assert.AreEqual(new Right(new Tuple<string, Term.Integer>("", (Term.Integer)Utils.Integer(123))), res);
 
-            Either<Error, Tuple<string, Term.Integer>> res2 = Parser.integer("-42");
-            Assert.AreEqual(new Right(new Tuple<string, Term.Integer>("", (Term.Integer)Utils.integer(-42))), res2);
+            Either<Error, Tuple<string, Term.Integer>> res2 = Parser.Integer("-42");
+            Assert.AreEqual(new Right(new Tuple<string, Term.Integer>("", (Term.Integer)Utils.Integer(-42))), res2);
         }
 
         [TestMethod]
         public void testDate()
         {
-            Either<Error, Tuple<string, Term.Date>> res = Parser.date("2019-12-02T13:49:53Z,");
+            Either<Error, Tuple<string, Term.Date>> res = Parser.Date("2019-12-02T13:49:53Z,");
             Assert.AreEqual(new Right(new Tuple<string, Term.Date>(",", new Term.Date(1575294593))), res);
         }
 
         [TestMethod]
         public void testVariable()
         {
-            Either<Error, Tuple<string, Term.Variable>> res = Parser.variable("$name");
-            Assert.AreEqual(new Right(new Tuple<string, Term.Variable>("", (Term.Variable)Utils.var("name"))), res);
+            Either<Error, Tuple<string, Term.Variable>> res = Parser.Variable("$name");
+            Assert.AreEqual(new Right(new Tuple<string, Term.Variable>("", (Term.Variable)Utils.Var("name"))), res);
         }
 
         public void testConstraint()
@@ -68,34 +68,34 @@ namespace Biscuit.Test.Builder
         [TestMethod]
         public void testFact()
         {
-            Either<Error, Tuple<string, Fact>> res = Biscuit.Token.Builder.Parser.Parser.fact("right( #authority, \"file1\", #read )");
-            Assert.AreEqual(new Right(new Tuple<string, Fact>("",
-                    Utils.fact("right", Arrays.asList(Utils.s("authority"), Utils.strings("file1"), Utils.s("read"))))),
+            Either<Error, Tuple<string, FactBuilder>> res = Biscuit.Token.Builder.Parser.Parser.Fact("right( #authority, \"file1\", #read )");
+            Assert.AreEqual(new Right(new Tuple<string, FactBuilder>("",
+                    Utils.Fact("right", Arrays.AsList(Utils.Symbol("authority"), Utils.Strings("file1"), Utils.Symbol("read"))))),
                     res);
 
-            Either<Error, Tuple<string, Fact>> res2 = Parser.fact("right( #authority, $var, #read )");
+            Either<Error, Tuple<string, FactBuilder>> res2 = Parser.Fact("right( #authority, $var, #read )");
             //Assert.AreEqual(new Left(new Error("$var, #read )", "variables are not allowed in facts")),
             //    res2);
             Assert.AreEqual(new Left(new Error("$var, #read )", "closing parens not found")),
                     res2);
 
-            Either<Error, Tuple<string, Fact>> res3 = Parser.fact("date(#ambient,2019-12-02T13:49:53Z)");
-            Assert.AreEqual(new Right(new Tuple<string, Fact>("",
-                            Utils.fact("date", Arrays.asList(Utils.s("ambient"), new Term.Date(1575294593))))),
+            Either<Error, Tuple<string, FactBuilder>> res3 = Parser.Fact("date(#ambient,2019-12-02T13:49:53Z)");
+            Assert.AreEqual(new Right(new Tuple<string, FactBuilder>("",
+                            Utils.Fact("date", Arrays.AsList(Utils.Symbol("ambient"), new Term.Date(1575294593))))),
                     res3);
         }
 
         [TestMethod]
         public void testRule()
         {
-            Either<Error, Tuple<string, Rule>> res =
-                    Parser.rule("right(#authority, $resource, #read) <- resource( #ambient, $resource), operation(#ambient, #read)");
-            Assert.AreEqual(new Right(new Tuple<string, Rule>("",
-                            Utils.rule("right",
-                                    Arrays.asList(Utils.s("authority"), Utils.var("resource"), Utils.s("read")),
-                                    Arrays.asList(
-                                            Utils.pred("resource", Arrays.asList(Utils.s("ambient"), Utils.var("resource"))),
-                                            Utils.pred("operation", Arrays.asList(Utils.s("ambient"), Utils.s("read"))))
+            Either<Error, Tuple<string, RuleBuilder>> res =
+                    Parser.Rule("right(#authority, $resource, #read) <- resource( #ambient, $resource), operation(#ambient, #read)");
+            Assert.AreEqual(new Right(new Tuple<string, RuleBuilder>("",
+                            Utils.Rule("right",
+                                    Arrays.AsList(Utils.Symbol("authority"), Utils.Var("resource"), Utils.Symbol("read")),
+                                    Arrays.AsList(
+                                            Utils.Pred("resource", Arrays.AsList(Utils.Symbol("ambient"), Utils.Var("resource"))),
+                                            Utils.Pred("operation", Arrays.AsList(Utils.Symbol("ambient"), Utils.Symbol("read"))))
                             ))),
                     res);
         }
@@ -103,20 +103,20 @@ namespace Biscuit.Test.Builder
         [TestMethod]
         public void testRuleWithExpression()
         {
-            Either<Error, Tuple<string, Rule>> res =
-                Parser.rule("valid_date(\"file1\") <- time(#ambient, $0 ), resource( #ambient, \"file1\"), $0 <= 2019-12-04T09:46:41+00:00");
-            Assert.AreEqual(new Right(new Tuple<string, Rule>("",
-                            Utils.constrained_rule("valid_date",
-                                    Arrays.asList(Utils.strings("file1")),
-                                    Arrays.asList(
-                                            Utils.pred("time", Arrays.asList(Utils.s("ambient"), Utils.var("0"))),
-                                            Utils.pred("resource", Arrays.asList(Utils.s("ambient"), Utils.strings("file1")))
+            Either<Error, Tuple<string, RuleBuilder>> res =
+                Parser.Rule("valid_date(\"file1\") <- time(#ambient, $0 ), resource( #ambient, \"file1\"), $0 <= 2019-12-04T09:46:41+00:00");
+            Assert.AreEqual(new Right(new Tuple<string, RuleBuilder>("",
+                            Utils.ConstrainedRule("valid_date",
+                                    Arrays.AsList(Utils.Strings("file1")),
+                                    Arrays.AsList(
+                                            Utils.Pred("time", Arrays.AsList(Utils.Symbol("ambient"), Utils.Var("0"))),
+                                            Utils.Pred("resource", Arrays.AsList(Utils.Symbol("ambient"), Utils.Strings("file1")))
                                             ),
-                                    Arrays.asList<Expression>(
-                                            new Expression.Binary(
-                                                    Expression.Op.LessOrEqual,
-                                                    new Expression.Value(Utils.var("0")),
-                                                    new Expression.Value(new Term.Date(1575452801)))
+                                    Arrays.AsList<ExpressionBuilder>(
+                                            new ExpressionBuilder.Binary(
+                                                    ExpressionBuilder.Op.LessOrEqual,
+                                                    new ExpressionBuilder.Value(Utils.Var("0")),
+                                                    new ExpressionBuilder.Value(new Term.Date(1575452801)))
                                     )
                             ))),
                     res);
@@ -125,20 +125,20 @@ namespace Biscuit.Test.Builder
         [TestMethod]
         public void testRuleWithExpressionOrdering()
         {
-            Either<Error, Tuple<string, Rule>> res =
-                    Parser.rule("valid_date(\"file1\") <- time(#ambient, $0 ), $0 <= 2019-12-04T09:46:41+00:00, resource( #ambient, \"file1\")");
-            Assert.AreEqual(new Right(new Tuple<string, Rule>("",
-                            Utils.constrained_rule("valid_date",
-                                    Arrays.asList(Utils.strings("file1")),
-                                    Arrays.asList(
-                                            Utils.pred("time", Arrays.asList(Utils.s("ambient"), Utils.var("0"))),
-                                            Utils.pred("resource", Arrays.asList(Utils.s("ambient"), Utils.strings("file1")))
+            Either<Error, Tuple<string, RuleBuilder>> res =
+                    Parser.Rule("valid_date(\"file1\") <- time(#ambient, $0 ), $0 <= 2019-12-04T09:46:41+00:00, resource( #ambient, \"file1\")");
+            Assert.AreEqual(new Right(new Tuple<string, RuleBuilder>("",
+                            Utils.ConstrainedRule("valid_date",
+                                    Arrays.AsList(Utils.Strings("file1")),
+                                    Arrays.AsList(
+                                            Utils.Pred("time", Arrays.AsList(Utils.Symbol("ambient"), Utils.Var("0"))),
+                                            Utils.Pred("resource", Arrays.AsList(Utils.Symbol("ambient"), Utils.Strings("file1")))
                                     ),
-                                    Arrays.asList<Expression>(
-                                            new Expression.Binary(
-                                                    Expression.Op.LessOrEqual,
-                                                    new Expression.Value(Utils.var("0")),
-                                                    new Expression.Value(new Term.Date(1575452801)))
+                                    Arrays.AsList<ExpressionBuilder>(
+                                            new ExpressionBuilder.Binary(
+                                                    ExpressionBuilder.Op.LessOrEqual,
+                                                    new ExpressionBuilder.Value(Utils.Var("0")),
+                                                    new ExpressionBuilder.Value(new Term.Date(1575452801)))
                                     )
                             ))),
                     res);
@@ -147,24 +147,24 @@ namespace Biscuit.Test.Builder
         [TestMethod]
         public void testCheck()
         {
-            var expectedCheck = new Check(Arrays.asList(
-                        Utils.rule("query",
+            var expectedCheck = new CheckBuilder(Arrays.AsList(
+                        Utils.Rule("query",
                                 new List<Term>(),
-                                Arrays.asList(
-                                        Utils.pred("resource", Arrays.asList(Utils.s("ambient"), Utils.var("0"))),
-                                        Utils.pred("operation", Arrays.asList(Utils.s("ambient"), Utils.s("read")))
+                                Arrays.AsList(
+                                        Utils.Pred("resource", Arrays.AsList(Utils.Symbol("ambient"), Utils.Var("0"))),
+                                        Utils.Pred("operation", Arrays.AsList(Utils.Symbol("ambient"), Utils.Symbol("read")))
                                 )
                         ),
-                        Utils.rule("query",
+                        Utils.Rule("query",
                                 new List<Term>(),
-                                Arrays.asList(
-                                        Utils.pred("admin", Arrays.asList(Utils.s("authority")))
+                                Arrays.AsList(
+                                        Utils.Pred("admin", Arrays.AsList(Utils.Symbol("authority")))
                                 )
                         )
                         ));
             //var expected = new Right(new Tuple<string, Check>("", check));
             
-            Either<Error, Tuple<string, Check>> res =
+            Either<Error, Tuple<string, CheckBuilder>> res =
                     Parser.Check("check if resource(#ambient, $0), operation(#ambient, #read) or admin(#authority)");
             
             
@@ -176,41 +176,41 @@ namespace Biscuit.Test.Builder
         [TestMethod]
         public void testExpression()
         {
-            Either<Error, Tuple<string, Expression>> res =
-                    Parser.expression(" -1 ");
+            Either<Error, Tuple<string, ExpressionBuilder>> res =
+                    Parser.Expression(" -1 ");
 
             Assert.AreEqual(
-                    new Expression.Value(Utils.integer(-1)),
+                    new ExpressionBuilder.Value(Utils.Integer(-1)),
                     res.Right.Item2);
 
-            Either<Error, Tuple<string, Expression>> res2 =
-                    Parser.expression(" $0 <= 2019-12-04T09:46:41+00:00");
+            Either<Error, Tuple<string, ExpressionBuilder>> res2 =
+                    Parser.Expression(" $0 <= 2019-12-04T09:46:41+00:00");
 
             Assert.AreEqual(
-                    new Expression.Binary(
-                            Expression.Op.LessOrEqual,
-                            new Expression.Value(Utils.var("0")),
-                            new Expression.Value(new Term.Date(1575452801))),
+                    new ExpressionBuilder.Binary(
+                            ExpressionBuilder.Op.LessOrEqual,
+                            new ExpressionBuilder.Value(Utils.Var("0")),
+                            new ExpressionBuilder.Value(new Term.Date(1575452801))),
                     res2.Right.Item2);
 
-            Either<Error, Tuple<string, Expression>> res3 =
-                    Parser.expression(" 1 < $test + 2 ");
+            Either<Error, Tuple<string, ExpressionBuilder>> res3 =
+                    Parser.Expression(" 1 < $test + 2 ");
 
             Assert.AreEqual(
-                new Expression.Binary(
-                        Expression.Op.LessThan,
-                        new Expression.Value(Utils.integer(1)),
-                        new Expression.Binary(
-                                Expression.Op.Add,
-                                new Expression.Value(Utils.var("test")),
-                                new Expression.Value(Utils.integer(2))
+                new ExpressionBuilder.Binary(
+                        ExpressionBuilder.Op.LessThan,
+                        new ExpressionBuilder.Value(Utils.Integer(1)),
+                        new ExpressionBuilder.Binary(
+                                ExpressionBuilder.Op.Add,
+                                new ExpressionBuilder.Value(Utils.Var("test")),
+                                new ExpressionBuilder.Value(Utils.Integer(2))
                         )
                 ),
                 res3.Right.Item2);
 
             SymbolTable s3 = new SymbolTable();
-            ulong test = s3.insert("test");
-            var expected = Arrays.asList<Biscuit.Datalog.Expressions.Op>(
+            ulong test = s3.Insert("test");
+            var expected = Arrays.AsList<Biscuit.Datalog.Expressions.Op>(
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Integer(1)),
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Variable(test)),
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Integer(2)),
@@ -218,44 +218,44 @@ namespace Biscuit.Test.Builder
                             new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.LessThan)
                     );
             Assert.IsTrue(expected.SequenceEqual(
-                res3.Right.Item2.convert(s3).getOps())
+                res3.Right.Item2.Convert(s3).GetOps())
             );
 
-            Either<Error, Tuple<string, Expression>> res4 =
-                    Parser.expression("  2 < $test && $var2.starts_with(\"test\") && true ");
+            Either<Error, Tuple<string, ExpressionBuilder>> res4 =
+                    Parser.Expression("  2 < $test && $var2.starts_with(\"test\") && true ");
 
             Assert.IsTrue(res4.IsRight);
-            Assert.AreEqual(new Expression.Binary(
-                                    Expression.Op.And,
-                                    new Expression.Binary(
-                                            Expression.Op.And,
-                                            new Expression.Binary(
-                                                    Expression.Op.LessThan,
-                                                    new Expression.Value(Utils.integer(2)),
-                                                    new Expression.Value(Utils.var("test"))
+            Assert.AreEqual(new ExpressionBuilder.Binary(
+                                    ExpressionBuilder.Op.And,
+                                    new ExpressionBuilder.Binary(
+                                            ExpressionBuilder.Op.And,
+                                            new ExpressionBuilder.Binary(
+                                                    ExpressionBuilder.Op.LessThan,
+                                                    new ExpressionBuilder.Value(Utils.Integer(2)),
+                                                    new ExpressionBuilder.Value(Utils.Var("test"))
                                             ),
-                                            new Expression.Binary(
-                                                    Expression.Op.Prefix,
-                                                    new Expression.Value(Utils.var("var2")),
-                                                    new Expression.Value(Utils.strings("test"))
+                                            new ExpressionBuilder.Binary(
+                                                    ExpressionBuilder.Op.Prefix,
+                                                    new ExpressionBuilder.Value(Utils.Var("var2")),
+                                                    new ExpressionBuilder.Value(Utils.Strings("test"))
                                             )
                                     ),
-                                    new Expression.Value(new Term.Bool(true))
+                                    new ExpressionBuilder.Value(new Term.Bool(true))
                             ),
                     res4.Right.Item2);
 
-            Either<Error, Tuple<string, Expression>> res5 =
-                Parser.expression("  [ #abc, #def ].contains($operation) ");
+            Either<Error, Tuple<string, ExpressionBuilder>> res5 =
+                Parser.Expression("  [ #abc, #def ].contains($operation) ");
 
             HashSet<Term> s = new HashSet<Term>();
-            s.Add(Utils.s("abc"));
-            s.Add(Utils.s("def"));
+            s.Add(Utils.Symbol("abc"));
+            s.Add(Utils.Symbol("def"));
             Assert.IsTrue(res5.IsRight);
-            Assert.AreEqual(new Tuple<string, Expression>("",
-                            new Expression.Binary(
-                                    Expression.Op.Contains,
-                                    new Expression.Value(Utils.set(s)),
-                                    new Expression.Value(Utils.var("operation"))
+            Assert.AreEqual(new Tuple<string, ExpressionBuilder>("",
+                            new ExpressionBuilder.Binary(
+                                    ExpressionBuilder.Op.Contains,
+                                    new ExpressionBuilder.Value(Utils.Set(s)),
+                                    new ExpressionBuilder.Value(Utils.Var("operation"))
                             )
                     ),
                     res5.Right);
@@ -264,69 +264,69 @@ namespace Biscuit.Test.Builder
         [TestMethod]
         public void testParens()
         {
-            Either<Error, Tuple<string, Expression>> res =
-                    Parser.expression("  1 + 2 * 3  ");
+            Either<Error, Tuple<string, ExpressionBuilder>> res =
+                    Parser.Expression("  1 + 2 * 3  ");
 
-            Assert.AreEqual(new Right(new Tuple<string, Expression>("",
-                            new Expression.Binary(
-                                    Expression.Op.Add,
-                                    new Expression.Value(Utils.integer(1)),
-                                    new Expression.Binary(
-                                            Expression.Op.Mul,
-                                            new Expression.Value(Utils.integer(2)),
-                                            new Expression.Value(Utils.integer(3))
+            Assert.AreEqual(new Right(new Tuple<string, ExpressionBuilder>("",
+                            new ExpressionBuilder.Binary(
+                                    ExpressionBuilder.Op.Add,
+                                    new ExpressionBuilder.Value(Utils.Integer(1)),
+                                    new ExpressionBuilder.Binary(
+                                            ExpressionBuilder.Op.Mul,
+                                            new ExpressionBuilder.Value(Utils.Integer(2)),
+                                            new ExpressionBuilder.Value(Utils.Integer(3))
                                     )
                             )
                     )),
                     res);
 
-            Expression e = res.Right.Item2;
+            ExpressionBuilder e = res.Right.Item2;
             SymbolTable s = new SymbolTable();
 
-            Biscuit.Datalog.Expressions.Expression ex = e.convert(s);
+            Biscuit.Datalog.Expressions.Expression ex = e.Convert(s);
 
             Assert.IsTrue(
-                    Arrays.asList<Biscuit.Datalog.Expressions.Op>(
+                    Arrays.AsList<Biscuit.Datalog.Expressions.Op>(
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Integer(1)),
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Integer(2)),
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Integer(3)),
                             new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.Mul),
                             new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.Add)
                     ).SequenceEqual(
-                    ex.getOps())
+                    ex.GetOps())
             );
 
             Dictionary<ulong, ID> variables = new Dictionary<ulong, ID>();
-            Option<ID> value = ex.evaluate(variables);
-            Assert.AreEqual(Option.some(new ID.Integer(7)), value);
-            Assert.AreEqual("1 + 2 * 3", ex.print(s).get());
+            Option<ID> value = ex.Evaluate(variables);
+            Assert.AreEqual(Option.Some(new ID.Integer(7)), value);
+            Assert.AreEqual("1 + 2 * 3", ex.Print(s).Get());
 
 
-            Either<Error, Tuple<string, Expression>> res2 =
-                    Parser.expression("  (1 + 2) * 3  ");
+            Either<Error, Tuple<string, ExpressionBuilder>> res2 =
+                    Parser.Expression("  (1 + 2) * 3  ");
 
-            Assert.AreEqual(new Expression.Binary(
-                                    Expression.Op.Mul,
-                                    new Expression.Unary(
-                                            Expression.Op.Parens,
-                                            new Expression.Binary(
-                                                    Expression.Op.Add,
-                                                    new Expression.Value(Utils.integer(1)),
-                                                    new Expression.Value(Utils.integer(2))
+            Assert.AreEqual(new ExpressionBuilder.Binary(
+                                    ExpressionBuilder.Op.Mul,
+                                    new ExpressionBuilder.Unary(
+                                            ExpressionBuilder.Op.Parens,
+                                            new ExpressionBuilder.Binary(
+                                                    ExpressionBuilder.Op.Add,
+                                                    new ExpressionBuilder.Value(Utils.Integer(1)),
+                                                    new ExpressionBuilder.Value(Utils.Integer(2))
                                             ))
                                     ,
-                                    new Expression.Value(Utils.integer(3))
+                                    new ExpressionBuilder.Value(Utils.Integer(3))
                             )
                     ,
                     res2.Right.Item2);
 
-            Expression e2 = res2.Right.Item2;
+            ExpressionBuilder e2 = res2.Right.Item2;
             SymbolTable s2 = new SymbolTable();
 
-            Biscuit.Datalog.Expressions.Expression ex2 = e2.convert(s2);
+            Biscuit.Datalog.Expressions.Expression ex2 = e2.Convert(s2);
 
             Assert.IsTrue(
-                    Arrays.asList<Biscuit.Datalog.Expressions.Op>(
+                    Arrays.AsList<Biscuit.Datalog.Expressions.Op>(
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Integer(1)),
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Integer(2)),
                             new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.Add),
@@ -334,13 +334,13 @@ namespace Biscuit.Test.Builder
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Integer(3)),
                             new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.Mul)
                     ).SequenceEqual(
-                    ex2.getOps())
+                    ex2.GetOps())
             );
 
             Dictionary<ulong, ID> variables2 = new Dictionary<ulong, ID>();
-            Option<ID> value2 = ex2.evaluate(variables2);
-            Assert.AreEqual(Option.some(new ID.Integer(9)), value2);
-            Assert.AreEqual("(1 + 2) * 3", ex2.print(s2).get());
+            Option<ID> value2 = ex2.Evaluate(variables2);
+            Assert.AreEqual(Option.Some(new ID.Integer(9)), value2);
+            Assert.AreEqual("(1 + 2) * 3", ex2.Print(s2).Get());
         }
     }
 }

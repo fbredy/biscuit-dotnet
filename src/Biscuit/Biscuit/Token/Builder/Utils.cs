@@ -5,61 +5,60 @@ namespace Biscuit.Token.Builder
 {
     public class Utils
     {
-
-        public static Term set(HashSet<Term> s)
+        public static Term Set(HashSet<Term> s)
         {
             return new Term.Set(s);
         }
 
-        public static Builder.Fact fact(string name, List<Term> ids)
+        public static FactBuilder Fact(string name, List<Term> ids)
         {
-            return new Builder.Fact(name, ids);
+            return new FactBuilder(name, ids);
         }
 
-        public static Builder.Predicate pred(string name, List<Term> ids)
+        public static PredicateBuilder Pred(string name, List<Term> ids)
         {
-            return new Builder.Predicate(name, ids);
+            return new PredicateBuilder(name, ids);
         }
 
-        public static Builder.Rule rule(string head_name, List<Term> head_ids,
-                                                                      List<Builder.Predicate> predicates)
+        public static RuleBuilder Rule(string head_name, List<Term> headIds,
+                                                                      List<PredicateBuilder> predicates)
         {
-            return new Builder.Rule(pred(head_name, head_ids), predicates, new List<Builder.Expression>());
+            return new RuleBuilder(Pred(head_name, headIds), predicates, new List<ExpressionBuilder>());
         }
 
-        public static Builder.Rule constrained_rule(String head_name, List<Term> head_ids,
-                                                                                  List<Builder.Predicate> predicates,
-                                                                                  List<Builder.Expression> expressions)
+        public static RuleBuilder ConstrainedRule(string head_name, List<Term> head_ids,
+                                                    List<PredicateBuilder> predicates,
+                                                    List<ExpressionBuilder> expressions)
         {
-            return new Builder.Rule(pred(head_name, head_ids), predicates, expressions);
+            return new RuleBuilder(Pred(head_name, head_ids), predicates, expressions);
         }
 
-        public static Check check(Builder.Rule rule)
+        public static CheckBuilder Check(RuleBuilder rule)
         {
-            return new Check(rule);
+            return new CheckBuilder(rule);
         }
 
-        public static Term integer(long i)
+        public static Term Integer(long i)
         {
             return new Term.Integer(i);
         }
 
-        public static Term strings(string s)
+        public static Term Strings(string s)
         {
             return new Term.Str(s);
         }
 
-        public static Term s(string str)
+        public static Term Symbol(string str)
         {
             return new Term.Symbol(str);
         }
 
-        public static Term date(DateTime d)
+        public static Term Date(DateTime d)
         {
             return new Term.Date((ulong)((DateTimeOffset)d).ToUnixTimeSeconds());
         }
 
-        public static Term var(string name)
+        public static Term Var(string name)
         {
             return new Term.Variable(name);
         }

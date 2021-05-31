@@ -8,34 +8,34 @@ namespace Biscuit.Crypto
     /// </summary>
     public sealed class KeyPair
     {
-        public Scalar Private_key { get; }
+        public Scalar PrivateKey { get; }
     
-        public RistrettoElement Public_key { get; }
+        public RistrettoElement PublicKey { get; }
     
         public KeyPair(RNGCryptoServiceProvider rng)
         {
             byte[] b = new byte[64];
             rng.GetBytes(b);
-            this.Private_key = Scalar.FromBytesModOrderWide(b);
-            this.Public_key = Constants.RISTRETTO_GENERATOR.Multiply(this.Private_key);
+            this.PrivateKey = Scalar.FromBytesModOrderWide(b);
+            this.PublicKey = Constants.RISTRETTO_GENERATOR.Multiply(this.PrivateKey);
         }
 
         public KeyPair(string hex)
         {
             byte[] b = StrUtils.hexToBytes(hex);
-            this.Private_key = Scalar.FromBytesModOrder(b);
-            this.Public_key = Constants.RISTRETTO_GENERATOR.Multiply(this.Private_key);
+            this.PrivateKey = Scalar.FromBytesModOrder(b);
+            this.PublicKey = Constants.RISTRETTO_GENERATOR.Multiply(this.PrivateKey);
         }
 
         public KeyPair(byte[] b)
         {
-            this.Private_key = Scalar.FromBytesModOrderWide(b);
-            this.Public_key = Constants.RISTRETTO_GENERATOR.Multiply(this.Private_key);
+            this.PrivateKey = Scalar.FromBytesModOrderWide(b);
+            this.PublicKey = Constants.RISTRETTO_GENERATOR.Multiply(this.PrivateKey);
         }
 
         public byte[] ToBytes()
         {
-            return this.Private_key.ToByteArray();
+            return this.PrivateKey.ToByteArray();
         }
         
         public string ToHex()
@@ -43,9 +43,9 @@ namespace Biscuit.Crypto
             return StrUtils.bytesToHex(this.ToBytes());
         }
 
-        public PublicKey public_key()
+        public PublicKey ToPublicKey()
         {
-            return new PublicKey(this.Public_key);
+            return new PublicKey(this.PublicKey);
         }
     }
 }

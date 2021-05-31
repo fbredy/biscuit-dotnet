@@ -1,20 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Biscuit.Datalog
 {
     public class Check
     {
-        public Check(List<Rule> queries)
+        public Check(IList<Rule> queries)
         {
-            this.queries = queries;
+            this.Queries = queries;
         }
 
-        public List<Rule> queries
-        { get; }
+        public IList<Rule> Queries { get; }
 
         public override int GetHashCode()
         {
-            return queries.GetHashCode();
+            return Queries.GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -22,50 +22,46 @@ namespace Biscuit.Datalog
             return base.Equals(obj);
         }
 
-        public Format.Schema.CheckV1 serialize()
+        public Format.Schema.CheckV1 Serialize()
         {
             Format.Schema.CheckV1 check = new Format.Schema.CheckV1();
 
-            for (int i = 0; i < this.queries.Count; i++)
-            {
-                check.Queries.Add(this.queries[i].serialize());
-            }
-
+            var querySerialized = this.Queries.Select(q => q.Serialize());
+            check.Queries.AddRange(querySerialized);
+            
             return check;
         }
 
-        static public Either<Errors.FormatError, Check> deserializeV0(Format.Schema.CaveatV0 caveat)
+        static public Either<Errors.FormatError, Check> DeserializeV0(Format.Schema.CaveatV0 caveat)
         {
-            List<Rule> queries = new List<Rule>();
+            IList<Rule> queries = new List<Rule>();
 
             foreach (Format.Schema.RuleV0 query in caveat.Queries)
             {
-                Either<Errors.FormatError, Rule> res = Rule.deserializeV0(query);
-                if (res.IsLeft)
+                Either<Errors.FormatError, Rule> deserializedRule = Rule.DeserializeV0(query);
+                if (deserializedRule.IsLeft)
                 {
-                    Errors.FormatError e = res.Left;
-                    return new Left(e);
+                    return deserializedRule.Left;
                 }
                 else
                 {
-                    queries.Add(res.Right);
+                    queries.Add(deserializedRule.Right);
                 }
             }
 
-            return new Right(new Check(queries));
+            return new Check(queries);
         }
 
-        static public Either<Errors.FormatError, Check> deserializeV1(Format.Schema.CheckV1 check)
+        static public Either<Errors.FormatError, Check> DeserializeV1(Format.Schema.CheckV1 check)
         {
-            List<Rule> queries = new List<Rule>();
+            IList<Rule> queries = new List<Rule>();
 
             foreach (Format.Schema.RuleV1 query in check.Queries)
             {
-                Either<Errors.FormatError, Rule> res = Rule.deserializeV1(query);
+                Either<Errors.FormatError, Rule> res = Rule.DeserializeV1(query);
                 if (res.IsLeft)
                 {
-                    Errors.FormatError e = res.Left;
-                    return new Left(e);
+                    return res.Left;
                 }
                 else
                 {
@@ -73,7 +69,7 @@ namespace Biscuit.Datalog
                 }
             }
 
-            return new Right(new Check(queries));
+            return new Check(queries);
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Biscuit
 {
     public static class HashSetExtension
     {
-        public static void addAll<T>(this HashSet<T> source, IEnumerable<T> collectionsToAdd)
+        public static void AddAll<T>(this HashSet<T> source, IEnumerable<T> collectionsToAdd)
         {
             if(source != null && collectionsToAdd != null)
             {

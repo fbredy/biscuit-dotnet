@@ -8,20 +8,20 @@ namespace Biscuit.Datalog
     [Serializable]
     public sealed class MatchedVariables
     {
-        private Dictionary<ulong, Optional<ID>> variables;
+        private readonly Dictionary<ulong, Optional<ID>> variables;
 
-        public bool insert(ulong key, ID value)
+        public bool Insert(ulong key, ID value)
         {
             if (this.variables.ContainsKey(key))
             {
                 Optional<ID> val = this.variables[key];
-                if (val.isPresent())
+                if (val.IsPresent())
                 {
-                    return val.get().Equals(value);
+                    return val.Get().Equals(value);
                 }
                 else
                 {
-                    this.variables[key] = Optional<ID>.of(value);
+                    this.variables[key] = Optional<ID>.Of(value);
                     return true;
                 }
             }
@@ -31,34 +31,34 @@ namespace Biscuit.Datalog
             }
         }
 
-        public bool is_complete()
+        public bool IsComplete()
         {
-            return this.variables.Values.All(v => v.isPresent());
+            return this.variables.Values.All(v => v.IsPresent());
         }
 
-        public Optional<Dictionary<ulong, ID>> complete()
+        public Optional<Dictionary<ulong, ID>> Complete()
         {
             Dictionary<ulong, ID> variables = new Dictionary<ulong, ID>();
             foreach (var entry in this.variables)
             {
-                if (entry.Value.isPresent())
+                if (entry.Value.IsPresent())
                 {
-                    variables.Add(entry.Key, entry.Value.get());
+                    variables.Add(entry.Key, entry.Value.Get());
                 }
                 else
                 {
-                    return Optional<Dictionary<ulong, ID>>.empty();
+                    return Optional<Dictionary<ulong, ID>>.Empty();
                 }
             }
-            return Optional<Dictionary<ulong, ID>>.of(variables);
+            return Optional<Dictionary<ulong, ID>>.Of(variables);
         }
 
-        public MatchedVariables clone()
+        public MatchedVariables Clone()
         {
             MatchedVariables other = new MatchedVariables(this.variables.Keys.ToArray());
             foreach (var entry in this.variables)
             {
-                if (entry.Value.isPresent())
+                if (entry.Value.IsPresent())
                 {
                     other.variables[entry.Key] = entry.Value;
                 }
@@ -71,37 +71,37 @@ namespace Biscuit.Datalog
             this.variables = new Dictionary<ulong, Optional<ID>>();
             foreach (ulong id in ids)
             {
-                this.variables.Add(id, Optional<ID>.empty());
+                this.variables.Add(id, Optional<ID>.Empty());
             }
         }
 
-        public Option<Dictionary<ulong, ID>> check_expressions(List<Expression> expressions)
+        public Option<Dictionary<ulong, ID>> CheckExpressions(IList<Expression> expressions)
         {
-            Optional<Dictionary<ulong, ID>> vars = this.complete();
-            if (vars.isPresent())
+            Optional<Dictionary<ulong, ID>> vars = this.Complete();
+            if (vars.IsPresent())
             {
-                Dictionary<ulong, ID> variables = vars.get();
+                Dictionary<ulong, ID> variables = vars.Get();
 
-                foreach (Expression e in expressions)
+                foreach (Expression expression in expressions)
                 {
-                    Option<ID> res = e.evaluate(variables);
+                    Option<ID> res = expression.Evaluate(variables);
 
-                    if (res.isEmpty())
+                    if (res.IsEmpty())
                     {
-                        return Option<Dictionary<ulong, ID>>.none();
+                        return Option<Dictionary<ulong, ID>>.None();
                     }
 
-                    if (!res.get().Equals(new ID.Bool(true)))
+                    if (!res.Get().Equals(new ID.Bool(true)))
                     {
-                        return Option<Dictionary<ulong, ID>>.none();
+                        return Option<Dictionary<ulong, ID>>.None();
                     }
                 }
 
-                return Option<Dictionary<ulong, ID>>.some(variables);
+                return Option<Dictionary<ulong, ID>>.Some(variables);
             }
             else
             {
-                return Option<Dictionary<ulong, ID>>.none();
+                return Option<Dictionary<ulong, ID>>.None();
             }
         }
     }

@@ -14,18 +14,18 @@ namespace Biscuit.Token
         }
 
         //TODO Rule  ou Rule
-        private List<Rule> queries;
+        private List<RuleBuilder> queries;
         public Kind kind;
 
-        public Policy(List<Rule> queries, Kind kind)
+        public Policy(List<RuleBuilder> queries, Kind kind)
         {
             this.queries = queries;
             this.kind = kind;
         }
 
-        public Policy(Rule query, Kind kind)
+        public Policy(RuleBuilder query, Kind kind)
         {
-            List<Rule> r = new List<Rule>();
+            List<RuleBuilder> r = new List<RuleBuilder>();
             r.Add(query);
 
             this.queries = r;
@@ -36,9 +36,9 @@ namespace Biscuit.Token
         {
             List<Datalog.Rule> queries = new List<Datalog.Rule>();
 
-            foreach (Rule q in this.queries)
+            foreach (RuleBuilder q in this.queries)
             {
-                queries.Add(q.convert(symbols));
+                queries.Add(q.Convert(symbols));
             }
             return new Datalog.Check(queries);
         }

@@ -154,26 +154,26 @@ namespace Biscuit.Token
             s.Append("Block[");
             s.Append(this.index);
             s.Append("] {\n\t\tsymbols: ");
-            s.Append(this.symbols.symbols);
+            s.Append(this.symbols.Symbols);
             s.Append("\n\t\tcontext: ");
             s.Append(this.context);
             s.Append("\n\t\tfacts: [");
             foreach (Fact f in this.facts)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.print_fact(f));
+                s.Append(symbol_table.PrintFact(f));
             }
             s.Append("\n\t\t]\n\t\trules: [");
             foreach (Rule r in this.rules)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.print_rule(r));
+                s.Append(symbol_table.PrintRule(r));
             }
             s.Append("\n\t\t]\n\t\tchecks: [");
             foreach (Check c in this.checks)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.print_check(c));
+                s.Append(symbol_table.PrintCheck(c));
             }
             s.Append("\n\t\t]\n\t}");
 
@@ -191,7 +191,7 @@ namespace Biscuit.Token
                 Index = (uint)this.index,
             };
 
-            b.Symbols.AddRange(this.symbols.symbols);
+            b.Symbols.AddRange(this.symbols.Symbols);
             
             if (this.context.Any())
             {
@@ -206,12 +206,12 @@ namespace Biscuit.Token
             
             foreach (Rule rule in this.rules)
             {
-                b.RulesV1.Add(rule.serialize());
+                b.RulesV1.Add(rule.Serialize());
             }
 
             foreach (Check check in this.checks)
             {
-                b.ChecksV1.Add(check.serialize());
+                b.ChecksV1.Add(check.Serialize());
             }
 
             b.Version = SerializedBiscuit.MAX_SCHEMA_VERSION;
@@ -260,7 +260,7 @@ namespace Biscuit.Token
 
                 foreach (Format.Schema.RuleV0 rule in b.RulesV0)
                 {
-                    Either<FormatError, Rule> res = Rule.deserializeV0(rule);
+                    Either<FormatError, Rule> res = Rule.DeserializeV0(rule);
                     if (res.IsLeft)
                     {
                         FormatError e = res.Left;
@@ -275,7 +275,7 @@ namespace Biscuit.Token
 
                 foreach (Format.Schema.CaveatV0 caveat in b.CaveatsV0)
                 {
-                    Either<FormatError, Check> res = Check.deserializeV0(caveat);
+                    Either<FormatError, Check> res = Check.DeserializeV0(caveat);
                     if (res.IsLeft)
                     {
                         FormatError e = res.Left;
@@ -306,7 +306,7 @@ namespace Biscuit.Token
 
                 foreach (Format.Schema.RuleV1 rule in b.RulesV1)
                 {
-                    Either<FormatError, Rule> res = Rule.deserializeV1(rule);
+                    Either<FormatError, Rule> res = Rule.DeserializeV1(rule);
                     if (res.IsLeft)
                     {
                         FormatError e = res.Left;
@@ -321,7 +321,7 @@ namespace Biscuit.Token
 
                 foreach (Format.Schema.CheckV1 check in b.ChecksV1)
                 {
-                    Either<FormatError, Check> res = Check.deserializeV1(check);
+                    Either<FormatError, Check> res = Check.DeserializeV1(check);
                     if (res.IsLeft)
                     {
                         FormatError e = res.Left;
