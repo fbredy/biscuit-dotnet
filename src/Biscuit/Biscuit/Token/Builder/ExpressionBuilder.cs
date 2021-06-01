@@ -22,7 +22,7 @@ namespace Biscuit.Token.Builder
                 if (op is Datalog.Expressions.Op.Value)
                 {
                     Datalog.Expressions.Op.Value v = (Datalog.Expressions.Op.Value)op;
-                    stack.Push(new ExpressionBuilder.Value(Term.convert_from(v.GetValue(), symbols)));
+                    stack.Push(new ExpressionBuilder.Value(Term.ConvertFrom(v.GetValue(), symbols)));
                 }
                 else if (op is Datalog.Expressions.Op.Unary)
                 {
@@ -149,7 +149,7 @@ namespace Biscuit.Token.Builder
 
             public override void ToOpcodes(Datalog.SymbolTable symbols, List<Datalog.Expressions.Op> ops)
             {
-                ops.Add(new Datalog.Expressions.Op.Value(this.value.convert(symbols)));
+                ops.Add(new Datalog.Expressions.Op.Value(this.value.Convert(symbols)));
             }
 
             public override bool Equals(object o)

@@ -14,7 +14,7 @@
 
         public static Option<T> None()
         {
-            return new Option<T>();
+            return new Option<T>() { Value = default };
         }
 
         public static Option<T> Some(T p)
@@ -32,9 +32,9 @@
             return this.Value;
         }
 
-        public bool IsDefined()
+        public bool IsDefined
         {
-            return Value != null;
+            get { return Value != null; }
         }
 
         public override bool Equals(object obj)
@@ -43,11 +43,10 @@
             if(obj != null )
             {
                 var isSubclass = this.Value.GetType().IsSubclassOf(obj.GetType().GenericTypeArguments[0]);
-                ///obj.GetType().GenericTypeArguments[0].IsAssignableFrom(this.Value.GetType())
                 if (isSubclass)
                 {
                     object valueOfObj = obj.GetType().GetMethod("Get").Invoke(obj, null);
-                    // T == 
+                    
                     if (valueOfObj != null)
                     {
                         res = valueOfObj.Equals(this.Value);
@@ -55,6 +54,11 @@
                 }
             }
             return res;
+        }
+
+        public override int GetHashCode()
+        {
+            return System.HashCode.Combine(Value);
         }
     }
 }

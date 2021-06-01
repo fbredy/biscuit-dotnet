@@ -6,16 +6,16 @@ namespace Biscuit.Token.Builder
 {
     public abstract class Term
     {
-        public abstract ID convert(SymbolTable symbols);
+        public abstract ID Convert(SymbolTable symbols);
 
-        static public Term convert_from(ID id, SymbolTable symbols)
+        static public Term ConvertFrom(ID id, SymbolTable symbols)
         {
             return id.ToTerm(symbols);
         }
 
         public class Symbol : Term
         {
-            readonly string value;
+            private readonly string value;
 
             public Symbol(string value)
             {
@@ -23,7 +23,7 @@ namespace Biscuit.Token.Builder
             }
 
 
-            public override ID convert(SymbolTable symbols)
+            public override ID Convert(SymbolTable symbols)
             {
                 return new ID.Symbol(symbols.Insert(this.value));
             }
@@ -52,14 +52,14 @@ namespace Biscuit.Token.Builder
 
         public class Variable : Term
         {
-            string value;
+            private readonly string value;
 
             public Variable(string value)
             {
                 this.value = value;
             }
 
-            public override ID convert(SymbolTable symbols)
+            public override ID Convert(SymbolTable symbols)
             {
                 return new ID.Variable(symbols.Insert(this.value));
             }
@@ -88,14 +88,14 @@ namespace Biscuit.Token.Builder
 
         public class Integer : Term
         {
-            long value;
+            private readonly long value;
 
             public Integer(long value)
             {
                 this.value = value;
             }
 
-            public override ID convert(SymbolTable symbols)
+            public override ID Convert(SymbolTable symbols)
             {
                 return new ID.Integer(this.value);
             }
@@ -115,7 +115,6 @@ namespace Biscuit.Token.Builder
                 return value == integer.value;
             }
 
-
             public override int GetHashCode()
             {
                 return (int)(value ^ (value >> 32));
@@ -124,21 +123,21 @@ namespace Biscuit.Token.Builder
 
         public class Str : Term
         {
-            public string value { get; }
+            public string Value { get; }
 
             public Str(string value)
             {
-                this.value = value;
+                this.Value = value;
             }
 
-            public override ID convert(SymbolTable symbols)
+            public override ID Convert(SymbolTable symbols)
             {
-                return new ID.Str(this.value);
+                return new ID.Str(this.Value);
             }
 
             public override string ToString()
             {
-                return "\"" + value + "\"";
+                return "\"" + Value + "\"";
             }
 
             public override bool Equals(object o)
@@ -148,18 +147,18 @@ namespace Biscuit.Token.Builder
 
                 Str str = (Str)o;
 
-                return value != null ? value.Equals(str.value) : str.value == null;
+                return Value != null ? Value.Equals(str.Value) : str.Value == null;
             }
 
             public override int GetHashCode()
             {
-                return value != null ? value.GetHashCode() : 0;
+                return Value != null ? Value.GetHashCode() : 0;
             }
         }
 
         public class Bytes : Term
         {
-            byte[] value;
+            private readonly byte[] value;
 
             public Bytes(byte[] value)
             {
@@ -167,7 +166,7 @@ namespace Biscuit.Token.Builder
             }
 
 
-            public override ID convert(SymbolTable symbols)
+            public override ID Convert(SymbolTable symbols)
             {
                 return new ID.Bytes(this.value);
             }
@@ -198,7 +197,7 @@ namespace Biscuit.Token.Builder
 
         public class Date : Term
         {
-            ulong value;
+            private readonly ulong value;
 
             /// <summary>
             /// constructor, takes seconds since January 1, 1970, 00:00:00 GTM
@@ -210,7 +209,7 @@ namespace Biscuit.Token.Builder
             }
 
 
-            public override ID convert(SymbolTable symbols)
+            public override ID Convert(SymbolTable symbols)
             {
                 return new ID.Date(this.value);
             }
@@ -241,7 +240,7 @@ namespace Biscuit.Token.Builder
 
         public class Bool : Term
         {
-            bool value;
+            private readonly bool value;
 
             public Bool(bool value)
             {
@@ -249,7 +248,7 @@ namespace Biscuit.Token.Builder
             }
 
 
-            public override ID convert(SymbolTable symbols)
+            public override ID Convert(SymbolTable symbols)
             {
                 return new ID.Bool(this.value);
             }
@@ -280,7 +279,7 @@ namespace Biscuit.Token.Builder
 
         public class Set : Term
         {
-            HashSet<Term> value;
+            private readonly HashSet<Term> value;
 
             public Set(HashSet<Term> value)
             {
@@ -288,13 +287,13 @@ namespace Biscuit.Token.Builder
             }
 
 
-            public override ID convert(SymbolTable symbols)
+            public override ID Convert(SymbolTable symbols)
             {
                 HashSet<ID> s = new HashSet<ID>();
 
                 foreach (Term t in this.value)
                 {
-                    s.Add(t.convert(symbols));
+                    s.Add(t.Convert(symbols));
                 }
 
                 return new ID.Set(s);

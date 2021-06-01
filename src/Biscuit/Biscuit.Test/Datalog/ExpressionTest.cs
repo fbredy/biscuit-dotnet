@@ -10,7 +10,7 @@ namespace Biscuit.Test.Datalog
     {
 
         [TestMethod]
-        public void testNegate()
+        public void TestNegate()
         {
             SymbolTable symbols = new SymbolTable();
             symbols.Add("a");
@@ -29,8 +29,10 @@ namespace Biscuit.Test.Datalog
                     e.Print(symbols).Get()
             );
 
-            Dictionary<ulong, ID> variables = new Dictionary<ulong, ID>();
-            variables.Add(2L, new ID.Integer(0));
+            Dictionary<ulong, ID> variables = new Dictionary<ulong, ID>
+            {
+                { 2L, new ID.Integer(0) }
+            };
 
             Assert.AreEqual(
                     new ID.Bool(true),

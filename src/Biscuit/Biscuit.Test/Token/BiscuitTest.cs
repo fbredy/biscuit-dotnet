@@ -9,17 +9,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using BlockBuilder = Biscuit.Token.Builder.BlockBuilder;
 
 namespace Biscuit.Test.Token
 {
     [TestClass]
     public class BiscuitTest
     {
-
         [TestMethod]
 
-        public void testBasic()
+        public void TestBasic()
         {
             byte[] seed = { 0, 0, 0, 0 };
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider(seed);
@@ -120,26 +118,26 @@ namespace Biscuit.Test.Token
             Console.WriteLine("will check the token for resource=file1 and operation=read");
 
             SymbolTable check_symbols = new SymbolTable(final_token.Symbols);
-            List<Biscuit.Datalog.Fact> ambient_facts = Arrays.AsList(
+            List<Fact> ambient_facts = Arrays.AsList(
                     Utils.Fact("resource", Arrays.AsList(Utils.Symbol("ambient"), Utils.Symbol("file1"))).Convert(check_symbols),
                     Utils.Fact("operation", Arrays.AsList(Utils.Symbol("ambient"), Utils.Symbol("read"))).Convert(check_symbols)
             );
 
-            Either<Error, Dictionary<string, HashSet<Biscuit.Datalog.Fact>>> res = final_token.Check(check_symbols, ambient_facts,
-                    new List<Biscuit.Datalog.Rule>(), new List<Biscuit.Datalog.Check>(), new Dictionary<string, Biscuit.Datalog.Rule>());
+            Either<Error, Dictionary<string, HashSet<Fact>>> res = final_token.Check(check_symbols, ambient_facts,
+                    new List<Rule>(), new List<Check>(), new Dictionary<string, Rule>());
 
             Assert.IsTrue(res.IsRight);
 
             Console.WriteLine("will check the token for resource=file2 and operation=write");
 
             SymbolTable check_symbols2 = new SymbolTable(final_token.Symbols);
-            List<Biscuit.Datalog.Fact> ambient_facts2 = Arrays.AsList(
+            List<Fact> ambient_facts2 = Arrays.AsList(
                     Utils.Fact("resource", Arrays.AsList(Utils.Symbol("ambient"), Utils.Symbol("file2"))).Convert(check_symbols2),
                     Utils.Fact("operation", Arrays.AsList(Utils.Symbol("ambient"), Utils.Symbol("write"))).Convert(check_symbols2)
             );
 
-            Either<Error, Dictionary<string, HashSet<Biscuit.Datalog.Fact>>> res2 = final_token.Check(check_symbols2, ambient_facts2,
-                    new List<Biscuit.Datalog.Rule>(), new List<Biscuit.Datalog.Check>(), new Dictionary<string, Biscuit.Datalog.Rule>());
+            Either<Error, Dictionary<string, HashSet<Fact>>> res2 = final_token.Check(check_symbols2, ambient_facts2,
+                    new List<Rule>(), new List<Check>(), new Dictionary<string, Rule>());
             Assert.IsTrue(res2.IsLeft);
             Console.WriteLine(res2.Left);
 
@@ -152,7 +150,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void testFolders()
+        public void TestFolders()
         {
             byte[] seed = { 0, 0, 0, 0 };
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider(seed);
@@ -161,7 +159,7 @@ namespace Biscuit.Test.Token
 
             KeyPair root = new KeyPair(rng);
 
-            Biscuit.Token.Builder.BiscuitBuilder builder = Biscuit.Token.Biscuit.Builder(rng, root);
+            BiscuitBuilder builder = Biscuit.Token.Biscuit.Builder(rng, root);
 
             builder.add_right("/folder1/file1", "read");
             builder.add_right("/folder1/file1", "write");
@@ -174,7 +172,7 @@ namespace Biscuit.Test.Token
 
             Console.WriteLine(b.Print());
 
-            Biscuit.Token.Builder.BlockBuilder block2 = b.CreateBlock();
+            BlockBuilder block2 = b.CreateBlock();
             block2.ResourcePrefix("/folder1/");
             block2.CheckRight("read");
 
@@ -218,7 +216,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void testSealedTokens()
+        public void TestSealedTokens()
         {
             byte[] seed = { 0, 0, 0, 0 };
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider(seed);
@@ -289,15 +287,15 @@ namespace Biscuit.Test.Token
             Console.WriteLine(deser2.Print());
 
             Console.WriteLine("trying to attenuate to a sealed token");
-            BlockBuilder builder2 = deser2.CreateBlock();
-            Error e2 = deser2.Attenuate(rng, keypair2, builder.Build()).Left;
+            _ = deser2.CreateBlock();
+            _ = deser2.Attenuate(rng, keypair2, builder.Build()).Left;
 
             Verifier v = deser2.VerifySealed().Right;
             Console.WriteLine(v.print_world());
         }
 
         [TestMethod]
-        public void testMultipleAttenuation()
+        public void TestMultipleAttenuation()
         {
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
             KeyPair root = new KeyPair(rng);
@@ -330,7 +328,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void testGetRevocationIds()
+        public void TestGetRevocationIds()
         {
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
             KeyPair root = new KeyPair(rng);
@@ -361,7 +359,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void testReset()
+        public void TestReset()
         {
             byte[] seed = { 0, 0, 0, 0 };
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider(seed);
@@ -436,7 +434,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void testEmptyVerifier()
+        public void TestEmptyVerifier()
         {
             byte[] seed = { 0, 0, 0, 0 };
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider(seed);
@@ -478,7 +476,6 @@ namespace Biscuit.Test.Token
 
             res = v1.Verify();
 
-            Error e = res.Left;
             Assert.IsTrue(res.IsLeft);
         }
     }

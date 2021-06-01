@@ -20,17 +20,17 @@ namespace Biscuit.Token.Builder
             return new PredicateBuilder(name, ids);
         }
 
-        public static RuleBuilder Rule(string head_name, List<Term> headIds,
+        public static RuleBuilder Rule(string headName, List<Term> headIds,
                                                                       List<PredicateBuilder> predicates)
         {
-            return new RuleBuilder(Pred(head_name, headIds), predicates, new List<ExpressionBuilder>());
+            return new RuleBuilder(Pred(headName, headIds), predicates, new List<ExpressionBuilder>());
         }
 
-        public static RuleBuilder ConstrainedRule(string head_name, List<Term> head_ids,
+        public static RuleBuilder ConstrainedRule(string headName, List<Term> headIds,
                                                     List<PredicateBuilder> predicates,
                                                     List<ExpressionBuilder> expressions)
         {
-            return new RuleBuilder(Pred(head_name, head_ids), predicates, expressions);
+            return new RuleBuilder(Pred(headName, headIds), predicates, expressions);
         }
 
         public static CheckBuilder Check(RuleBuilder rule)
@@ -43,9 +43,9 @@ namespace Biscuit.Token.Builder
             return new Term.Integer(i);
         }
 
-        public static Term Strings(string s)
+        public static Term Strings(string str)
         {
-            return new Term.Str(s);
+            return new Term.Str(str);
         }
 
         public static Term Symbol(string str)
@@ -62,31 +62,5 @@ namespace Biscuit.Token.Builder
         {
             return new Term.Variable(name);
         }
-
-        //private static readonly char[] HEX_ARRAY = "0123456789ABCDEF".ToCharArray();
-
-        //public static string byteArrayToHexString(byte[] bytes)
-        //{
-        //    char[] hexChars = new char[bytes.Length * 2];
-        //    for (int j = 0; j < bytes.Length; j++)
-        //    {
-        //        int v = bytes[j] & 0xFF;
-        //        hexChars[j * 2] = HEX_ARRAY[v >> 4];
-        //        hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        //    }
-        //    return new string(hexChars);
-        //}
-
-        //public static byte[] hexStringToByteArray(string hex)
-        //{
-        //    int l = hex.Length;
-        //    byte[] data = new byte[l / 2];
-        //    for (int i = 0; i < l; i += 2)
-        //    {
-        //        data[i / 2] = (byte)((char.digit(hex[i], 16) << 4)
-        //                + char.digit(hex[i + 1], 16));
-        //    }
-        //    return data;
-        //}
     }
 }

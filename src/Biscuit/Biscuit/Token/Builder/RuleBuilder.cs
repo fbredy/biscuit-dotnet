@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Biscuit.Datalog;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Biscuit.Token.Builder
@@ -16,10 +17,10 @@ namespace Biscuit.Token.Builder
             this.Expressions = expressions;
         }
 
-        public Datalog.Rule Convert(Datalog.SymbolTable symbols)
+        public Rule Convert(SymbolTable symbols)
         {
-            Datalog.Predicate head = this.Head.Convert(symbols);
-            List<Datalog.Predicate> body = new List<Datalog.Predicate>();
+            Predicate head = this.Head.Convert(symbols);
+            List<Predicate> body = new List<Predicate>();
             List<Datalog.Expressions.Expression> expressions = new List<Datalog.Expressions.Expression>();
 
             foreach (var p in this.Body)
@@ -32,22 +33,22 @@ namespace Biscuit.Token.Builder
                 expressions.Add(e.Convert(symbols));
             }
 
-            return new Datalog.Rule(head, body, expressions);
+            return new Rule(head, body, expressions);
         }
 
-        public static RuleBuilder ConvertFrom(Datalog.Rule r, Datalog.SymbolTable symbols)
+        public static RuleBuilder ConvertFrom(Rule rule, SymbolTable symbols)
         {
-            PredicateBuilder head = PredicateBuilder.ConvertFrom(r.Head, symbols);
+            PredicateBuilder head = PredicateBuilder.ConvertFrom(rule.Head, symbols);
 
             List<PredicateBuilder> body = new List<PredicateBuilder>();
             List<ExpressionBuilder> expressions = new List<ExpressionBuilder>();
 
-            foreach (Datalog.Predicate p in r.Body)
+            foreach (Predicate predicate in rule.Body)
             {
-                body.Add(PredicateBuilder.ConvertFrom(p, symbols));
+                body.Add(PredicateBuilder.ConvertFrom(predicate, symbols));
             }
 
-            foreach (Datalog.Expressions.Expression e in r.Expressions)
+            foreach (Datalog.Expressions.Expression e in rule.Expressions)
             {
                 expressions.Add(ExpressionBuilder.ConvertFrom(e, symbols));
             }

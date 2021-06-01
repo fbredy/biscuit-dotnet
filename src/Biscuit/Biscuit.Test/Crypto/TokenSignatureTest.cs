@@ -9,7 +9,7 @@ namespace Biscuit.Test.Crypto
     public class TokenSignatureTest
     {
         [TestMethod]
-        public void testThreeMessages()
+        public void TestThreeMessages()
         {
             byte[] seed = { 0, 0, 0, 0 };
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider(seed);
@@ -31,7 +31,7 @@ namespace Biscuit.Test.Crypto
         }
 
         [TestMethod]
-        public void testChangeMessages()
+        public void TestChangeMessages()
         {
             byte[] seed = { 0, 0, 0, 0 };
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider(seed);

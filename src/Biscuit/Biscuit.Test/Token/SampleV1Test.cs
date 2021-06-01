@@ -12,20 +12,16 @@ namespace Biscuit.Test.Token
     [TestClass]
     public class SamplesV1Test
     {
-
-
         static byte[] rootData = Ristretto.StrUtils.hexToBytes("529e780f28d9181c968b0eab9977ed8494a27a4544c3adc1910f41bb3dc36958");
 
         [TestMethod]
-        public void test1_Basic()
+        public void Test1_Basic()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
             byte[] data = resources.ResourceTestV1.test1_basic;
 
             Console.WriteLine("a");
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -51,15 +47,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test2_DifferentRootKey()
+        public void Test2_DifferentRootKey()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test2_different_root_key;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Error e = token.CheckRootKey(root).Left;
@@ -68,10 +60,8 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test3_InvalidSignatureFormat()
+        public void Test3_InvalidSignatureFormat()
         {
-            PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
-
             byte[] data = resources.ResourceTestV1.test3_invalid_signature_format;
 
             Error e = Biscuit.Token.Biscuit.FromBytes(data).Left;
@@ -83,48 +73,28 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test4_random_block()
+        public void Test4_random_block()
         {
-            PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
-
-
             byte[] data = resources.ResourceTestV1.test4_random_block;
-
-
-
-
             Error e = Biscuit.Token.Biscuit.FromBytes(data).Left;
             Console.WriteLine("got error: " + e);
             Assert.AreEqual(new InvalidSignature(), e);
         }
 
         [TestMethod]
-        public void test5_InvalidSignature()
+        public void Test5_InvalidSignature()
         {
-            PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
-
-
             byte[] data = resources.ResourceTestV1.test5_invalid_signature;
-
-
-
-
             Error e = Biscuit.Token.Biscuit.FromBytes(data).Left;
             Console.WriteLine("got error: " + e);
             Assert.AreEqual(new InvalidSignature(), e);
         }
 
         [TestMethod]
-        public void test6_reordered_blocks()
+        public void Test6_reordered_blocks()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
-
-
             byte[] data = resources.ResourceTestV1.test6_reordered_blocks;
-
-
-
-
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
 
             var res = token.Verify(root);
@@ -139,15 +109,10 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test7_invalid_block_fact_authority()
+        public void Test7_invalid_block_fact_authority()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
-
-
             byte[] data = resources.ResourceTestV1.test7_invalid_block_fact_authority;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -161,15 +126,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test8_invalid_block_fact_ambient()
+        public void Test8_invalid_block_fact_ambient()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test8_invalid_block_fact_ambient;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -183,15 +144,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test9_ExpiredToken()
+        public void Test9_ExpiredToken()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test9_expired_token;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -211,15 +168,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test10_AuthorityRules()
+        public void Test10_AuthorityRules()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test10_authority_rules;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -235,15 +188,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test11_VerifierAuthorityCaveats()
+        public void Test11_VerifierAuthorityCaveats()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test11_verifier_authority_caveats;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -272,15 +221,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test12_VerifierAuthorityCaveats()
+        public void Test12_VerifierAuthorityCaveats()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test12_authority_caveats;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -307,15 +252,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test13_BlockRules()
+        public void Test13_BlockRules()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test13_block_rules;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -342,15 +283,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test14_RegexConstraint()
+        public void Test14_RegexConstraint()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test14_regex_constraint;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -378,51 +315,45 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test15_MultiQueriesCaveats()
+        public void Test15_MultiQueriesCaveats()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test15_multi_queries_caveats;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
 
             var v1 = token.Verify(root).Right;
-            var queries = new List<Biscuit.Token.Builder.RuleBuilder>();
-            queries.Add(Utils.Rule(
+            var queries = new List<RuleBuilder>
+            {
+                Utils.Rule(
                     "test_must_be_present_authority",
                     Arrays.AsList(Utils.Var("0")),
                     Arrays.AsList(
                             Utils.Pred("must_be_present", Arrays.AsList(Utils.Symbol("authority"), Utils.Var("0")))
                     )
-            ));
-            queries.Add(Utils.Rule(
+            ),
+                Utils.Rule(
                     "test_must_be_present",
                     Arrays.AsList(Utils.Var("0")),
                     Arrays.AsList(
                             Utils.Pred("mst_be_present", Arrays.AsList(Utils.Var("0")))
                     )
-            ));
-            v1.AddCheck(new Biscuit.Token.Builder.CheckBuilder(queries));
+            )
+            };
+            v1.AddCheck(new CheckBuilder(queries));
             v1.Allow();
 
             Assert.IsTrue(v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).IsRight);
         }
 
         [TestMethod]
-        public void test16_CaveatHeadName()
+        public void Test16_CaveatHeadName()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test16_caveat_head_name;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -441,15 +372,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test17_Expressions()
+        public void Test17_Expressions()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test17_expressions;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());
@@ -461,7 +388,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test18_Unbound_Variables()
+        public void Test18_Unbound_Variables()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -479,15 +406,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test19_generating_ambient_from_variables()
+        public void Test19_generating_ambient_from_variables()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-
             byte[] data = resources.ResourceTestV1.test19_generating_ambient_from_variables;
-
-
-
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Console.WriteLine(token.Print());

@@ -17,28 +17,28 @@ namespace Biscuit.Test.Builder
     {
 
         [TestMethod]
-        public void testName()
+        public void TestName()
         {
             Either<Error, Tuple<string, string>> res = Parser.Name("operation(#ambient, #read)");
             Assert.AreEqual(new Right(new Tuple<string, string>("(#ambient, #read)", "operation")), res);
         }
 
         [TestMethod]
-        public void testSymbol()
+        public void TestSymbol()
         {
             Either<Error, Tuple<string, Term.Symbol>> res = Parser.Symbol("#ambient");
             Assert.AreEqual(new Right(new Tuple<string, Term.Symbol>("", (Term.Symbol)Utils.Symbol("ambient"))), res);
         }
 
         [TestMethod]
-        public void testString()
+        public void TestString()
         {
             Either<Error, Tuple<string, Term.Str>> res = Parser.Strings("\"file1 a hello - 123_\"");
             Assert.AreEqual(new Right(new Tuple<string, Term.Str>("", (Term.Str)Utils.Strings("file1 a hello - 123_"))), res);
         }
 
         [TestMethod]
-        public void testInteger()
+        public void TestInteger()
         {
             Either<Error, Tuple<string, Term.Integer>> res = Parser.Integer("123");
             Assert.AreEqual(new Right(new Tuple<string, Term.Integer>("", (Term.Integer)Utils.Integer(123))), res);
@@ -48,25 +48,25 @@ namespace Biscuit.Test.Builder
         }
 
         [TestMethod]
-        public void testDate()
+        public void TestDate()
         {
             Either<Error, Tuple<string, Term.Date>> res = Parser.Date("2019-12-02T13:49:53Z,");
             Assert.AreEqual(new Right(new Tuple<string, Term.Date>(",", new Term.Date(1575294593))), res);
         }
 
         [TestMethod]
-        public void testVariable()
+        public void TestVariable()
         {
             Either<Error, Tuple<string, Term.Variable>> res = Parser.Variable("$name");
             Assert.AreEqual(new Right(new Tuple<string, Term.Variable>("", (Term.Variable)Utils.Var("name"))), res);
         }
 
-        public void testConstraint()
+        public void TestConstraint()
         {
         }
 
         [TestMethod]
-        public void testFact()
+        public void TestFact()
         {
             Either<Error, Tuple<string, FactBuilder>> res = Biscuit.Token.Builder.Parser.Parser.Fact("right( #authority, \"file1\", #read )");
             Assert.AreEqual(new Right(new Tuple<string, FactBuilder>("",
@@ -86,7 +86,7 @@ namespace Biscuit.Test.Builder
         }
 
         [TestMethod]
-        public void testRule()
+        public void TestRule()
         {
             Either<Error, Tuple<string, RuleBuilder>> res =
                     Parser.Rule("right(#authority, $resource, #read) <- resource( #ambient, $resource), operation(#ambient, #read)");
@@ -101,7 +101,7 @@ namespace Biscuit.Test.Builder
         }
 
         [TestMethod]
-        public void testRuleWithExpression()
+        public void TestRuleWithExpression()
         {
             Either<Error, Tuple<string, RuleBuilder>> res =
                 Parser.Rule("valid_date(\"file1\") <- time(#ambient, $0 ), resource( #ambient, \"file1\"), $0 <= 2019-12-04T09:46:41+00:00");
@@ -123,7 +123,7 @@ namespace Biscuit.Test.Builder
         }
 
         [TestMethod]
-        public void testRuleWithExpressionOrdering()
+        public void TestRuleWithExpressionOrdering()
         {
             Either<Error, Tuple<string, RuleBuilder>> res =
                     Parser.Rule("valid_date(\"file1\") <- time(#ambient, $0 ), $0 <= 2019-12-04T09:46:41+00:00, resource( #ambient, \"file1\")");
@@ -145,7 +145,7 @@ namespace Biscuit.Test.Builder
         }
 
         [TestMethod]
-        public void testCheck()
+        public void TestCheck()
         {
             var expectedCheck = new CheckBuilder(Arrays.AsList(
                         Utils.Rule("query",
@@ -174,7 +174,7 @@ namespace Biscuit.Test.Builder
         }
 
         [TestMethod]
-        public void testExpression()
+        public void TestExpression()
         {
             Either<Error, Tuple<string, ExpressionBuilder>> res =
                     Parser.Expression(" -1 ");
@@ -247,9 +247,11 @@ namespace Biscuit.Test.Builder
             Either<Error, Tuple<string, ExpressionBuilder>> res5 =
                 Parser.Expression("  [ #abc, #def ].contains($operation) ");
 
-            HashSet<Term> s = new HashSet<Term>();
-            s.Add(Utils.Symbol("abc"));
-            s.Add(Utils.Symbol("def"));
+            HashSet<Term> s = new HashSet<Term>
+            {
+                Utils.Symbol("abc"),
+                Utils.Symbol("def")
+            };
             Assert.IsTrue(res5.IsRight);
             Assert.AreEqual(new Tuple<string, ExpressionBuilder>("",
                             new ExpressionBuilder.Binary(
@@ -262,7 +264,7 @@ namespace Biscuit.Test.Builder
         }
 
         [TestMethod]
-        public void testParens()
+        public void TestParens()
         {
             Either<Error, Tuple<string, ExpressionBuilder>> res =
                     Parser.Expression("  1 + 2 * 3  ");

@@ -16,7 +16,7 @@ namespace Biscuit.Test.Token
             Ristretto.StrUtils.hexToBytes("529e780f28d9181c968b0eab9977ed8494a27a4544c3adc1910f41bb3dc36958");
 
         [TestMethod]
-        public void test1_Basic()
+        public void Test1_Basic()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -49,12 +49,11 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test2_DifferentRootKey()
+        public void Test2_DifferentRootKey()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
-            byte[] data =
-                    resources.ResourceTestV0.test2_different_root_key;
+            byte[] data = resources.ResourceTestV0.test2_different_root_key;
 
             var token = Biscuit.Token.Biscuit.FromBytes(data).Right;
             Error e = token.CheckRootKey(root).Left;
@@ -63,12 +62,9 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test3_InvalidSignatureFormat()
+        public void Test3_InvalidSignatureFormat()
         {
-            PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
-
-            byte[] data =
-                    resources.ResourceTestV0.test3_invalid_signature_format;
+            byte[] data = resources.ResourceTestV0.test3_invalid_signature_format;
 
             Error e = Biscuit.Token.Biscuit.FromBytes(data).Left;
             Console.WriteLine("got error: " + e);
@@ -78,13 +74,9 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test4_random_block()
+        public void Test4_random_block()
         {
-            PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
-
-            byte[] data =
-                    resources.ResourceTestV0.test4_random_block;
-
+            byte[] data = resources.ResourceTestV0.test4_random_block;
 
             Error e = Biscuit.Token.Biscuit.FromBytes(data).Left;
             Console.WriteLine("got error: " + e);
@@ -92,10 +84,8 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test5_InvalidSignature()
+        public void Test5_InvalidSignature()
         {
-            PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
-
             byte[] data =
                     resources.ResourceTestV0.test5_invalid_signature;
 
@@ -105,7 +95,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test6_reordered_blocks()
+        public void Test6_reordered_blocks()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -126,7 +116,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test7_invalid_block_fact_authority()
+        public void Test7_invalid_block_fact_authority()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -145,7 +135,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test8_invalid_block_fact_ambient()
+        public void Test8_invalid_block_fact_ambient()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -164,7 +154,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test9_ExpiredToken()
+        public void Test9_ExpiredToken()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -189,7 +179,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test10_AuthorityRules()
+        public void Test10_AuthorityRules()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -210,7 +200,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test11_VerifierAuthorityCaveats()
+        public void Test11_VerifierAuthorityCaveats()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -244,7 +234,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test12_VerifierAuthorityCaveats()
+        public void Test12_VerifierAuthorityCaveats()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -276,7 +266,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test13_BlockRules()
+        public void Test13_BlockRules()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -308,7 +298,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test14_RegexConstraint()
+        public void Test14_RegexConstraint()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -341,7 +331,7 @@ namespace Biscuit.Test.Token
         }
 
         [TestMethod]
-        public void test15_MultiQueriesCaveats()
+        public void Test15_MultiQueriesCaveats()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 
@@ -352,7 +342,7 @@ namespace Biscuit.Test.Token
             Console.WriteLine(token.Print());
 
             var v1 = token.Verify(root).Right;
-            var queries = new List<Biscuit.Token.Builder.RuleBuilder>();
+            var queries = new List<RuleBuilder>();
             queries.Add(Utils.Rule(
                     "test_must_be_present_authority",
                     Arrays.AsList(Utils.Var("0")),
@@ -367,14 +357,14 @@ namespace Biscuit.Test.Token
                             Utils.Pred("mst_be_present", Arrays.AsList(Utils.Var("0")))
                     )
             ));
-            v1.AddCheck(new Biscuit.Token.Builder.CheckBuilder(queries));
+            v1.AddCheck(new CheckBuilder(queries));
             v1.Allow();
 
             Assert.IsTrue(v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).IsRight);
         }
 
         [TestMethod]
-        public void test16_CaveatHeadName()
+        public void Test16_CaveatHeadName()
         {
             PublicKey root = new PublicKey((new CompressedRistretto(rootData)).Decompress());
 

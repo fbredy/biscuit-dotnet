@@ -301,7 +301,7 @@ namespace Biscuit.Token
             {
                 foreach (var id in fact.Ids.Where(id => id is Term.Str))
                 {
-                    ids.Add(((Term.Str)id).value);
+                    ids.Add(((Term.Str)id).Value);
                 }
             }
 

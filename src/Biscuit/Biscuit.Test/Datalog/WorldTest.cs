@@ -3,7 +3,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Biscuit.Test.Datalog
 {
@@ -12,7 +11,7 @@ namespace Biscuit.Test.Datalog
     {
 
         [TestMethod]
-        public void testFamily()
+        public void TestFamily()
         {
             World w = new World();
             SymbolTable syms = new SymbolTable();
@@ -94,7 +93,7 @@ namespace Biscuit.Test.Datalog
         }
 
         [TestMethod]
-        public void testNumbers()
+        public void TestNumbers()
         {
             World w = new World();
             SymbolTable syms = new SymbolTable();
@@ -159,7 +158,7 @@ namespace Biscuit.Test.Datalog
             Assert.IsTrue(expected.SequenceEqual(res));
         }
 
-        private HashSet<Fact> testSuffix(World w, SymbolTable syms, ulong suff, ulong route, String suffix)
+        private HashSet<Fact> TestSuffix(World w, SymbolTable syms, ulong suff, ulong route, String suffix)
         {
             return w.QueryRule(new Rule(new Predicate(suff,
                     Arrays.AsList<ID>(new ID.Variable(syms.Insert("app_id")), new ID.Variable(syms.Insert("domain")))),
@@ -177,7 +176,7 @@ namespace Biscuit.Test.Datalog
             ));
         }
 
-        public void testStr()
+        public void TestStr()
         {
             World w = new World();
             SymbolTable syms = new SymbolTable();
@@ -194,7 +193,7 @@ namespace Biscuit.Test.Datalog
             w.AddFact(new Fact(new Predicate(route, Arrays.AsList(new ID.Integer(3), app_0, new ID.Str("www.example.com")))));
             w.AddFact(new Fact(new Predicate(route, Arrays.AsList(new ID.Integer(4), app_1, new ID.Str("mx.example.com")))));
 
-            HashSet<Fact> res = testSuffix(w, syms, suff, route, ".fr");
+            HashSet<Fact> res = TestSuffix(w, syms, suff, route, ".fr");
             foreach (Fact f in res)
             {
                 Console.WriteLine("\t" + syms.PrintFact(f));
@@ -202,7 +201,7 @@ namespace Biscuit.Test.Datalog
             var expected = new HashSet<Fact>(Arrays.AsList(new Fact(new Predicate(suff, Arrays.AsList(app_2, new ID.Str("test.fr"))))));
             Assert.IsTrue(expected.SequenceEqual(res));
 
-            res = testSuffix(w, syms, suff, route, "example.com");
+            res = TestSuffix(w, syms, suff, route, "example.com");
             foreach (Fact f in res)
             {
                 Console.WriteLine("\t" + syms.PrintFact(f));
@@ -218,7 +217,7 @@ namespace Biscuit.Test.Datalog
         }
 
         [TestMethod]
-        public void testDate()
+        public void TestDate()
         {
             World w = new World();
             SymbolTable syms = new SymbolTable();
@@ -302,7 +301,7 @@ namespace Biscuit.Test.Datalog
         }
 
         [TestMethod]
-        public void testSet()
+        public void TestSet()
         {
             World w = new World();
             SymbolTable syms = new SymbolTable();
@@ -389,7 +388,7 @@ namespace Biscuit.Test.Datalog
         }
 
         [TestMethod]
-        public void testResource()
+        public void TestResource()
         {
             World w = new World();
             SymbolTable syms = new SymbolTable();

@@ -66,7 +66,7 @@ namespace Biscuit.Datalog.Expressions
 
         static public Either<Errors.FormatError, Expression> DeserializeV1(Format.Schema.ExpressionV1 expression)
         {
-            List<Op> ops = new List<Op>();
+            List<Op> result = new List<Op>();
 
             foreach (Format.Schema.Op op in expression.Ops)
             {
@@ -78,11 +78,11 @@ namespace Biscuit.Datalog.Expressions
                 }
                 else
                 {
-                    ops.Add(deserialized.Right);
+                    result.Add(deserialized.Right);
                 }
             }
 
-            return new Expression(ops);
+            return new Expression(result);
         }
     }
 }

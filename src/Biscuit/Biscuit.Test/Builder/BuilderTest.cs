@@ -12,7 +12,7 @@ namespace Biscuit.Test.Builder
     public class BuilderTest
     {
         [TestMethod]
-        public void testBuild()
+        public void TestBuild()
         {
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
             KeyPair root = new KeyPair(rng);

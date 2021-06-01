@@ -23,7 +23,7 @@ namespace Biscuit.Token.Builder
 
             foreach (Term term in this.Ids)
             {
-                ids.Add(term.convert(symbols));
+                ids.Add(term.Convert(symbols));
             }
 
             return new Predicate(name, ids);

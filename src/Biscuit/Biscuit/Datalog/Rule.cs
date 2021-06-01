@@ -36,7 +36,7 @@ namespace Biscuit.Datalog
             if (!this.Body.Any())
             {
                 Option<Dictionary<ulong, ID>> h_opt = variables.CheckExpressions(this.Expressions);
-                if (h_opt.IsDefined())
+                if (h_opt.IsDefined)
                 {
                     Dictionary<ulong, ID> h = h_opt.Get();
                     Predicate predicate = this.Head.Clone(); 
@@ -106,12 +106,12 @@ namespace Biscuit.Datalog
 
             if (!this.Body.Any())
             {
-                return variables.CheckExpressions(this.Expressions).IsDefined();
+                return variables.CheckExpressions(this.Expressions).IsDefined;
             }
 
             Combinator c = new Combinator(variables, this.Body, this.Expressions, facts);
 
-            return c.Next().IsDefined();
+            return c.Next().IsDefined;
         }
 
         public Rule(Predicate head, List<Predicate> body, List<Expression> expressions)

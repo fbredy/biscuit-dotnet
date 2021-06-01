@@ -8,20 +8,20 @@ namespace Biscuit.Datalog
     [Serializable]
     public sealed class MatchedVariables
     {
-        private readonly Dictionary<ulong, Optional<ID>> variables;
+        private readonly Dictionary<ulong, Option<ID>> variables;
 
         public bool Insert(ulong key, ID value)
         {
             if (this.variables.ContainsKey(key))
             {
-                Optional<ID> val = this.variables[key];
-                if (val.IsPresent())
+                Option<ID> val = this.variables[key];
+                if (val.IsDefined)
                 {
                     return val.Get().Equals(value);
                 }
                 else
                 {
-                    this.variables[key] = Optional<ID>.Of(value);
+                    this.variables[key] = Option<ID>.Some(value);
                     return true;
                 }
             }
@@ -33,24 +33,24 @@ namespace Biscuit.Datalog
 
         public bool IsComplete()
         {
-            return this.variables.Values.All(v => v.IsPresent());
+            return this.variables.Values.All(v => v.IsDefined);
         }
 
-        public Optional<Dictionary<ulong, ID>> Complete()
+        public Option<Dictionary<ulong, ID>> Complete()
         {
             Dictionary<ulong, ID> variables = new Dictionary<ulong, ID>();
             foreach (var entry in this.variables)
             {
-                if (entry.Value.IsPresent())
+                if (entry.Value.IsDefined)
                 {
                     variables.Add(entry.Key, entry.Value.Get());
                 }
                 else
                 {
-                    return Optional<Dictionary<ulong, ID>>.Empty();
+                    return Option<Dictionary<ulong, ID>>.None();
                 }
             }
-            return Optional<Dictionary<ulong, ID>>.Of(variables);
+            return Option.Some(variables);
         }
 
         public MatchedVariables Clone()
@@ -58,7 +58,7 @@ namespace Biscuit.Datalog
             MatchedVariables other = new MatchedVariables(this.variables.Keys.ToArray());
             foreach (var entry in this.variables)
             {
-                if (entry.Value.IsPresent())
+                if (entry.Value.IsDefined)
                 {
                     other.variables[entry.Key] = entry.Value;
                 }
@@ -68,17 +68,17 @@ namespace Biscuit.Datalog
 
         public MatchedVariables(IEnumerable<ulong> ids)
         {
-            this.variables = new Dictionary<ulong, Optional<ID>>();
+            this.variables = new Dictionary<ulong, Option<ID>>();
             foreach (ulong id in ids)
             {
-                this.variables.Add(id, Optional<ID>.Empty());
+                this.variables.Add(id, Option<ID>.None());
             }
         }
 
         public Option<Dictionary<ulong, ID>> CheckExpressions(IList<Expression> expressions)
         {
-            Optional<Dictionary<ulong, ID>> vars = this.Complete();
-            if (vars.IsPresent())
+            Option<Dictionary<ulong, ID>> vars = this.Complete();
+            if (vars.IsDefined)
             {
                 Dictionary<ulong, ID> variables = vars.Get();
 
@@ -97,7 +97,7 @@ namespace Biscuit.Datalog
                     }
                 }
 
-                return Option<Dictionary<ulong, ID>>.Some(variables);
+                return Option.Some(variables);
             }
             else
             {
