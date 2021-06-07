@@ -37,10 +37,10 @@ namespace Biscuit.Datalog
 
         public Either<Errors.Error, Void> Run(RunLimits limits, HashSet<ulong> restrictedSymbols)
         {
-            int iterations = 0;
-            DateTime limit = DateTime.Now.Add(limits.MaxTime);
 
-            while (true)
+            DateTime limit = DateTime.Now.Add(limits.MaxTime);
+            int iterations;
+            for (iterations = 0; iterations < limits.MaxIterations; iterations++)
             {
                 HashSet<Fact> newFacts = new HashSet<Fact>();
 
@@ -75,13 +75,9 @@ namespace Biscuit.Datalog
                 {
                     return new Errors.TooManyFacts();
                 }
-
-                iterations += 1;
-                if (iterations >= limits.MaxIterations)
-                {
-                    return new Errors.TooManyIterationsError();
-                }
             }
+
+            return new Errors.TooManyIterationsError();
         }
 
         public HashSet<Fact> Facts { get; }
@@ -97,14 +93,14 @@ namespace Biscuit.Datalog
         {
             var result = this.Facts.Where(f =>
             {
-                if (f.predicate.Name != predicate.Name)
+                if (f.Predicate.Name != predicate.Name)
                 {
                     return false;
                 }
-                int minSize = Math.Min(f.predicate.Ids.Count, predicate.Ids.Count);
+                int minSize = Math.Min(f.Predicate.Ids.Count, predicate.Ids.Count);
                 for (int i = 0; i < minSize; ++i)
                 {
-                    ID fid = f.predicate.Ids[i];
+                    ID fid = f.Predicate.Ids[i];
                     ID pid = predicate.Ids[i];
                     if ((fid is ID.Symbol || fid is ID.Integer || fid is ID.Str || fid is ID.Date)
                     && fid.GetType() == pid.GetType())
@@ -145,20 +141,20 @@ namespace Biscuit.Datalog
             this.PrivilegedRules = new List<Rule>();
         }
 
-        public World(HashSet<Fact> facts, List<Rule> privileged_rules, List<Rule> rules)
+        public World(HashSet<Fact> facts, List<Rule> privilegedRules, List<Rule> rules)
         {
             this.Facts = facts;
             this.Rules = rules;
             this.Checks = new List<Check>();
-            this.PrivilegedRules = privileged_rules;
+            this.PrivilegedRules = privilegedRules;
         }
 
-        public World(HashSet<Fact> facts, List<Rule> privileged_rules, List<Rule> rules, List<Check> checks)
+        public World(HashSet<Fact> facts, List<Rule> privilegedRules, List<Rule> rules, List<Check> checks)
         {
             this.Facts = facts;
             this.Rules = rules;
             this.Checks = checks;
-            this.PrivilegedRules = privileged_rules;
+            this.PrivilegedRules = privilegedRules;
         }
 
         public World(World world)
@@ -168,7 +164,7 @@ namespace Biscuit.Datalog
             {
                 this.Facts.Add(fact);
             }
-            
+
             this.Rules = new List<Rule>();
             this.Rules.AddRange(world.Rules);
 
@@ -179,7 +175,7 @@ namespace Biscuit.Datalog
             this.Checks.AddRange(world.Checks);
         }
 
-        public string Print(SymbolTable symbol_table)
+        public string Print(SymbolTable symbolTable)
         {
             StringBuilder s = new StringBuilder();
 
@@ -187,25 +183,25 @@ namespace Biscuit.Datalog
             foreach (Fact f in this.Facts)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.PrintFact(f));
+                s.Append(symbolTable.PrintFact(f));
             }
             s.Append("\n\t\t]\n\t\tprivileged rules: [");
             foreach (Rule r in this.PrivilegedRules)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.PrintRule(r));
+                s.Append(symbolTable.PrintRule(r));
             }
             s.Append("\n\t\t]\n\t\trules: [");
             foreach (Rule r in this.Rules)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.PrintRule(r));
+                s.Append(symbolTable.PrintRule(r));
             }
             s.Append("\n\t\t]\n\t\tchecks: [");
             foreach (Check c in this.Checks)
             {
                 s.Append("\n\t\t\t");
-                s.Append(symbol_table.PrintCheck(c));
+                s.Append(symbolTable.PrintCheck(c));
             }
             s.Append("\n\t\t]\n\t}");
 

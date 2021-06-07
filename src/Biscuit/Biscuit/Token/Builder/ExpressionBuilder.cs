@@ -15,7 +15,6 @@ namespace Biscuit.Token.Builder
 
         public static ExpressionBuilder ConvertFrom(Expression e, Datalog.SymbolTable symbols)
         {
-            List<Op> ops = new List<Op>();
             Stack<ExpressionBuilder> stack = new Stack<ExpressionBuilder>(16);
             foreach (Datalog.Expressions.Op op in e.GetOps())
             {

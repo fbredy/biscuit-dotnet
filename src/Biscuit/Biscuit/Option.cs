@@ -40,13 +40,13 @@
         public override bool Equals(object obj)
         {
             bool res = false;
-            if(obj != null )
+            if (obj != null)
             {
                 var isSubclass = this.Value.GetType().IsSubclassOf(obj.GetType().GenericTypeArguments[0]);
                 if (isSubclass)
                 {
                     object valueOfObj = obj.GetType().GetMethod("Get").Invoke(obj, null);
-                    
+
                     if (valueOfObj != null)
                     {
                         res = valueOfObj.Equals(this.Value);

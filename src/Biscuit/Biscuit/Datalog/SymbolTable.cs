@@ -101,7 +101,7 @@ namespace Biscuit.Datalog
 
         public string PrintRuleBody(Rule r)
         {
-            List<string> preds = r.Body.Select(p=> this.PrintPredicate(p)).ToList();
+            List<string> preds = r.Body.Select(p => this.PrintPredicate(p)).ToList();
             List<string> expressions = r.Expressions.Select(c => this.PrintExpression(c)).ToList();
 
             string res = string.Join(", ", preds);
@@ -124,20 +124,33 @@ namespace Biscuit.Datalog
 
         public string PrintPredicate(Predicate p)
         {
-            List<string> ids = p.Ids.Select(i => { 
-                if (i is ID.Variable) {
+            List<string> ids = p.Ids.Select(i =>
+            {
+                if (i is ID.Variable)
+                {
                     return "$" + this.PrintSymbol((int)((ID.Variable)i).Value);
-                } else if (i is ID.Symbol) {
+                }
+                else if (i is ID.Symbol)
+                {
                     return "#" + this.PrintSymbol((int)((ID.Symbol)i).Value);
-                } else if (i is ID.Date) {
+                }
+                else if (i is ID.Date)
+                {
                     return DateTime.UnixEpoch.AddSeconds(((ID.Date)i).Value).ToString();
-                } else if (i is ID.Integer) {
+                }
+                else if (i is ID.Integer)
+                {
                     return "" + ((ID.Integer)i).Value;
-                } else if (i is ID.Str) {
+                }
+                else if (i is ID.Str)
+                {
                     return "\"" + ((ID.Str)i).Value + "\"";
-                } else if (i is ID.Bytes) {
+                }
+                else if (i is ID.Bytes)
+                {
                     return "hex:" + StrUtils.bytesToHex(((ID.Bytes)i).Value);
-                } else
+                }
+                else
                 {
                     return "???";
                 }
@@ -150,21 +163,21 @@ namespace Biscuit.Datalog
 
         public string PrintFact(Fact f)
         {
-            return this.PrintPredicate(f.predicate);
+            return this.PrintPredicate(f.Predicate);
         }
 
         public string PrintCheck(Check c)
         {
             string res = "check if ";
-            List<string> queries = c.Queries.Select((q)=> this.PrintRuleBody(q)).ToList();
+            List<string> queries = c.Queries.Select((q) => this.PrintRuleBody(q)).ToList();
             return res + string.Join(" or ", queries);
         }
 
         public string PrintWorld(World w)
         {
-            List<string> facts = w.Facts.Select((f)=> this.PrintFact(f)).ToList();
-            List<string> rules = w.Rules.Select((r)=> this.PrintRule(r)).ToList();
-            List<string> checksStr = w.Checks.Select((c)=> this.PrintCheck(c)).ToList();
+            List<string> facts = w.Facts.Select((f) => this.PrintFact(f)).ToList();
+            List<string> rules = w.Rules.Select((r) => this.PrintRule(r)).ToList();
+            List<string> checksStr = w.Checks.Select((c) => this.PrintCheck(c)).ToList();
 
             StringBuilder b = new StringBuilder();
             b.Append("World {\n\tfacts: [\n\t\t");

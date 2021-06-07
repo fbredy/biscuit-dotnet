@@ -21,12 +21,12 @@ namespace Biscuit.Test.Crypto
 
             string message2 = "world";
             KeyPair keypair2 = new KeyPair(rng);
-            Biscuit.Crypto.Token token2 = token1.append(rng, keypair2, Encoding.UTF8.GetBytes(message2));
+            Biscuit.Crypto.Token token2 = token1.Append(rng, keypair2, Encoding.UTF8.GetBytes(message2));
             Assert.AreEqual(new Right(null), token2.Verify());
 
             string message3 = "!!";
             KeyPair keypair3 = new KeyPair(rng);
-            Biscuit.Crypto.Token token3 = token2.append(rng, keypair3, Encoding.UTF8.GetBytes(message3));
+            Biscuit.Crypto.Token token3 = token2.Append(rng, keypair3, Encoding.UTF8.GetBytes(message3));
             Assert.AreEqual(new Right(null), token3.Verify());
         }
 
@@ -44,13 +44,13 @@ namespace Biscuit.Test.Crypto
 
             string message2 = "world";
             KeyPair keypair2 = new KeyPair(rng);
-            Biscuit.Crypto.Token token2 = token1.append(rng, keypair2, Encoding.UTF8.GetBytes(message2));
+            Biscuit.Crypto.Token token2 = token1.Append(rng, keypair2, Encoding.UTF8.GetBytes(message2));
             token2.Blocks[1] = Encoding.UTF8.GetBytes("you");
             Assert.AreEqual(new Left(new Errors.InvalidSignature()), token2.Verify());
 
             string message3 = "!!";
             KeyPair keypair3 = new KeyPair(rng);
-            Biscuit.Crypto.Token token3 = token2.append(rng, keypair3, Encoding.UTF8.GetBytes(message3));
+            Biscuit.Crypto.Token token3 = token2.Append(rng, keypair3, Encoding.UTF8.GetBytes(message3));
             Assert.AreEqual(new Left(new Errors.InvalidSignature()), token3.Verify());
         }
     }

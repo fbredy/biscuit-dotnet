@@ -23,7 +23,7 @@ namespace Biscuit.Token.Builder
 
         public static FactBuilder ConvertFrom(Datalog.Fact f, Datalog.SymbolTable symbols)
         {
-            return new FactBuilder(PredicateBuilder.ConvertFrom(f.predicate, symbols));
+            return new FactBuilder(PredicateBuilder.ConvertFrom(f.Predicate, symbols));
         }
 
 
@@ -40,12 +40,12 @@ namespace Biscuit.Token.Builder
             }
         }
 
-        public List<Term> Ids 
-        { 
+        public List<Term> Ids
+        {
             get
             {
                 return this.Predicate.Ids;
-            } 
+            }
         }
 
 

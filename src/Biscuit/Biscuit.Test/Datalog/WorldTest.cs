@@ -36,8 +36,8 @@ namespace Biscuit.Test.Datalog
 
             Console.WriteLine("testing r1: " + syms.PrintRule(r1));
             var query_rule_result = w.QueryRule(r1);
-            Console.WriteLine("grandparents query_rules: [" + string.Join(", ", query_rule_result.Select((f)=>syms.PrintFact(f))) + "]");
-            Console.WriteLine("current facts: [" + string.Join(", ", w.Facts.Select((f)=>syms.PrintFact(f))) + "]");
+            Console.WriteLine("grandparents query_rules: [" + string.Join(", ", query_rule_result.Select((f) => syms.PrintFact(f))) + "]");
+            Console.WriteLine("current facts: [" + string.Join(", ", w.Facts.Select((f) => syms.PrintFact(f))) + "]");
 
             Rule r2 = new Rule(new Predicate(grandparent,
                    Arrays.AsList<ID>(new ID.Variable(syms.Insert("grandparent")), new ID.Variable(syms.Insert("grandchild")))), Arrays.AsList(
@@ -57,11 +57,11 @@ namespace Biscuit.Test.Datalog
             }
             Console.WriteLine("parents of B: [" + string.Join(", ",
                     w.Query(new Predicate(parent, Arrays.AsList(new ID.Variable(syms.Insert("parent")), b)))
-                            .Select((f)=>syms.PrintFact(f))) + "]");
+                            .Select((f) => syms.PrintFact(f))) + "]");
             Console.WriteLine("grandparents: [" + string.Join(", ",
                     w.Query(new Predicate(grandparent, Arrays.AsList<ID>(new ID.Variable(syms.Insert("grandparent")),
                             new ID.Variable(syms.Insert("grandchild")))))
-                            .Select((f)=>syms.PrintFact(f))) + "]");
+                            .Select((f) => syms.PrintFact(f))) + "]");
 
             w.AddFact(new Fact(new Predicate(parent, Arrays.AsList(c, e))));
             w.Run(new HashSet<ulong>());
@@ -69,13 +69,13 @@ namespace Biscuit.Test.Datalog
             HashSet<Fact> res = w.Query(new Predicate(grandparent,
                    Arrays.AsList<ID>(new ID.Variable(syms.Insert("grandparent")), new ID.Variable(syms.Insert("grandchild")))));
             Console.WriteLine("grandparents after inserting parent(C, E): [" + string.Join(", ",
-                    res.Select((f)=>syms.PrintFact(f))) + "]");
+                    res.Select((f) => syms.PrintFact(f))) + "]");
 
             HashSet<Fact> expected = new HashSet<Fact>(Arrays.AsList<Fact>(
                    new Fact(new Predicate(grandparent, Arrays.AsList(a, c))),
                    new Fact(new Predicate(grandparent, Arrays.AsList(b, d))),
                    new Fact(new Predicate(grandparent, Arrays.AsList(b, e)))));
-            
+
             Assert.IsTrue(expected.SequenceEqual(res));
 
             w.AddRule(new Rule(new Predicate(sibling,
@@ -89,7 +89,7 @@ namespace Biscuit.Test.Datalog
                     w.Query(new Predicate(sibling, Arrays.AsList<ID>(
                             new ID.Variable(syms.Insert("sibling1")),
                             new ID.Variable(syms.Insert("sibling2")))))
-                            .Select((f)=>syms.PrintFact(f))) + "]");
+                            .Select((f) => syms.PrintFact(f))) + "]");
         }
 
         [TestMethod]
@@ -158,7 +158,7 @@ namespace Biscuit.Test.Datalog
             Assert.IsTrue(expected.SequenceEqual(res));
         }
 
-        private HashSet<Fact> TestSuffix(World w, SymbolTable syms, ulong suff, ulong route, String suffix)
+        private static HashSet<Fact> TestSuffix(World w, SymbolTable syms, ulong suff, ulong route, string suffix)
         {
             return w.QueryRule(new Rule(new Predicate(suff,
                     Arrays.AsList<ID>(new ID.Variable(syms.Insert("app_id")), new ID.Variable(syms.Insert("domain")))),
@@ -168,7 +168,7 @@ namespace Biscuit.Test.Datalog
                           new ID.Variable(syms.Insert("app_id")),
                           new ID.Variable(syms.Insert("domain"))))
             ),
-                    Arrays.AsList(new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList< Biscuit.Datalog.Expressions.Op>(
+                    Arrays.AsList(new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList<Biscuit.Datalog.Expressions.Op>(
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Variable(syms.Insert("domain"))),
                             new Biscuit.Datalog.Expressions.Op.Value(new ID.Str(suffix)),
                             new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.Suffix)
@@ -176,6 +176,7 @@ namespace Biscuit.Test.Datalog
             ));
         }
 
+        [TestMethod]
         public void TestStr()
         {
             World w = new World();
@@ -229,10 +230,10 @@ namespace Biscuit.Test.Datalog
             DateTimeOffset t3 = t2.AddSeconds(30);
             Console.WriteLine("t3 = " + t3);
 
-            
+
             ulong t2_timestamp = (ulong)t2.ToUnixTimeSeconds();
 
-             ID abc = syms.Add("abc");
+            ID abc = syms.Add("abc");
             ID def = syms.Add("def");
             ulong x = syms.Insert("x");
             ulong before = syms.Insert("before");
@@ -248,12 +249,12 @@ namespace Biscuit.Test.Datalog
                            new Predicate(x, Arrays.AsList<ID>(new ID.Variable(syms.Insert("date")), new ID.Variable(syms.Insert("val"))))
                    ),
                    Arrays.AsList(
-                        new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList < Biscuit.Datalog.Expressions.Op>(
+                        new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList<Biscuit.Datalog.Expressions.Op>(
                                 new Biscuit.Datalog.Expressions.Op.Value(new ID.Variable(syms.Insert("date"))),
                                 new Biscuit.Datalog.Expressions.Op.Value(new ID.Date(t2_timestamp)),
                                 new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.LessOrEqual)
                         ))),
-                        new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList< Biscuit.Datalog.Expressions.Op>(
+                        new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList<Biscuit.Datalog.Expressions.Op>(
                                 new Biscuit.Datalog.Expressions.Op.Value(new ID.Variable(syms.Insert("date"))),
                                 new Biscuit.Datalog.Expressions.Op.Value(new ID.Date(0)),
                                 new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.GreaterOrEqual)
@@ -282,7 +283,7 @@ namespace Biscuit.Test.Datalog
                                    new Biscuit.Datalog.Expressions.Op.Value(new ID.Date(t2_timestamp)),
                                    new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.GreaterOrEqual)
                            ))),
-                          new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList< Biscuit.Datalog.Expressions.Op>(
+                          new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList<Biscuit.Datalog.Expressions.Op>(
                                    new Biscuit.Datalog.Expressions.Op.Value(new ID.Variable(syms.Insert("date"))),
                                    new Biscuit.Datalog.Expressions.Op.Value(new ID.Date(0)),
                                    new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.GreaterOrEqual)
@@ -324,8 +325,8 @@ namespace Biscuit.Test.Datalog
                            Arrays.AsList<ID>(new ID.Variable(syms.Insert("sym")), new ID.Variable(syms.Insert("int")), new ID.Variable(syms.Insert("str"))))
            ),
                    Arrays.AsList(
-                           new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList< Biscuit.Datalog.Expressions.Op>(
-                                   new Biscuit.Datalog.Expressions.Op.Value(new ID.Set(new HashSet<ID>(Arrays.AsList(new ID.Integer(0l), new ID.Integer(1l))))),
+                           new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList<Biscuit.Datalog.Expressions.Op>(
+                                   new Biscuit.Datalog.Expressions.Op.Value(new ID.Set(new HashSet<ID>(Arrays.AsList(new ID.Integer(0), new ID.Integer(1))))),
                                    new Biscuit.Datalog.Expressions.Op.Value(new ID.Variable(syms.Insert("int"))),
                                    new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.Contains)
                            )))
@@ -348,7 +349,7 @@ namespace Biscuit.Test.Datalog
                    Arrays.AsList(new Predicate(x, Arrays.AsList<ID>(new ID.Variable(syms.Insert("sym")), new ID.Variable(syms.Insert("int")), new ID.Variable(syms.Insert("str"))))
                    ),
                    Arrays.AsList(
-                           new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList< Biscuit.Datalog.Expressions.Op>(
+                           new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList<Biscuit.Datalog.Expressions.Op>(
                                    new Biscuit.Datalog.Expressions.Op.Value(new ID.Set(new HashSet<ID>(Arrays.AsList<ID>(new ID.Symbol(abc_sym_id), new ID.Symbol(ghi_sym_id))))),
                                    new Biscuit.Datalog.Expressions.Op.Value(new ID.Variable(syms.Insert("sym"))),
                                    new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.Contains),
@@ -370,7 +371,7 @@ namespace Biscuit.Test.Datalog
                    new Predicate(string_set, Arrays.AsList<ID>(new ID.Variable(syms.Insert("sym")), new ID.Variable(syms.Insert("int")), new ID.Variable(syms.Insert("str")))),
                    Arrays.AsList(new Predicate(x, Arrays.AsList<ID>(new ID.Variable(syms.Insert("sym")), new ID.Variable(syms.Insert("int")), new ID.Variable(syms.Insert("str"))))),
                    Arrays.AsList(
-                           new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList< Biscuit.Datalog.Expressions.Op>(
+                           new Biscuit.Datalog.Expressions.Expression(new List<Biscuit.Datalog.Expressions.Op>(Arrays.AsList<Biscuit.Datalog.Expressions.Op>(
                                    new Biscuit.Datalog.Expressions.Op.Value(new ID.Set(new HashSet<ID>(Arrays.AsList(new ID.Str("test"), new ID.Str("aaa"))))),
                                    new Biscuit.Datalog.Expressions.Op.Value(new ID.Variable(syms.Insert("str"))),
                                    new Biscuit.Datalog.Expressions.Op.Binary(Biscuit.Datalog.Expressions.Op.BinaryOp.Contains)

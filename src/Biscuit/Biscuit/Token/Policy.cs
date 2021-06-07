@@ -1,7 +1,5 @@
 ﻿using Biscuit.Token.Builder;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Biscuit.Token
 {
@@ -13,8 +11,7 @@ namespace Biscuit.Token
             Deny,
         }
 
-        //TODO Rule  ou Rule
-        private List<RuleBuilder> queries;
+        private readonly List<RuleBuilder> queries;
         public Kind kind;
 
         public Policy(List<RuleBuilder> queries, Kind kind)
@@ -25,14 +22,15 @@ namespace Biscuit.Token
 
         public Policy(RuleBuilder query, Kind kind)
         {
-            List<RuleBuilder> r = new List<RuleBuilder>();
-            r.Add(query);
+            this.queries = new List<RuleBuilder>
+            {
+                query
+            };
 
-            this.queries = r;
             this.kind = kind;
         }
 
-        public Datalog.Check convert(Datalog.SymbolTable symbols)
+        public Datalog.Check Convert(Datalog.SymbolTable symbols)
         {
             List<Datalog.Rule> queries = new List<Datalog.Rule>();
 
@@ -43,16 +41,14 @@ namespace Biscuit.Token
             return new Datalog.Check(queries);
         }
 
-    public override string ToString()
+        public override string ToString()
         {
-            switch (this.kind)
+            return this.kind switch
             {
-                case Kind.Allow:
-                    return "allow if " + queries;
-                case Kind.Deny:
-                    return "deny if " + queries;
-            }
-            return null;
+                Kind.Allow => "allow if " + queries,
+                Kind.Deny => "deny if " + queries,
+                _ => null,
+            };
         }
 
     }

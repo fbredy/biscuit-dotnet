@@ -42,6 +42,11 @@ namespace Biscuit.Errors
             }
             return o != null && this.GetType() == o.GetType();
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     public class SealedSignature : FormatError
@@ -114,7 +119,7 @@ namespace Biscuit.Errors
     {
         public readonly string e;
 
-        public BlockDeserializationError(String e)
+        public BlockDeserializationError(string e)
         {
             this.e = e;
         }
@@ -275,7 +280,13 @@ namespace Biscuit.Errors
             if (o == null || !(o is SymbolTableOverlap)) return false;
             return true;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
+
     public class MissingSymbols : Error
     {
 
@@ -285,9 +296,19 @@ namespace Biscuit.Errors
             if (o == null || !(o is MissingSymbols)) return false;
             return true;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
+
     public class Sealed : Error
     {
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
 
         public override bool Equals(object o)
         {
@@ -326,7 +347,7 @@ namespace Biscuit.Errors
             return "Error.FailedLogic{ error: " + error + " }";
         }
 
-        
+
         public override Option<List<FailedCheck>> FailedCheck()
         {
             return this.error.GetFailedChecks();
@@ -343,6 +364,11 @@ namespace Biscuit.Errors
             if (o == null || !(o is TooManyFacts)) return false;
             return true;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     public class TooManyIterationsError : Error
@@ -354,6 +380,11 @@ namespace Biscuit.Errors
             if (o == null || !(o is TooManyIterationsError)) return false;
             return true;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     public class TimeoutError : Error
@@ -363,6 +394,11 @@ namespace Biscuit.Errors
             if (this == o) return true;
             if (o == null || !(o is TimeoutError)) return false;
             return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 

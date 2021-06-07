@@ -163,11 +163,11 @@ namespace Biscuit.Test.Builder
                         )
                         ));
             //var expected = new Right(new Tuple<string, Check>("", check));
-            
+
             Either<Error, Tuple<string, CheckBuilder>> res =
                     Parser.Check("check if resource(#ambient, $0), operation(#ambient, #read) or admin(#authority)");
-            
-            
+
+
             Assert.IsTrue(res.IsRight);
 
             Assert.AreEqual(expectedCheck, res.Right.Item2);

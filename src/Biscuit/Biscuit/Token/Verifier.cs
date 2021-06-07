@@ -4,8 +4,8 @@ using Biscuit.Errors;
 using Biscuit.Token.Builder;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
+using System.Text;
 
 namespace Biscuit.Token
 {
@@ -14,12 +14,12 @@ namespace Biscuit.Token
     /// </summary>
     public class Verifier
     {
-        Biscuit token;
-        List<CheckBuilder> checks;
-        List<List<Check>> token_checks;
-        List<Policy> policies;
-        World world;
-        SymbolTable symbols;
+        readonly Biscuit token;
+        readonly List<CheckBuilder> checks;
+        readonly List<List<Check>> token_checks;
+        readonly List<Policy> policies;
+        readonly World world;
+        readonly SymbolTable symbols;
 
         private Verifier(Biscuit token, World w)
         {
@@ -56,7 +56,7 @@ namespace Biscuit.Token
             this.symbols = symbols;
         }
 
-        
+
         static public Either<Error, Verifier> Make(Biscuit token, Option<PublicKey> root)
         {
             if (!token.IsSealed())
@@ -102,9 +102,9 @@ namespace Biscuit.Token
             ulong authority_index = symbols.Get("authority").Get();
             ulong ambient_index = symbols.Get("ambient").Get();
 
-            foreach (Fact fact in token.Authority.facts)
+            foreach (Fact fact in token.Authority.Facts)
             {
-                if (fact.predicate.Ids[0].Equals(new ID.Symbol(ambient_index)))
+                if (fact.Predicate.Ids[0].Equals(new ID.Symbol(ambient_index)))
                 {
                     return new FailedLogic(new LogicError.InvalidAuthorityFact(symbols.PrintFact(fact)));
                 }
@@ -113,16 +113,16 @@ namespace Biscuit.Token
                 world.AddFact(converted_fact);
             }
 
-            foreach (Rule rule in token.Authority.rules)
+            foreach (Rule rule in token.Authority.Rules)
             {
                 Rule converted_rule = RuleBuilder.ConvertFrom(rule, token.Symbols).Convert(this.symbols);
                 world.AddPrivilegedRule(converted_rule);
             }
 
             List<Check> authority_checks = new List<Check>();
-            foreach (Check check in token.Authority.checks)
+            foreach (Check check in token.Authority.Checks)
             {
-                Datalog.Check converted_check = CheckBuilder.convert_from(check, token.Symbols).convert(this.symbols);
+                Datalog.Check converted_check = CheckBuilder.ConvertFrom(check, token.Symbols).Convert(this.symbols);
                 authority_checks.Add(converted_check);
             }
             token_checks.Add(authority_checks);
@@ -130,15 +130,15 @@ namespace Biscuit.Token
             for (int i = 0; i < token.Blocks.Count; i++)
             {
                 Block b = token.Blocks[i];
-                if (b.index != i + 1)
+                if (b.Index != i + 1)
                 {
-                    return new InvalidBlockIndex(1 + token.Blocks.Count, token.Blocks[i].index);
+                    return new InvalidBlockIndex(1 + token.Blocks.Count, token.Blocks[i].Index);
                 }
 
-                foreach (Fact fact in b.facts)
+                foreach (Fact fact in b.Facts)
                 {
-                    if (fact.predicate.Ids[0].Equals(new ID.Symbol(authority_index)) ||
-                            fact.predicate.Ids[0].Equals(new ID.Symbol(ambient_index)))
+                    if (fact.Predicate.Ids[0].Equals(new ID.Symbol(authority_index)) ||
+                            fact.Predicate.Ids[0].Equals(new ID.Symbol(ambient_index)))
                     {
                         return new FailedLogic(new LogicError.InvalidBlockFact(i, symbols.PrintFact(fact)));
                     }
@@ -147,16 +147,16 @@ namespace Biscuit.Token
                     world.AddFact(converted_fact);
                 }
 
-                foreach (Rule rule in b.rules)
+                foreach (Rule rule in b.Rules)
                 {
                     Rule converted_rule = RuleBuilder.ConvertFrom(rule, token.Symbols).Convert(this.symbols);
                     world.AddRule(converted_rule);
                 }
 
                 List<Check> block_checks = new List<Check>();
-                foreach (Check check in b.checks)
+                foreach (Check check in b.Checks)
                 {
-                    Check converted_check = CheckBuilder.convert_from(check, token.Symbols).convert(this.symbols);
+                    Check converted_check = CheckBuilder.ConvertFrom(check, token.Symbols).Convert(this.symbols);
                     block_checks.Add(converted_check);
                 }
                 token_checks.Add(block_checks);
@@ -220,7 +220,7 @@ namespace Biscuit.Token
         public void AddCheck(CheckBuilder check)
         {
             this.checks.Add(check);
-            world.AddCheck(check.convert(symbols));
+            world.AddCheck(check.Convert(symbols));
         }
 
         public Either<Error, Void> AddCheck(string s)
@@ -259,7 +259,7 @@ namespace Biscuit.Token
         public void RevocationCheck(List<long> ids)
         {
             List<RuleBuilder> q = new List<RuleBuilder>();
-            
+
             var termIds = ids.Select(id => new Term.Integer(id)).ToHashSet<Term>();
 
             q.Add(Utils.ConstrainedRule(
@@ -310,28 +310,30 @@ namespace Biscuit.Token
 
         public void Allow()
         {
-            List<RuleBuilder> q = new List<RuleBuilder>();
-
-            q.Add(Utils.ConstrainedRule(
+            List<RuleBuilder> q = new List<RuleBuilder>
+            {
+                Utils.ConstrainedRule(
                     "allow",
                     new List<Term>(),
                     new List<PredicateBuilder>(),
                     Arrays.AsList<ExpressionBuilder>(new ExpressionBuilder.Value(new Term.Bool(true)))
-            ));
+            )
+            };
 
             this.policies.Add(new Policy(q, Policy.Kind.Allow));
         }
 
         public void Deny()
         {
-            List<RuleBuilder> q = new List<RuleBuilder>();
-
-            q.Add(Utils.ConstrainedRule(
+            List<RuleBuilder> q = new List<RuleBuilder>
+            {
+                Utils.ConstrainedRule(
                     "deny",
                     new List<Term>(),
                     new List<PredicateBuilder>(),
                     Arrays.AsList<ExpressionBuilder>(new ExpressionBuilder.Value(new Term.Bool(true)))
-            ));
+            )
+            };
 
             this.policies.Add(new Policy(q, Policy.Kind.Deny));
         }
@@ -418,12 +420,14 @@ namespace Biscuit.Token
 
             if (this.symbols.Get("authority").IsEmpty() || this.symbols.Get("ambient").IsEmpty())
             {
-                return new Left(new MissingSymbols());
+                return new MissingSymbols();
             }
 
-            HashSet<ulong> restricted_symbols = new HashSet<ulong>();
-            restricted_symbols.Add(this.symbols.Get("authority").Get());
-            restricted_symbols.Add(this.symbols.Get("ambient").Get());
+            HashSet<ulong> restricted_symbols = new HashSet<ulong>
+            {
+                this.symbols.Get("authority").Get(),
+                this.symbols.Get("ambient").Get()
+            };
 
             Either<Error, Void> runRes = world.Run(limits, restricted_symbols);
             if (runRes.IsLeft)
@@ -437,7 +441,7 @@ namespace Biscuit.Token
 
             for (int j = 0; j < this.checks.Count; j++)
             {
-                Datalog.Check c = this.checks[j].convert(symbols);
+                Datalog.Check c = this.checks[j].Convert(symbols);
                 bool successful = false;
 
                 for (int k = 0; k < c.Queries.Count; k++)
@@ -467,12 +471,12 @@ namespace Biscuit.Token
             {
                 List<Check> checks = this.token_checks[i];
 
-                for (int j = 0; j < checks.Count; j++)
+                for (int j = 0; j < checks.Count ; j++)
                 {
                     bool successful = false;
                     Check c = checks[j];
 
-                    for (int k = 0; k < c.Queries.Count; k++)
+                    for (int k = 0; k < c.Queries.Count && !successful; k++)
                     {
                         bool res = world.TestRule(c.Queries[k]);
 
@@ -484,7 +488,6 @@ namespace Biscuit.Token
                         if (res)
                         {
                             successful = true;
-                            break;
                         }
                     }
 
@@ -499,7 +502,7 @@ namespace Biscuit.Token
             {
                 for (int i = 0; i < this.policies.Count; i++)
                 {
-                    Check c = this.policies[i].convert(symbols);
+                    Check c = this.policies[i].Convert(symbols);
                     for (int k = 0; k < c.Queries.Count; k++)
                     {
                         bool res = world.TestRule(c.Queries[k]);
@@ -531,7 +534,7 @@ namespace Biscuit.Token
             }
         }
 
-        public string print_world()
+        public string PrintWorld()
         {
             List<string> facts = this.world.Facts.Select(fact => this.symbols.PrintFact(fact)).ToList();
             List<string> rules = this.world.Rules.Select(rule => this.symbols.PrintRule(rule)).ToList();
@@ -546,18 +549,18 @@ namespace Biscuit.Token
 
             if (this.token != null)
             {
-                for (int j = 0; j < this.token.Authority.checks.Count; j++)
+                for (int j = 0; j < this.token.Authority.Checks.Count; j++)
                 {
-                    checks.Add("Block[0][" + j + "]: " + this.symbols.PrintCheck(this.token.Authority.checks[j]));
+                    checks.Add("Block[0][" + j + "]: " + this.symbols.PrintCheck(this.token.Authority.Checks[j]));
                 }
 
                 for (int i = 0; i < this.token.Blocks.Count; i++)
                 {
                     Block block = this.token.Blocks[i];
 
-                    for (int j = 0; j < block.checks.Count; j++)
+                    for (int j = 0; j < block.Checks.Count; j++)
                     {
-                        checks.Add("Block[" + i + "][" + j + "]: " + this.symbols.PrintCheck(block.checks[j]));
+                        checks.Add("Block[" + i + "][" + j + "]: " + this.symbols.PrintCheck(block.Checks[j]));
                     }
                 }
             }

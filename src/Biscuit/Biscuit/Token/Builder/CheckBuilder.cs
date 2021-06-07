@@ -19,22 +19,22 @@ namespace Biscuit.Token.Builder
         }
 
 
-        public Datalog.Check convert(SymbolTable symbols)
+        public Check Convert(SymbolTable symbols)
         {
-            List<Datalog.Rule> queries = new List<Datalog.Rule>();
+            List<Rule> queries = new List<Rule>();
 
             foreach (RuleBuilder q in this.queries)
             {
                 queries.Add(q.Convert(symbols));
             }
-            return new Datalog.Check(queries);
+            return new Check(queries);
         }
 
-        public static CheckBuilder convert_from(Datalog.Check r, SymbolTable symbols)
+        public static CheckBuilder ConvertFrom(Check r, SymbolTable symbols)
         {
             List<RuleBuilder> queries = new List<RuleBuilder>();
 
-            foreach (Datalog.Rule q in r.Queries)
+            foreach (Rule q in r.Queries)
             {
                 queries.Add(RuleBuilder.ConvertFrom(q, symbols));
             }
@@ -44,19 +44,20 @@ namespace Biscuit.Token.Builder
 
         public override string ToString()
         {
-            IEnumerable<string> qs = 
-                queries.Select((q)=> {
-                IEnumerable<string> b = q.Body.Select((pred)=>pred.ToString());
-                string res = string.Join(", ", b);
-
-                if (!q.Expressions.IsEmpty())
+            IEnumerable<string> qs =
+                queries.Select((q) =>
                 {
-                    IEnumerable<string> e = q.Expressions.Select((expression)=>expression.ToString());
-                    res += ", " + string.Join(", ", e);
-                }
+                    IEnumerable<string> b = q.Body.Select((pred) => pred.ToString());
+                    string res = string.Join(", ", b);
 
-                return res;
-            });
+                    if (!q.Expressions.IsEmpty())
+                    {
+                        IEnumerable<string> e = q.Expressions.Select((expression) => expression.ToString());
+                        res += ", " + string.Join(", ", e);
+                    }
+
+                    return res;
+                });
 
             return "check if " + string.Join(" or ", qs);
         }

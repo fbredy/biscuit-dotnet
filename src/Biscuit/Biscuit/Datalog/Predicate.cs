@@ -7,7 +7,6 @@ namespace Biscuit.Datalog
     [Serializable]
     public sealed class Predicate
     {
-
         public ulong Name
         {
             get;
@@ -61,7 +60,7 @@ namespace Biscuit.Datalog
             if (this == obj) return true;
             if (obj == null || GetType() != obj.GetType()) return false;
             Predicate predicate = (Predicate)obj;
-            return Name == predicate.Name && Ids.SequenceEqual(predicate.Ids); 
+            return Name == predicate.Name && Ids.SequenceEqual(predicate.Ids);
         }
 
         public override int GetHashCode()
@@ -71,7 +70,7 @@ namespace Biscuit.Datalog
 
         public override string ToString()
         {
-            return this.Name + "(" + string.Join(", ", this.Ids.Select((i)=> (i == null) ? "(null)" : i.ToString()).ToList()) + ")";
+            return this.Name + "(" + string.Join(", ", this.Ids.Select((i) => (i == null) ? "(null)" : i.ToString()).ToList()) + ")";
         }
 
         public Format.Schema.PredicateV1 Serialize()

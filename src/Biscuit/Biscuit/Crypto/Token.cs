@@ -25,7 +25,7 @@ namespace Biscuit.Crypto
             this.Keys = keys;
         }
 
-        public Token append(RNGCryptoServiceProvider rng, KeyPair keypair, byte[] message)
+        public Token Append(RNGCryptoServiceProvider rng, KeyPair keypair, byte[] message)
         {
             TokenSignature signature = this.Signature.Sign(rng, keypair, message);
             Token token = new Token(this.Blocks, this.Keys, signature);
@@ -35,7 +35,6 @@ namespace Biscuit.Crypto
             return token;
         }
 
-        // FIXME: rust version returns a Result<(), error::Signature>
         public Either<Error, Void> Verify()
         {
             return this.Signature.Verify(this.Keys, this.Blocks);

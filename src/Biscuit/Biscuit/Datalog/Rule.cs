@@ -39,7 +39,7 @@ namespace Biscuit.Datalog
                 if (h_opt.IsDefined)
                 {
                     Dictionary<ulong, ID> h = h_opt.Get();
-                    Predicate predicate = this.Head.Clone(); 
+                    Predicate predicate = this.Head.Clone();
 
                     for (int i = 0; i < predicate.Ids.Count; i++)
                     {
@@ -50,8 +50,8 @@ namespace Biscuit.Datalog
                             predicate.Ids[i] = value;
                         }
                     }
-                    
-                    newFacts.Add(new Fact(predicate));                                        
+
+                    newFacts.Add(new Fact(predicate));
                 }
             }
 
@@ -62,13 +62,13 @@ namespace Biscuit.Datalog
                 Predicate predicate = this.Head.Clone();
                 bool unbound_variable = false;
 
-                for (int i=0; i < predicate.Ids.Count; i++)
+                for (int i = 0; i < predicate.Ids.Count; i++)
                 {
                     ID id = predicate.Ids[i];
                     if (id is ID.Variable)
                     {
                         bool isInDictionnary = h.TryGetValue(((ID.Variable)id).Value, out ID value);
-                        
+
                         predicate.Ids[i] = value;
                         // variables that appear in the head should appear in the body and constraints as well
                         if (value == null)
@@ -79,15 +79,16 @@ namespace Biscuit.Datalog
                 }
                 // if the generated fact has #authority or #ambient as first element and we're n ot in a privileged rule
                 // do not generate it
+                bool isRestrictedSymbol = false;
                 ID first = predicate.Ids.FirstOrDefault();
                 if (first != null && first is ID.Symbol)
                 {
                     if (restrictedSymbols.Contains(((ID.Symbol)first).Value))
                     {
-                        continue;
+                        isRestrictedSymbol = true;
                     }
                 }
-                if (!unbound_variable)
+                if (!unbound_variable && !isRestrictedSymbol)
                 {
                     newFacts.Add(new Fact(predicate));
                 }
@@ -100,7 +101,7 @@ namespace Biscuit.Datalog
             HashSet<ulong> variables_set = new HashSet<ulong>();
             foreach (Predicate pred in this.Body)
             {
-                variables_set.AddAll(pred.Ids.Where((id)=>id is ID.Variable).Select(id => ((ID.Variable)id).Value));
+                variables_set.AddAll(pred.Ids.Where((id) => id is ID.Variable).Select(id => ((ID.Variable)id).Value));
             }
             MatchedVariables variables = new MatchedVariables(variables_set);
 
@@ -123,7 +124,7 @@ namespace Biscuit.Datalog
 
         public Format.Schema.RuleV1 Serialize()
         {
-            Format.Schema.RuleV1 b = new Format.Schema.RuleV1(){ Head = this.Head.Serialize() };
+            Format.Schema.RuleV1 b = new Format.Schema.RuleV1() { Head = this.Head.Serialize() };
 
             for (int i = 0; i < this.Body.Count; i++)
             {

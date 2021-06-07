@@ -28,7 +28,7 @@ namespace Biscuit.Datalog
 
             var querySerialized = this.Queries.Select(q => q.Serialize());
             check.Queries.AddRange(querySerialized);
-            
+
             return check;
         }
 

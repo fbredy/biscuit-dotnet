@@ -5,68 +5,66 @@ namespace Biscuit.Datalog
     [Serializable]
     public sealed class Fact
     {
-        public Predicate predicate { get; }
+        public Predicate Predicate { get; }
 
-        public bool match_predicate(Predicate predicate)
+        public bool MatchPredicate(Predicate predicate)
         {
-            return this.predicate.Match(predicate);
+            return this.Predicate.Match(predicate);
         }
 
         public Fact(Predicate predicate)
         {
-            this.predicate = predicate;
+            this.Predicate = predicate;
         }
         public override bool Equals(object obj)
         {
             if (this == obj) return true;
             if (obj == null || GetType() != obj.GetType()) return false;
             Fact fact = (Fact)obj;
-            return Object.Equals(predicate,fact.predicate);
+            return Equals(Predicate, fact.Predicate);
         }
 
         public override int GetHashCode()
         {
-            return predicate.GetHashCode();
+            return Predicate.GetHashCode();
         }
 
         public override string ToString()
         {
-            return predicate.ToString();
+            return Predicate.ToString();
         }
 
-        public Format.Schema.FactV1 serialize()
+        public Format.Schema.FactV1 Serialize()
         {
             return new Format.Schema.FactV1
             {
-                Predicate = this.predicate.Serialize()
+                Predicate = this.Predicate.Serialize()
             };
         }
 
-        static public Either<Errors.FormatError, Fact> deserializeV0(Format.Schema.FactV0 fact)
+        static public Either<Errors.FormatError, Fact> DeserializeV0(Format.Schema.FactV0 fact)
         {
             Either<Errors.FormatError, Predicate> res = Predicate.DeserializeV0(fact.Predicate);
             if (res.IsLeft)
             {
-                Errors.FormatError e = res.Left;
-                return new Left(e);
+                return res.Left;
             }
             else
             {
-                return new Right(new Fact(res.Right));
+                return new Fact(res.Right);
             }
         }
 
-        static public Either<Errors.FormatError, Fact> deserializeV1(Format.Schema.FactV1 fact)
+        static public Either<Errors.FormatError, Fact> DeserializeV1(Format.Schema.FactV1 fact)
         {
             Either<Errors.FormatError, Predicate> res = Predicate.DeserializeV1(fact.Predicate);
             if (res.IsLeft)
             {
-                Errors.FormatError e = res.Left;
-                return new Left (e);
+                return res.Left;
             }
             else
             {
-                return new Right(new Fact(res.Right));
+                return new Fact(res.Right);
             }
         }
     }

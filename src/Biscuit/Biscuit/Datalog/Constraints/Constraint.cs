@@ -88,7 +88,7 @@ namespace Biscuit.Datalog.Constraints
                         return new DeserializationError("invalid Int constraint");
                     }
                 case Format.Schema.ConstraintV0.Types.Kind.Bytes:
-                    if (c.Bytes!=null)
+                    if (c.Bytes != null)
                     {
                         Format.Schema.BytesConstraintV0 constraint = c.Bytes;
 

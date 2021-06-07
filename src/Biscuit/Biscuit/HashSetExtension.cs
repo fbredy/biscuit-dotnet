@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Biscuit
 {
@@ -9,7 +7,7 @@ namespace Biscuit
     {
         public static void AddAll<T>(this HashSet<T> source, IEnumerable<T> collectionsToAdd)
         {
-            if(source != null && collectionsToAdd != null)
+            if (source != null && collectionsToAdd != null)
             {
                 foreach (T item in collectionsToAdd)
                 {

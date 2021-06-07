@@ -43,7 +43,7 @@ namespace Biscuit.Token.Builder.Parser
 
             s = s.Substring(2);
 
-            Either<Error, Tuple<string, List<PredicateBuilder>, List<ExpressionBuilder>>> bodyRes = rule_body(s);
+            Either<Error, Tuple<string, List<PredicateBuilder>, List<ExpressionBuilder>>> bodyRes = RuleBody(s);
             if (bodyRes.IsLeft)
             {
                 return bodyRes.Left;
@@ -122,7 +122,7 @@ namespace Biscuit.Token.Builder.Parser
         public static Either<Error, Tuple<string, List<RuleBuilder>>> CheckBody(string s)
         {
             List<RuleBuilder> queries = new List<RuleBuilder>();
-            Either<Error, Tuple<string, List<PredicateBuilder>, List<ExpressionBuilder>>> bodyRes = rule_body(s);
+            Either<Error, Tuple<string, List<PredicateBuilder>, List<ExpressionBuilder>>> bodyRes = RuleBody(s);
             if (bodyRes.IsLeft)
             {
                 return bodyRes.Left;
@@ -132,43 +132,50 @@ namespace Biscuit.Token.Builder.Parser
 
             s = body.Item1;
             queries.Add(new RuleBuilder(new PredicateBuilder("query", new List<Term>()), body.Item2, body.Item3));
-
-            while (true)
+            bool isBreak = false;
+            while (!isBreak)
             {
-                if (s.Length == 0)
+                if (s.Length != 0)
                 {
-                    break;
+                    s = Space(s);
+
+                    if (s.StartsWith("or"))
+                    {
+                        s = s.Substring(2);
+
+                        Either<Error, Tuple<string, List<PredicateBuilder>, List<ExpressionBuilder>>> bodyRes2 = RuleBody(s);
+                        if (bodyRes2.IsLeft)
+                        {
+                            return bodyRes2.Left;
+                        }
+
+                        Tuple<string, List<PredicateBuilder>, List<ExpressionBuilder>> body2 = bodyRes2.Right;
+
+                        s = body2.Item1;
+                        queries.Add(new RuleBuilder(new PredicateBuilder("query", new List<Term>()), body2.Item2, body2.Item3));
+                    }
+                    else
+                    {
+                        isBreak = true;
+                    }
                 }
-
-                s = Space(s);
-
-                if (!s.StartsWith("or"))
+                else
                 {
-                    break;
+                    isBreak = true;
                 }
-                s = s.Substring(2);
-
-                Either<Error, Tuple<string, List<PredicateBuilder>, List<ExpressionBuilder>>> bodyRes2 = rule_body(s);
-                if (bodyRes2.IsLeft)
-                {
-                    return bodyRes2.Left;
-                }
-
-                Tuple<string, List<PredicateBuilder>, List<ExpressionBuilder>> body2 = bodyRes2.Right;
-
-                s = body2.Item1;
-                queries.Add(new RuleBuilder(new PredicateBuilder("query", new List<Term>()), body2.Item2, body2.Item3));
             }
 
             return new Tuple<string, List<RuleBuilder>>(s, queries);
         }
 
-        public static Either<Error, Tuple<string, List<PredicateBuilder>, List<ExpressionBuilder>>> rule_body(string s)
+        public static Either<Error, Tuple<string, List<PredicateBuilder>, List<ExpressionBuilder>>> RuleBody(string s)
         {
             List<PredicateBuilder> predicates = new List<PredicateBuilder>();
             List<ExpressionBuilder> expressions = new List<ExpressionBuilder>();
+            bool isError = false;
+            bool hasNext = true;
 
-            while (true)
+            while (!isError && hasNext)
             {
                 s = Space(s);
 
@@ -190,19 +197,19 @@ namespace Biscuit.Token.Builder.Parser
                     }
                     else
                     {
-                        break;
+                        isError = true;
                     }
                 }
 
                 s = Space(s);
 
-                if (s.Length == 0 || s[0] != ',')
+                if (s.Length != 0 && s[0] == ',')
                 {
-                    break;
+                    s = s.Substring(1);
                 }
                 else
                 {
-                    s = s.Substring(1);
+                    hasNext = false;
                 }
             }
 
@@ -225,29 +232,32 @@ namespace Biscuit.Token.Builder.Parser
             s = s.Substring(1);
 
             List<Term> terms = new List<Term>();
-            while (true)
+            bool isBreak = false;
+            while (!isBreak)
             {
                 s = Space(s);
 
                 Either<Error, Tuple<string, Term>> res = Term(s);
-                if (res.IsLeft)
+                if (!res.IsLeft)
                 {
-                    break;
-                }
+                    Tuple<string, Term> t = res.Right;
+                    s = t.Item1;
+                    terms.Add(t.Item2);
 
-                Tuple<string, Term> t = res.Right;
-                s = t.Item1;
-                terms.Add(t.Item2);
+                    s = Space(s);
 
-                s = Space(s);
-
-                if (s.Length == 0 || s[0] != ',')
-                {
-                    break;
+                    if (s.Length == 0 || s[0] != ',')
+                    {
+                        isBreak = true;
+                    }
+                    else
+                    {
+                        s = s.Substring(1);
+                    }
                 }
                 else
                 {
-                    s = s.Substring(1);
+                    isBreak = true;
                 }
             }
 
@@ -275,30 +285,32 @@ namespace Biscuit.Token.Builder.Parser
             s = s.Substring(1);
 
             List<Term> terms = new List<Term>();
-            while (true)
+            bool isBreak = false;
+            while (!isBreak)
             {
-
                 s = Space(s);
 
                 Either<Error, Tuple<string, Term>> res = FactTerm(s);
-                if (res.IsLeft)
+                if (!res.IsLeft)
                 {
-                    break;
-                }
+                    Tuple<string, Term> t = res.Right;
+                    s = t.Item1;
+                    terms.Add(t.Item2);
 
-                Tuple<string, Term> t = res.Right;
-                s = t.Item1;
-                terms.Add(t.Item2);
+                    s = Space(s);
 
-                s = Space(s);
-
-                if (s.Length == 0 || s[0] != ',')
-                {
-                    break;
+                    if (s.Length != 0 && s[0] == ',')
+                    {
+                        s = s.Substring(1);
+                    }
+                    else
+                    {
+                        isBreak = true;
+                    }
                 }
                 else
                 {
-                    s = s.Substring(1);
+                    isBreak = true;
                 }
             }
 
@@ -314,7 +326,7 @@ namespace Biscuit.Token.Builder.Parser
 
         public static Either<Error, Tuple<string, string>> Name(string s)
         {
-            Tuple<string, string> t = TakeWhile(s, (c)=> char.IsLetter(c) || c == '_');
+            Tuple<string, string> t = TakeWhile(s, (c) => char.IsLetter(c) || c == '_');
             string name = t.Item1;
             string remaining = t.Item2;
 
@@ -449,20 +461,19 @@ namespace Biscuit.Token.Builder.Parser
             }
 
             int index = s.Length;
-            for (int i = 1; i < s.Length; i++)
+            bool found = false;
+            for (int i = 1; i < s.Length && !found; i++)
             {
                 char c = s[i];
 
                 if (c == '\\' && s[i + 1] == '"')
                 {
                     i += 1;
-                    continue;
                 }
-
-                if (c == '"')
+                else if (c == '"')
                 {
                     index = i - 1;
-                    break;
+                    found = true;
                 }
             }
 
@@ -494,14 +505,15 @@ namespace Biscuit.Token.Builder.Parser
             }
 
             int index2 = s.Length;
-            for (int i = index; i < s.Length; i++)
+            bool found = false;
+            for (int i = index; i < s.Length && !found; i++)
             {
                 char c = s[i];
 
                 if (!char.IsDigit(c))
                 {
                     index2 = i;
-                    break;
+                    found = true;
                 }
             }
 
@@ -509,7 +521,7 @@ namespace Biscuit.Token.Builder.Parser
             {
                 return new Error(s, "not an integer");
             }
-            
+
             long j = long.Parse(s.Substring(0, index2));
             string remaining = s.Substring(index2);
 
@@ -519,12 +531,12 @@ namespace Biscuit.Token.Builder.Parser
 
         public static Either<Error, Tuple<string, Term.Date>> Date(string s)
         {
-            Tuple<string, string> t = TakeWhile(s, (c)=>c != ' ' && c != ',' && c != ')');
+            Tuple<string, string> t = TakeWhile(s, (c) => c != ' ' && c != ',' && c != ')');
 
             try
             {
                 DateTimeOffset d = DateTimeOffset.Parse(t.Item1);
-                
+
                 string remaining = t.Item2;
                 return new Tuple<string, Term.Date>(remaining, new Term.Date((ulong)d.ToUnixTimeSeconds()));
             }
@@ -542,7 +554,7 @@ namespace Biscuit.Token.Builder.Parser
                 return new Error(s, "not a variable");
             }
 
-            Tuple<string, string> t = TakeWhile(s.Substring(1), (c)=>char.IsLetterOrDigit(c) || c == '_');
+            Tuple<string, string> t = TakeWhile(s.Substring(1), (c) => char.IsLetterOrDigit(c) || c == '_');
 
             return new Tuple<string, Term.Variable>(t.Item2, (Term.Variable)Utils.Var(t.Item1));
         }
@@ -578,35 +590,39 @@ namespace Biscuit.Token.Builder.Parser
             s = s.Substring(1);
 
             HashSet<Term> terms = new HashSet<Term>();
-            while (true)
+            bool isBreak = false;
+            while (!isBreak)
             {
 
                 s = Space(s);
 
                 Either<Error, Tuple<string, Term>> res = FactTerm(s);
-                if (res.IsLeft)
+                if (res.IsRight)
                 {
-                    break;
-                }
+                    Tuple<string, Term> t = res.Right;
 
-                Tuple<string, Term> t = res.Right;
+                    if (t.Item2 is Term.Variable)
+                    {
+                        return new Error(s, "sets cannot contain variables");
+                    }
 
-                if (t.Item2 is Term.Variable) {
-                    return new Error(s, "sets cannot contain variables");
-                }
+                    s = t.Item1;
+                    terms.Add(t.Item2);
 
-                s = t.Item1;
-                terms.Add(t.Item2);
+                    s = Space(s);
 
-                s = Space(s);
-
-                if (s.Length == 0 || s[0] != ',')
-                {
-                    break;
+                    if (s.Length != 0 && s[0] == ',')
+                    {
+                        s = s.Substring(1);
+                    }
+                    else
+                    {
+                        isBreak = true;
+                    }
                 }
                 else
                 {
-                    s = s.Substring(1);
+                    isBreak = true;
                 }
             }
 

@@ -9,9 +9,9 @@ namespace Biscuit.Crypto
     public sealed class KeyPair
     {
         public Scalar PrivateKey { get; }
-    
+
         public RistrettoElement PublicKey { get; }
-    
+
         public KeyPair(RNGCryptoServiceProvider rng)
         {
             byte[] b = new byte[64];
@@ -37,7 +37,7 @@ namespace Biscuit.Crypto
         {
             return this.PrivateKey.ToByteArray();
         }
-        
+
         public string ToHex()
         {
             return StrUtils.bytesToHex(this.ToBytes());

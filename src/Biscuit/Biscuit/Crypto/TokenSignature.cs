@@ -14,7 +14,7 @@ namespace Biscuit.Crypto
     public class TokenSignature
     {
         private List<RistrettoElement> Parameters { get; }
-        private Scalar z { get; }
+        private Scalar Z { get; }
 
         /// <summary>
         /// Generates a new valid signature for a message and a private key
@@ -37,13 +37,13 @@ namespace Biscuit.Crypto
             Scalar z = r.Multiply(d).Subtract(e.Multiply(keypair.PrivateKey));
 
             this.Parameters = ristrettoElements;
-            this.z = z;
+            this.Z = z;
         }
 
         TokenSignature(List<RistrettoElement> parameters, Scalar z)
         {
             this.Parameters = parameters;
-            this.z = z;
+            this.Z = z;
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Biscuit.Crypto
             Scalar e = HashMessage(keypair.PublicKey, message);
             Scalar z = r.Multiply(d).Subtract(e.Multiply(keypair.PrivateKey));
 
-            TokenSignature sig = new TokenSignature(this.Parameters, this.z.Add(z));
+            TokenSignature sig = new TokenSignature(this.Parameters, this.Z.Add(z));
             sig.Parameters.Add(ristretto);
 
             return sig;
@@ -84,7 +84,7 @@ namespace Biscuit.Crypto
                 return new Either<Error, Void>(new InvalidFormat());
             }
 
-            RistrettoElement zP = Constants.RISTRETTO_GENERATOR.Multiply(this.z);
+            RistrettoElement zP = Constants.RISTRETTO_GENERATOR.Multiply(this.Z);
 
             RistrettoElement eiXi = RistrettoElement.IDENTITY;
             for (int i = 0; i < publicKeys.Count(); i++)
@@ -97,7 +97,7 @@ namespace Biscuit.Crypto
             foreach (RistrettoElement item in Parameters)
             {
                 List<RistrettoElement> ristrettoElements = new List<RistrettoElement> { item };
-                
+
                 Scalar d = HashPoints(ristrettoElements);
 
                 diAi = diAi.Add(item.Multiply(d));
@@ -107,7 +107,7 @@ namespace Biscuit.Crypto
 
             if (res.Equals(RistrettoElement.IDENTITY))
             {
-                return new Right((Void)null);
+                return new Right(null);
             }
             else
             {
@@ -123,7 +123,7 @@ namespace Biscuit.Crypto
         {
             Format.Schema.Signature sig = new Format.Schema.Signature()
             {
-                Z = ByteString.CopyFrom(this.z.ToByteArray())
+                Z = ByteString.CopyFrom(this.Z.ToByteArray())
             };
 
             foreach (RistrettoElement element in this.Parameters)
@@ -167,13 +167,11 @@ namespace Biscuit.Crypto
         {
             try
             {
-                using (var sha = SHA512.Create())
-                {
-                    sha.Initialize();
-                    var compressed = points.SelectMany(point => point.Compress().ToByteArray()).ToArray();
-                    byte[] hashed = sha.ComputeHash(compressed);
-                    return Scalar.FromBytesModOrderWide(hashed);
-                }
+                using var sha = SHA512.Create();
+                sha.Initialize();
+                byte[] compressed = points.SelectMany(point => point.Compress().ToByteArray()).ToArray();
+                byte[] hashed = sha.ComputeHash(compressed);
+                return Scalar.FromBytesModOrderWide(hashed);
             }
             catch (Exception e)
             {
@@ -186,14 +184,12 @@ namespace Biscuit.Crypto
         {
             try
             {
-                using (var sha = SHA512.Create())
-                {
-                    sha.Initialize();
+                using var sha = SHA512.Create();
+                sha.Initialize();
 
-                    var combined = point.Compress().ToByteArray().Concat(data).ToArray();
-                    byte[] hashed = sha.ComputeHash(combined);
-                    return Scalar.FromBytesModOrderWide(hashed);
-                }
+                var combined = point.Compress().ToByteArray().Concat(data).ToArray();
+                byte[] hashed = sha.ComputeHash(combined);
+                return Scalar.FromBytesModOrderWide(hashed);
             }
             catch (Exception e)
             {

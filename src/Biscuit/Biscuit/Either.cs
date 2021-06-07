@@ -18,13 +18,13 @@ namespace Biscuit
         public Either(T left)
         {
             this.left = left;
-            this.right = default(U);
+            this.right = default;
             this.isLeft = true;
         }
 
         public Either(U right)
         {
-            this.left = default(T);
+            this.left = default;
             this.right = right;
             this.isLeft = false;
         }
@@ -40,9 +40,9 @@ namespace Biscuit
         public override bool Equals(object obj)
         {
             bool res = false;
-            if (obj != null && (obj is Either<T, U>))
+            if (obj != null && (obj is Either<T, U> either))
             {
-                Either<T, U> x = (Either<T, U>)obj;
+                Either<T, U> x = either;
                 if (x.IsLeft && this.IsLeft)
                 {
                     res = Equals(x.Left, this.Left);
@@ -57,12 +57,12 @@ namespace Biscuit
 
         public U Get()
         {
-            return  Right;
+            return Right;
         }
 
         public static implicit operator Either<T, U>(T value)
         {
-            return new Either<T,U>(value);
+            return new Either<T, U>(value);
         }
 
         public static implicit operator Either<T, U>(U value)
@@ -92,9 +92,15 @@ namespace Biscuit
                 return left;
             }
 
-            return selector(right);            
+            return selector(right);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(left, right, isLeft, Left, Right, IsLeft, IsRight);
         }
     }
+
 
     public class Right
     {
@@ -116,18 +122,23 @@ namespace Biscuit
                 {
                     Type valueType = t.GetGenericArguments()[1];
                     var rightValue = t.GetProperty("Right").GetValue(obj);
-                    
+
                     if (this.Value == null && rightValue == null)
                     {
                         result = true;
                     }
-                    else if(this.Value.GetType() == valueType)
+                    else if (this.Value.GetType() == valueType)
                     {
                         result = Value.Equals(rightValue);
                     }
                 }
             }
             return result;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Value.GetHashCode();
         }
     }
 
@@ -149,20 +160,24 @@ namespace Biscuit
                 bool isEither = t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Either<,>);
                 if (isEither)
                 {
-                    Type valueType = t.GetGenericArguments()[0];
                     var leftValue = t.GetProperty("Left").GetValue(obj);
 
                     if (this.Value == null && leftValue == null)
                     {
                         result = true;
                     }
-                    else 
+                    else
                     {
                         result = Value.Equals(leftValue);
                     }
                 }
             }
             return result;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Value.GetHashCode();
         }
     }
 }

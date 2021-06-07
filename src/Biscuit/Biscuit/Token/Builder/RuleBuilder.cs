@@ -78,7 +78,7 @@ namespace Biscuit.Token.Builder
 
         public override string ToString()
         {
-            var b = Body.Select((pred)=>pred.ToString());
+            var b = Body.Select((pred) => pred.ToString());
             string res = Head.ToString() + " <- " + string.Join(", ", b);
 
             if (!Expressions.IsEmpty())

@@ -12,7 +12,7 @@ namespace Biscuit.Test.Token
     [TestClass]
     public class SamplesV0Test
     {
-        static byte[] rootData =
+        static readonly byte[] rootData =
             Ristretto.StrUtils.hexToBytes("529e780f28d9181c968b0eab9977ed8494a27a4544c3adc1910f41bb3dc36958");
 
         [TestMethod]
@@ -168,7 +168,7 @@ namespace Biscuit.Test.Token
             v1.AddResource("file1");
             v1.AddOperation("read");
             v1.SetTime();
-            Console.WriteLine(v1.print_world());
+            Console.WriteLine(v1.PrintWorld());
 
             Error e = v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).Left;
             Assert.AreEqual(
@@ -342,21 +342,23 @@ namespace Biscuit.Test.Token
             Console.WriteLine(token.Print());
 
             var v1 = token.Verify(root).Right;
-            var queries = new List<RuleBuilder>();
-            queries.Add(Utils.Rule(
+            var queries = new List<RuleBuilder>
+            {
+                Utils.Rule(
                     "test_must_be_present_authority",
                     Arrays.AsList(Utils.Var("0")),
                     Arrays.AsList(
                             Utils.Pred("must_be_present", Arrays.AsList(Utils.Symbol("authority"), Utils.Var("0")))
                     )
-                    ));
-            queries.Add(Utils.Rule(
+                    ),
+                Utils.Rule(
                     "test_must_be_present",
                     Arrays.AsList(Utils.Var("0")),
                     Arrays.AsList(
                             Utils.Pred("mst_be_present", Arrays.AsList(Utils.Var("0")))
                     )
-            ));
+            )
+            };
             v1.AddCheck(new CheckBuilder(queries));
             v1.Allow();
 

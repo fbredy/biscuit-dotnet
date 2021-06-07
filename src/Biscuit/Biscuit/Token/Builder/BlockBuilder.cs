@@ -69,7 +69,7 @@ namespace Biscuit.Token.Builder
 
         public void AddCheck(CheckBuilder check)
         {
-            this.checks.Add(check.convert(this.symbols));
+            this.checks.Add(check.Convert(this.symbols));
         }
 
         public Either<Parser.Error, Void> AddCheck(string s)
@@ -93,7 +93,7 @@ namespace Biscuit.Token.Builder
             this.context = context;
         }
 
-        public Token.Block Build()
+        public Block Build()
         {
             SymbolTable symbols = new SymbolTable();
 
@@ -102,13 +102,14 @@ namespace Biscuit.Token.Builder
                 symbols.Add(this.symbols.Symbols[i]);
             }
 
-            return new Token.Block(this.index, symbols, this.context, this.facts, this.rules, this.checks);
+            return new Block(this.index, symbols, this.context, this.facts, this.rules, this.checks);
         }
 
         public void CheckRight(string right)
         {
-            List<RuleBuilder> queries = new List<RuleBuilder>();
-            queries.Add(Utils.Rule(
+            List<RuleBuilder> queries = new List<RuleBuilder>
+            {
+                Utils.Rule(
                     "check_right",
                     Arrays.AsList(Utils.Symbol(right)),
                     Arrays.AsList(
@@ -116,48 +117,52 @@ namespace Biscuit.Token.Builder
                             Utils.Pred("operation", Arrays.AsList(Utils.Symbol("ambient"), Utils.Symbol(right))),
                             Utils.Pred("right", Arrays.AsList(Utils.Symbol("authority"), Utils.Var("resource"), Utils.Symbol(right)))
                     )
-            ));
+            )
+            };
             this.AddCheck(new CheckBuilder(queries));
         }
 
         public void ResourcePrefix(string prefix)
         {
-            List<RuleBuilder> queries = new List<RuleBuilder>();
-
-            queries.Add(Utils.ConstrainedRule(
+            List<RuleBuilder> queries = new List<RuleBuilder>
+            {
+                Utils.ConstrainedRule(
                     "prefix",
                     Arrays.AsList(Utils.Var("resource")),
                     Arrays.AsList(Utils.Pred("resource", Arrays.AsList(Utils.Symbol("ambient"), Utils.Var("resource")))),
                     Arrays.AsList<ExpressionBuilder>(new ExpressionBuilder.Binary(ExpressionBuilder.Op.Prefix, new ExpressionBuilder.Value(Utils.Var("resource")), new ExpressionBuilder.Value(Utils.Strings(prefix))))
-            ));
+            )
+            };
             this.AddCheck(new CheckBuilder(queries));
         }
 
         public void ResourceSuffix(string suffix)
         {
-            List<RuleBuilder> queries = new List<RuleBuilder>();
-
-            queries.Add(Utils.ConstrainedRule(
+            List<RuleBuilder> queries = new List<RuleBuilder>
+            {
+                Utils.ConstrainedRule(
                     "suffix",
                     Arrays.AsList(Utils.Var("resource")),
                     Arrays.AsList(Utils.Pred("resource", Arrays.AsList(Utils.Symbol("ambient"), Utils.Var("resource")))),
                     Arrays.AsList<ExpressionBuilder>(new ExpressionBuilder.Binary(ExpressionBuilder.Op.Suffix, new ExpressionBuilder.Value(Utils.Var("resource")),
                             new ExpressionBuilder.Value(Utils.Strings(suffix))))
-            ));
+            )
+            };
             this.AddCheck(new CheckBuilder(queries));
         }
 
         public void ExpirationDate(DateTime d)
         {
-            List<RuleBuilder> queries = new List<RuleBuilder>();
-
-            queries.Add(Utils.ConstrainedRule(
+            List<RuleBuilder> queries = new List<RuleBuilder>
+            {
+                Utils.ConstrainedRule(
                     "expiration",
                     Arrays.AsList(Utils.Var("date")),
                     Arrays.AsList(Utils.Pred("time", Arrays.AsList(Utils.Symbol("ambient"), Utils.Var("date")))),
                     Arrays.AsList<ExpressionBuilder>(new ExpressionBuilder.Binary(ExpressionBuilder.Op.LessOrEqual, new ExpressionBuilder.Value(Utils.Var("date")),
                             new ExpressionBuilder.Value(Utils.Date(d))))
-            ));
+            )
+            };
             this.AddCheck(new CheckBuilder(queries));
         }
     }

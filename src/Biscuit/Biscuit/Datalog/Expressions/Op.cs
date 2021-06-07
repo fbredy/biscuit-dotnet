@@ -581,55 +581,55 @@ namespace Biscuit.Datalog.Expressions
                 switch (this.op)
                 {
                     case BinaryOp.LessThan:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.LessThan;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.LessThan;
                         break;
                     case BinaryOp.GreaterThan:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.GreaterThan;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.GreaterThan;
                         break;
                     case BinaryOp.LessOrEqual:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.LessOrEqual;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.LessOrEqual;
                         break;
                     case BinaryOp.GreaterOrEqual:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.GreaterOrEqual;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.GreaterOrEqual;
                         break;
                     case BinaryOp.Equal:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Equal;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Equal;
                         break;
                     case BinaryOp.Contains:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Contains;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Contains;
                         break;
                     case BinaryOp.Prefix:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Prefix;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Prefix;
                         break;
                     case BinaryOp.Suffix:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Suffix;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Suffix;
                         break;
                     case BinaryOp.Regex:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Regex;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Regex;
                         break;
                     case BinaryOp.Add:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Add;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Add;
                         break;
                     case BinaryOp.Sub:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Sub;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Sub;
                         break;
                     case BinaryOp.Mul:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Mul;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Mul;
                         break;
                     case BinaryOp.Div:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Div;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Div;
                         break;
                     case BinaryOp.And:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.And;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.And;
                         break;
                     case BinaryOp.Or:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Or;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Or;
                         break;
                     case BinaryOp.Intersection:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Intersection;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Intersection;
                         break;
                     case BinaryOp.Union:
-                        b1.Kind=Format.Schema.OpBinary.Types.Kind.Union;
+                        b1.Kind = Format.Schema.OpBinary.Types.Kind.Union;
                         break;
                 }
 

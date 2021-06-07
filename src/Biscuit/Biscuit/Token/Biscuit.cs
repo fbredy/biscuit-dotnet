@@ -39,9 +39,9 @@ namespace Biscuit.Token
         /// <param name="root">root private key</param>
         /// <param name="symbols">symbol table</param>
         /// <returns></returns>
-        public static Builder.BiscuitBuilder Builder(RNGCryptoServiceProvider rng, KeyPair root, SymbolTable symbols)
+        public static BiscuitBuilder Builder(RNGCryptoServiceProvider rng, KeyPair root, SymbolTable symbols)
         {
-            return new Builder.BiscuitBuilder(rng, root, symbols);
+            return new BiscuitBuilder(rng, root, symbols);
         }
 
         /// <summary>
@@ -54,17 +54,17 @@ namespace Biscuit.Token
         /// <returns></returns>
         static public Either<Error, Biscuit> Make(RNGCryptoServiceProvider rng, KeyPair root, SymbolTable symbols, Block authority)
         {
-            if (!Collections.Disjoint(symbols.Symbols, authority.symbols.Symbols))
+            if (!Collections.Disjoint(symbols.Symbols, authority.Symbols.Symbols))
             {
                 return new Left(new SymbolTableOverlap());
             }
 
-            if (authority.index != 0)
+            if (authority.Index != 0)
             {
-                return new Left(new InvalidAuthorityIndex(authority.index));
+                return new Left(new InvalidAuthorityIndex(authority.Index));
             }
 
-            symbols.Symbols.AddRange(authority.symbols.Symbols);
+            symbols.Symbols.AddRange(authority.Symbols.Symbols);
             List<Block> blocks = new List<Block>();
 
             Either<FormatError, SerializedBiscuit> container = SerializedBiscuit.Make(rng, root, authority);
@@ -138,7 +138,7 @@ namespace Biscuit.Token
             }
 
             SerializedBiscuit ser = res.Right;
-            Either<FormatError, Block> authRes = Block.from_bytes(ser.authority);
+            Either<FormatError, Block> authRes = Block.FromBytes(ser.authority);
             if (authRes.IsLeft)
             {
                 Error e = authRes.Left;
@@ -149,7 +149,7 @@ namespace Biscuit.Token
             List<Block> blocks = new List<Block>();
             foreach (byte[] bdata in ser.blocks)
             {
-                Either<FormatError, Block> blockRes = Block.from_bytes(bdata);
+                Either<FormatError, Block> blockRes = Block.FromBytes(bdata);
                 if (blockRes.IsLeft)
                 {
                     return blockRes.Left;
@@ -157,14 +157,14 @@ namespace Biscuit.Token
                 blocks.Add(blockRes.Right);
             }
 
-            foreach (string s in authority.symbols.Symbols)
+            foreach (string s in authority.Symbols.Symbols)
             {
                 symbols.Add(s);
             }
 
             foreach (Block b in blocks)
             {
-                foreach (string s in b.symbols.Symbols)
+                foreach (string s in b.Symbols.Symbols)
                 {
                     symbols.Add(s);
                 }
@@ -215,7 +215,7 @@ namespace Biscuit.Token
             {
                 return new Left(serialized.Left);
             }
-            
+
             return new Right(Convert.ToBase64String(serialized.Right));
         }
 
@@ -232,7 +232,7 @@ namespace Biscuit.Token
             }
 
             SealedBiscuit ser = res.Right;
-            Either<FormatError, Block> authRes = Block.from_bytes(ser.Authority);
+            Either<FormatError, Block> authRes = Block.FromBytes(ser.Authority);
             if (authRes.IsLeft)
             {
                 Error e = authRes.Left;
@@ -243,7 +243,7 @@ namespace Biscuit.Token
             List<Block> blocks = new List<Block>();
             foreach (byte[] bdata in ser.Blocks)
             {
-                Either<FormatError, Block> blockRes = Block.from_bytes(bdata);
+                Either<FormatError, Block> blockRes = Block.FromBytes(bdata);
                 if (blockRes.IsLeft)
                 {
                     return blockRes.Left;
@@ -251,14 +251,14 @@ namespace Biscuit.Token
                 blocks.Add(blockRes.Right);
             }
 
-            foreach (string s in authority.symbols.Symbols)
+            foreach (string s in authority.Symbols.Symbols)
             {
                 symbols.Add(s);
             }
 
             foreach (Block b in blocks)
             {
-                foreach (string s in b.symbols.Symbols)
+                foreach (string s in b.Symbols.Symbols)
                 {
                     symbols.Add(s);
                 }
@@ -309,12 +309,12 @@ namespace Biscuit.Token
             ulong authority_index = Symbols.Get("authority").Get();
             ulong ambient_index = Symbols.Get("ambient").Get();
 
-            foreach (Fact fact in this.Authority.facts)
+            foreach (Fact fact in this.Authority.Facts)
             {
                 world.AddFact(fact);
             }
 
-            foreach (Rule rule in this.Authority.rules)
+            foreach (Rule rule in this.Authority.Rules)
             {
                 world.AddPrivilegedRule(rule);
             }
@@ -322,15 +322,15 @@ namespace Biscuit.Token
             for (int i = 0; i < this.Blocks.Count; i++)
             {
                 Block b = this.Blocks[i];
-                if (b.index != i + 1)
+                if (b.Index != i + 1)
                 {
-                    return new Left(new InvalidBlockIndex(1 + this.Blocks.Count, this.Blocks[i].index));
+                    return new Left(new InvalidBlockIndex(1 + this.Blocks.Count, this.Blocks[i].Index));
                 }
 
-                foreach (Fact fact in b.facts)
+                foreach (Fact fact in b.Facts)
                 {
-                    if (fact.predicate.Ids[0].Equals(new ID.Symbol(authority_index)) ||
-                            fact.predicate.Ids[0].Equals(new ID.Symbol(ambient_index)))
+                    if (fact.Predicate.Ids[0].Equals(new ID.Symbol(authority_index)) ||
+                            fact.Predicate.Ids[0].Equals(new ID.Symbol(ambient_index)))
                     {
                         return new Left(new FailedLogic(new LogicError.InvalidBlockFact(i, Symbols.PrintFact(fact))));
                     }
@@ -338,7 +338,7 @@ namespace Biscuit.Token
                     world.AddFact(fact);
                 }
 
-                foreach (Rule rule in b.rules)
+                foreach (Rule rule in b.Rules)
                 {
                     world.AddRule(rule);
                 }
@@ -383,26 +383,25 @@ namespace Biscuit.Token
                 symbols.Get("ambient").Get()
             };
             world.Run(restricted_symbols);
-            
+
             List<FailedCheck> errors = new List<FailedCheck>();
-            for (int j = 0; j < this.Authority.checks.Count; j++)
+            for (int j = 0; j < this.Authority.Checks.Count; j++)
             {
                 bool successful = false;
-                Check c = this.Authority.checks[j];
+                Check c = this.Authority.Checks[j];
 
-                for (int k = 0; k < c.Queries.Count; k++)
+                for (int k = 0; k < c.Queries.Count && !successful; k++)
                 {
                     HashSet<Fact> res = world.QueryRule(c.Queries[k]);
                     if (res.Any())
                     {
                         successful = true;
-                        break;
                     }
                 }
 
                 if (!successful)
                 {
-                    errors.Add(new FailedCheck.FailedBlock(0, j, symbols.PrintCheck(this.Authority.checks[j])));
+                    errors.Add(new FailedCheck.FailedBlock(0, j, symbols.PrintCheck(this.Authority.Checks[j])));
                 }
             }
 
@@ -411,13 +410,12 @@ namespace Biscuit.Token
                 bool successful = false;
                 Check c = verifier_checks[j];
 
-                for (int k = 0; k < c.Queries.Count; k++)
+                for (int k = 0; k < c.Queries.Count && !successful; k++)
                 {
                     HashSet<Fact> res = world.QueryRule(c.Queries[k]);
                     if (res.Any())
                     {
                         successful = true;
-                        break;
                     }
                 }
 
@@ -431,24 +429,23 @@ namespace Biscuit.Token
             {
                 Block b = this.Blocks[i];
 
-                for (int j = 0; j < b.checks.Count; j++)
+                for (int j = 0; j < b.Checks.Count; j++)
                 {
                     bool successful = false;
-                    Check c = b.checks[j];
+                    Check c = b.Checks[j];
 
-                    for (int k = 0; k < c.Queries.Count; k++)
+                    for (int k = 0; k < c.Queries.Count && !successful; k++)
                     {
                         HashSet<Fact> res = world.QueryRule(c.Queries[k]);
                         if (res.Any())
                         {
                             successful = true;
-                            break;
                         }
                     }
 
                     if (!successful)
                     {
-                        errors.Add(new FailedCheck.FailedBlock(b.index, j, symbols.PrintCheck(b.checks[j])));
+                        errors.Add(new FailedCheck.FailedBlock(b.Index, j, symbols.PrintCheck(b.Checks[j])));
                     }
                 }
             }
@@ -474,9 +471,9 @@ namespace Biscuit.Token
         /// Create a block builder
         /// </summary>
         /// <returns></returns>
-        public Builder.BlockBuilder CreateBlock()
+        public BlockBuilder CreateBlock()
         {
-            return new Builder.BlockBuilder(1 + this.Blocks.Count, new SymbolTable(this.Symbols));
+            return new BlockBuilder(1 + this.Blocks.Count, new SymbolTable(this.Symbols));
         }
 
         /// <summary>
@@ -497,14 +494,14 @@ namespace Biscuit.Token
 
             Biscuit copiedBiscuit = e.Right;
 
-            if (!Collections.Disjoint(copiedBiscuit.Symbols.Symbols, block.symbols.Symbols))
+            if (!Collections.Disjoint(copiedBiscuit.Symbols.Symbols, block.Symbols.Symbols))
             {
                 return new SymbolTableOverlap();
             }
 
-            if (block.index != 1 + this.Blocks.Count)
+            if (block.Index != 1 + this.Blocks.Count)
             {
-                return new InvalidBlockIndex(1 + copiedBiscuit.Blocks.Count, block.index);
+                return new InvalidBlockIndex(1 + copiedBiscuit.Blocks.Count, block.Index);
             }
 
             Either<FormatError, SerializedBiscuit> containerRes = copiedBiscuit.container.Get().Append(rng, keypair, block);
@@ -516,7 +513,7 @@ namespace Biscuit.Token
             SerializedBiscuit container = containerRes.Right;
 
             SymbolTable symbols = new SymbolTable(copiedBiscuit.Symbols);
-            foreach (string s in block.symbols.Symbols)
+            foreach (string s in block.Symbols.Symbols)
             {
                 symbols.Add(s);
             }
@@ -537,33 +534,33 @@ namespace Biscuit.Token
         {
             List<List<Check>> checks = new List<List<Check>>
             {
-                new List<Check>(this.Authority.checks)
+                new List<Check>(this.Authority.Checks)
             };
-            checks.AddRange(this.Blocks.Select(b => new List<Check>(b.checks)));
+            checks.AddRange(this.Blocks.Select(b => new List<Check>(b.Checks)));
             return checks;
         }
 
         public List<Option<string>> Context()
         {
             List<Option<string>> res = new List<Option<string>>();
-            if (this.Authority.context.Length == 0)
+            if (this.Authority.Context.Length == 0)
             {
                 res.Add(Option<string>.None());
             }
             else
             {
-                res.Add(Option.Some(this.Authority.context));
+                res.Add(Option.Some(this.Authority.Context));
             }
 
             foreach (Block b in this.Blocks)
             {
-                if (b.context.Length == 0)
+                if (b.Context.Length == 0)
                 {
                     res.Add(Option<string>.None());
                 }
                 else
                 {
-                    res.Add(Option.Some(b.context));
+                    res.Add(Option.Some(b.Context));
                 }
             }
 
@@ -580,12 +577,12 @@ namespace Biscuit.Token
             s.Append("Biscuit {\n\tsymbols: ");
             s.Append(this.Symbols.Symbols);
             s.Append("\n\tauthority: ");
-            s.Append(this.Authority.print(this.Symbols));
+            s.Append(this.Authority.Print(this.Symbols));
             s.Append("\n\tblocks: [\n");
             foreach (Block b in this.Blocks)
             {
                 s.Append("\t\t");
-                s.Append(b.print(this.Symbols));
+                s.Append(b.Print(this.Symbols));
                 s.Append("\n");
             }
             s.Append("\t]\n}");
@@ -614,7 +611,7 @@ namespace Biscuit.Token
         public Either<Error, Biscuit> Copy()
         {
             var serialized = this.Serialize();
-            if(serialized.IsLeft)
+            if (serialized.IsLeft)
             {
                 return serialized.Left;
             }

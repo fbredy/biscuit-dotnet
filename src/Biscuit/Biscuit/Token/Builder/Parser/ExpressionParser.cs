@@ -21,37 +21,42 @@ namespace Biscuit.Token.Builder.Parser
 
             str = t1.Item1;
             ExpressionBuilder builder = t1.Item2;
-
-            while (true)
+            bool errorOrEmpty = false;
+            while (!errorOrEmpty)
             {
                 str = Parser.Space(str);
-                if (str.IsEmpty())
+                if (!str.IsEmpty())
                 {
-                    break;
-                }
+                    Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp(str);
+                    if (!res2.IsLeft)
+                    {
+                        Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
+                        str = t2.Item1;
+                        ExpressionBuilder.Op op = t2.Item2;
 
-                Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp(str);
-                if (res2.IsLeft)
+                        str = Parser.Space(str);
+
+                        Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr1(str);
+                        if (res3.IsLeft)
+                        {
+                            return res3.Left;
+                        }
+                        Tuple<string, ExpressionBuilder> t3 = res3.Right;
+
+                        str = t3.Item1;
+                        ExpressionBuilder e2 = t3.Item2;
+
+                        builder = new ExpressionBuilder.Binary(op, builder, e2);
+                    }
+                    else
+                    {
+                        errorOrEmpty = true;
+                    }
+                }
+                else
                 {
-                    break;
+                    errorOrEmpty = true;
                 }
-                Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
-                str = t2.Item1;
-                ExpressionBuilder.Op op = t2.Item2;
-
-                str = Parser.Space(str);
-
-                Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr1(str);
-                if (res3.IsLeft)
-                {
-                    return res3.Left;
-                }
-                Tuple<string, ExpressionBuilder> t3 = res3.Right;
-
-                str = t3.Item1;
-                ExpressionBuilder e2 = t3.Item2;
-
-                builder = new ExpressionBuilder.Binary(op, builder, e2);
             }
 
             return new Tuple<string, ExpressionBuilder>(str, builder);
@@ -68,37 +73,42 @@ namespace Biscuit.Token.Builder.Parser
 
             s = t1.Item1;
             ExpressionBuilder e = t1.Item2;
-
-            while (true)
+            bool errorOrEmpty = false;
+            while (!errorOrEmpty)
             {
                 s = Parser.Space(s);
-                if (s.Length == 0)
+                if (s.Length != 0)
                 {
-                    break;
-                }
+                    Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp1(s);
+                    if (res2.IsRight)
+                    {
+                        Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
+                        s = t2.Item1;
+                        ExpressionBuilder.Op op = t2.Item2;
 
-                Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp1(s);
-                if (res2.IsLeft)
+                        s = Parser.Space(s);
+
+                        Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr2(s);
+                        if (res3.IsLeft)
+                        {
+                            return res3.Left;
+                        }
+                        Tuple<string, ExpressionBuilder> t3 = res3.Right;
+
+                        s = t3.Item1;
+                        ExpressionBuilder e2 = t3.Item2;
+
+                        e = new ExpressionBuilder.Binary(op, e, e2);
+                    }
+                    else
+                    {
+                        errorOrEmpty = true;
+                    }
+                }
+                else
                 {
-                    break;
+                    errorOrEmpty = true;
                 }
-                Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
-                s = t2.Item1;
-                ExpressionBuilder.Op op = t2.Item2;
-
-                s = Parser.Space(s);
-
-                Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr2(s);
-                if (res3.IsLeft)
-                {
-                    return res3.Left;
-                }
-                Tuple<string, ExpressionBuilder> t3 = res3.Right;
-
-                s = t3.Item1;
-                ExpressionBuilder e2 = t3.Item2;
-
-                e = new ExpressionBuilder.Binary(op, e, e2);
             }
 
             return new Tuple<string, ExpressionBuilder>(s, e);
@@ -115,37 +125,42 @@ namespace Biscuit.Token.Builder.Parser
 
             s = t1.Item1;
             ExpressionBuilder e = t1.Item2;
-
-            while (true)
+            bool errorOrEmpty = false;
+            while (!errorOrEmpty)
             {
                 s = Parser.Space(s);
-                if (s.Length == 0)
+                if (s.Length != 0)
                 {
-                    break;
-                }
+                    Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp2(s);
+                    if (res2.IsRight)
+                    {
+                        Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
+                        s = t2.Item1;
+                        ExpressionBuilder.Op op = t2.Item2;
 
-                Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp2(s);
-                if (res2.IsLeft)
+                        s = Parser.Space(s);
+
+                        Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr3(s);
+                        if (res3.IsLeft)
+                        {
+                            return res3.Left;
+                        }
+                        Tuple<string, ExpressionBuilder> t3 = res3.Right;
+
+                        s = t3.Item1;
+                        ExpressionBuilder e2 = t3.Item2;
+
+                        e = new ExpressionBuilder.Binary(op, e, e2);
+                    }
+                    else
+                    {
+                        errorOrEmpty = true;
+                    }
+                }
+                else
                 {
-                    break;
+                    errorOrEmpty = true;
                 }
-                Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
-                s = t2.Item1;
-                ExpressionBuilder.Op op = t2.Item2;
-
-                s = Parser.Space(s);
-
-                Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr3(s);
-                if (res3.IsLeft)
-                {
-                    return res3.Left;
-                }
-                Tuple<string, ExpressionBuilder> t3 = res3.Right;
-
-                s = t3.Item1;
-                ExpressionBuilder e2 = t3.Item2;
-
-                e = new ExpressionBuilder.Binary(op, e, e2);
             }
 
             return new Tuple<string, ExpressionBuilder>(s, e);
@@ -162,37 +177,42 @@ namespace Biscuit.Token.Builder.Parser
 
             s = t1.Item1;
             ExpressionBuilder e = t1.Item2;
-
-            while (true)
+            bool errorOrEmpty = false;
+            while (!errorOrEmpty)
             {
                 s = Parser.Space(s);
-                if (s.Length == 0)
+                if (s.Length != 0)
                 {
-                    break;
-                }
+                    Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp3(s);
+                    if (res2.IsRight)
+                    {
+                        Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
+                        s = t2.Item1;
+                        ExpressionBuilder.Op op = t2.Item2;
 
-                Either<Error, Tuple<string, ExpressionBuilder.Op>> res2 = BinaryOp3(s);
-                if (res2.IsLeft)
+                        s = Parser.Space(s);
+
+                        Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr4(s);
+                        if (res3.IsLeft)
+                        {
+                            return res3.Left;
+                        }
+                        Tuple<string, ExpressionBuilder> t3 = res3.Right;
+
+                        s = t3.Item1;
+                        ExpressionBuilder e2 = t3.Item2;
+
+                        e = new ExpressionBuilder.Binary(op, e, e2);
+                    }
+                    else
+                    {
+                        errorOrEmpty = true;
+                    }
+                }
+                else
                 {
-                    break;
+                    errorOrEmpty = true;
                 }
-                Tuple<string, ExpressionBuilder.Op> t2 = res2.Right;
-                s = t2.Item1;
-                ExpressionBuilder.Op op = t2.Item2;
-
-                s = Parser.Space(s);
-
-                Either<Error, Tuple<string, ExpressionBuilder>> res3 = Expr4(s);
-                if (res3.IsLeft)
-                {
-                    return res3.Left;
-                }
-                Tuple<string, ExpressionBuilder> t3 = res3.Right;
-
-                s = t3.Item1;
-                ExpressionBuilder e2 = t3.Item2;
-
-                e = new ExpressionBuilder.Binary(op, e, e2);
             }
 
             return new Tuple<string, ExpressionBuilder>(s, e);
@@ -269,15 +289,15 @@ namespace Biscuit.Token.Builder.Parser
             return new Tuple<string, ExpressionBuilder>(t2.Item1, e);
         }
 
-        public static Either<Error, Tuple<string, ExpressionBuilder>> Unary(string s)
+        public static Either<Error, Tuple<string, ExpressionBuilder>> Unary(string str)
         {
-            s = Parser.Space(s);
+            str = Parser.Space(str);
 
-            if (s.StartsWith("!"))
+            if (str.StartsWith("!"))
             {
-                s = Parser.Space(s.Substring(1));
+                str = Parser.Space(str.Substring(1));
 
-                Either<Error, Tuple<string, ExpressionBuilder>> resultExpression = Expr(s);
+                Either<Error, Tuple<string, ExpressionBuilder>> resultExpression = Expr(str);
                 if (resultExpression.IsLeft)
                 {
                     return resultExpression.Left;
@@ -288,9 +308,9 @@ namespace Biscuit.Token.Builder.Parser
             }
 
 
-            if (s.StartsWith("("))
+            if (str.StartsWith("("))
             {
-                Either<Error, Tuple<string, ExpressionBuilder>> unaryParens = UnaryParens(s);
+                Either<Error, Tuple<string, ExpressionBuilder>> unaryParens = UnaryParens(str);
                 if (unaryParens.IsLeft)
                 {
                     return unaryParens.Left;
@@ -298,39 +318,39 @@ namespace Biscuit.Token.Builder.Parser
 
                 Tuple<string, ExpressionBuilder> t = unaryParens.Right;
 
-                s = Parser.Space(s.Substring(1));
+                str = Parser.Space(str.Substring(1));
                 return new Tuple<string, ExpressionBuilder>(t.Item1, t.Item2);
             }
 
             ExpressionBuilder e;
-            Either<Error, Tuple<string, Term>> res = Parser.Term(s);
+            Either<Error, Tuple<string, Term>> res = Parser.Term(str);
             if (res.IsRight)
             {
                 Tuple<string, Term> t = res.Right;
-                s = Parser.Space(t.Item1);
+                str = Parser.Space(t.Item1);
                 e = new ExpressionBuilder.Value(t.Item2);
             }
             else
             {
-                Either<Error, Tuple<string, ExpressionBuilder>> res2 = UnaryParens(s);
+                Either<Error, Tuple<string, ExpressionBuilder>> res2 = UnaryParens(str);
                 if (res2.IsLeft)
                 {
                     return res2.Left;
                 }
 
                 Tuple<string, ExpressionBuilder> t = res2.Right;
-                s = Parser.Space(t.Item1);
+                str = Parser.Space(t.Item1);
                 e = t.Item2;
             }
 
-            if (s.StartsWith(".Length"))
+            if (str.StartsWith(".Length"))
             {
-                s = Parser.Space(s.Substring(9));
-                return new Tuple<string, ExpressionBuilder>(s, new ExpressionBuilder.Unary(ExpressionBuilder.Op.Length, e));
+                str = Parser.Space(str.Substring(9));
+                return new Tuple<string, ExpressionBuilder>(str, new ExpressionBuilder.Unary(ExpressionBuilder.Op.Length, e));
             }
             else
             {
-                return new Error(s, "unexpected token");
+                return new Error(str, "unexpected token");
             }
         }
 

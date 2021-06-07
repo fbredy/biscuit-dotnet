@@ -44,7 +44,7 @@ namespace Biscuit.Token.Builder
 
         public override string ToString()
         {
-            var idsInString = Ids.Select((id)=>id.ToString());
+            var idsInString = Ids.Select((id) => id.ToString());
             return "" + Name + "(" + string.Join(", ", idsInString) + ")";
         }
 

@@ -67,7 +67,7 @@ namespace Biscuit.Datalog
             }
             else if (id.HasSymbol)
             {
-                return Symbol.deserializeV1(id);
+                return Symbol.DeserializeV1(id);
             }
             else if (id.HasVariable)
             {
@@ -476,7 +476,7 @@ namespace Biscuit.Datalog
                 }
             }
 
-            static public Either<Errors.FormatError, ID> deserializeV1(Format.Schema.IDV1 id)
+            static public Either<Errors.FormatError, ID> DeserializeV1(Format.Schema.IDV1 id)
             {
                 if (!id.HasSymbol)
                 {

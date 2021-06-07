@@ -161,14 +161,14 @@ namespace Biscuit.Test.Token
 
             BiscuitBuilder builder = Biscuit.Token.Biscuit.Builder(rng, root);
 
-            builder.add_right("/folder1/file1", "read");
-            builder.add_right("/folder1/file1", "write");
-            builder.add_right("/folder1/file2", "read");
-            builder.add_right("/folder1/file2", "write");
-            builder.add_right("/folder2/file3", "read");
+            builder.AddRight("/folder1/file1", "read");
+            builder.AddRight("/folder1/file1", "write");
+            builder.AddRight("/folder1/file2", "read");
+            builder.AddRight("/folder1/file2", "write");
+            builder.AddRight("/folder2/file3", "read");
 
-            Console.WriteLine(builder.build());
-            Biscuit.Token.Biscuit b = builder.build().Right;
+            Console.WriteLine(builder.Build());
+            Biscuit.Token.Biscuit b = builder.Build().Right;
 
             Console.WriteLine(b.Print());
 
@@ -202,7 +202,7 @@ namespace Biscuit.Test.Token
             Error e = res.Left;
             Assert.IsTrue(res.IsLeft);
 
-            Console.WriteLine(v3.print_world());
+            Console.WriteLine(v3.PrintWorld());
             foreach (FailedCheck f in e.FailedCheck().Get())
             {
                 Console.WriteLine(f.ToString());
@@ -291,7 +291,7 @@ namespace Biscuit.Test.Token
             _ = deser2.Attenuate(rng, keypair2, builder.Build()).Left;
 
             Verifier v = deser2.VerifySealed().Right;
-            Console.WriteLine(v.print_world());
+            Console.WriteLine(v.PrintWorld());
         }
 
         [TestMethod]
@@ -353,7 +353,7 @@ namespace Biscuit.Test.Token
             Biscuit.Token.Biscuit b = Biscuit.Token.Biscuit.FromBase64(attenuatedB64).Right;
 
             Verifier v1 = b.Verify(root.ToPublicKey()).Right;
-            List<Guid> revokedIds = v1.GetRevocationIdentifiers().Right.Select(s=> Guid.Parse(s)).ToList();
+            List<Guid> revokedIds = v1.GetRevocationIdentifiers().Right.Select(s => Guid.Parse(s)).ToList();
             Assert.IsTrue(revokedIds.Contains(uuid1));
             Assert.IsTrue(revokedIds.Contains(uuid2));
         }
@@ -370,14 +370,14 @@ namespace Biscuit.Test.Token
 
             Biscuit.Token.Builder.BiscuitBuilder builder = Biscuit.Token.Biscuit.Builder(rng, root);
 
-            builder.add_right("/folder1/file1", "read");
-            builder.add_right("/folder1/file1", "write");
-            builder.add_right("/folder1/file2", "read");
-            builder.add_right("/folder1/file2", "write");
-            builder.add_right("/folder2/file3", "read");
+            builder.AddRight("/folder1/file1", "read");
+            builder.AddRight("/folder1/file1", "write");
+            builder.AddRight("/folder1/file2", "read");
+            builder.AddRight("/folder1/file2", "write");
+            builder.AddRight("/folder2/file3", "read");
 
-            Console.WriteLine(builder.build());
-            Biscuit.Token.Biscuit b = builder.build().Right;
+            Console.WriteLine(builder.Build());
+            Biscuit.Token.Biscuit b = builder.Build().Right;
 
             Console.WriteLine(b.Print());
 
@@ -406,7 +406,7 @@ namespace Biscuit.Test.Token
             v3.AddOperation("read");
 
             res = v3.Verify();
-            Console.WriteLine(v3.print_world());
+            Console.WriteLine(v3.PrintWorld());
 
             Assert.IsTrue(res.IsLeft);
 
@@ -420,7 +420,7 @@ namespace Biscuit.Test.Token
             Error e = res.Left;
             Assert.IsTrue(res.IsLeft);
 
-            Console.WriteLine(v4.print_world());
+            Console.WriteLine(v4.PrintWorld());
             foreach (FailedCheck f in e.FailedCheck().Get())
             {
                 Console.WriteLine(f.ToString());
@@ -445,14 +445,14 @@ namespace Biscuit.Test.Token
 
             Biscuit.Token.Builder.BiscuitBuilder builder = Biscuit.Token.Biscuit.Builder(rng, root);
 
-            builder.add_right("/folder1/file1", "read");
-            builder.add_right("/folder1/file1", "write");
-            builder.add_right("/folder1/file2", "read");
-            builder.add_right("/folder1/file2", "write");
-            builder.add_right("/folder2/file3", "read");
+            builder.AddRight("/folder1/file1", "read");
+            builder.AddRight("/folder1/file1", "write");
+            builder.AddRight("/folder1/file2", "read");
+            builder.AddRight("/folder1/file2", "write");
+            builder.AddRight("/folder2/file3", "read");
 
-            Console.WriteLine(builder.build());
-            Biscuit.Token.Biscuit b = builder.build().Right;
+            Console.WriteLine(builder.Build());
+            Biscuit.Token.Biscuit b = builder.Build().Right;
 
             Console.WriteLine(b.Print());
 

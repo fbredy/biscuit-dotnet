@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Biscuit.Errors
 {
@@ -104,11 +103,6 @@ namespace Biscuit.Errors
                 this.errors = errors;
             }
 
-            public Option<List<FailedCheck>> failed_checks()
-            {
-                return Option.Some(errors);
-            }
-
             public override bool Equals(object o)
             {
                 if (this == o) return true;
@@ -159,7 +153,7 @@ namespace Biscuit.Errors
 
         public class Denied : LogicError
         {
-            private long id;
+            private readonly long id;
 
             public Denied(long id)
             {

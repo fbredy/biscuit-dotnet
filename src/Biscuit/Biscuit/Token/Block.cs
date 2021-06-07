@@ -14,163 +14,80 @@ namespace Biscuit.Token
     /// </summary>
     public class Block
     {
-        public long index { get; }
-        public SymbolTable symbols { get; }
-        public string context { get; }
+        public long Index { get; }
+        public SymbolTable Symbols { get; }
+        public string Context { get; }
 
-        public List<Fact> facts { get; }
-        public List<Rule> rules { get; }
-        public List<Check> checks { get; }
-        readonly long version;
+        public List<Fact> Facts { get; }
+        public List<Rule> Rules { get; }
+        public List<Check> Checks { get; }
+        public uint Version { get; }
 
-        /**
-         * creates a new block
-         * @param index
-         * @param base_symbols
-         */
+        /// <summary>
+        /// creates a new block
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="base_symbols"></param>
         public Block(long index, SymbolTable base_symbols)
         {
-            this.index = index;
-            this.symbols = base_symbols;
-            this.context = "";
-            this.facts = new List<Fact>();
-            this.rules = new List<Rule>();
-            this.checks = new List<Check>();
-            this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
+            this.Index = index;
+            this.Symbols = base_symbols;
+            this.Context = string.Empty;
+            this.Facts = new List<Fact>();
+            this.Rules = new List<Rule>();
+            this.Checks = new List<Check>();
+            this.Version = SerializedBiscuit.MAX_SCHEMA_VERSION;
         }
 
-        /**
-         * creates a new block
-         * @param index
-         * @param base_symbols
-         * @param facts
-         * @param checks
-         */
+        /// <summary>
+        /// creates a new block
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="base_symbols"></param>
+        /// <param name="context"></param>
+        /// <param name="facts"></param>
+        /// <param name="rules"></param>
+        /// <param name="checks"></param>
         public Block(long index, SymbolTable base_symbols, string context, List<Fact> facts, List<Rule> rules, List<Check> checks)
         {
-            this.index = index;
-            this.symbols = base_symbols;
-            this.context = context;
-            this.facts = facts;
-            this.rules = rules;
-            this.checks = checks;
-            this.version = SerializedBiscuit.MAX_SCHEMA_VERSION;
+            this.Index = index;
+            this.Symbols = base_symbols;
+            this.Context = context;
+            this.Facts = facts;
+            this.Rules = rules;
+            this.Checks = checks;
+            this.Version = SerializedBiscuit.MAX_SCHEMA_VERSION;
         }
 
-        //Either<LogicError, Void> check(long i, World w, SymbolTable symbols, List<Check> verifier_checks,
-        //                               Dictionary<string, Rule> queries, Dictionary<string, Dictionary<long, HashSet<Fact>>> query_results)
-        //{
-        //    World world = new World(w);
-        //    ulong authority_index = (ulong)symbols.get("authority").get();
-        //    ulong ambient_index = (ulong)symbols.get("ambient").get();
-
-        //    foreach (Fact fact in this.facts)
-        //    {
-        //        if (fact.predicate.ids[0].Equals(new ID.Symbol(authority_index)) ||
-        //                fact.predicate.ids[0].Equals(new ID.Symbol(ambient_index)))
-        //        {
-        //            return new Left(new LogicError.InvalidBlockFact(i, symbols.print_fact(fact)));
-        //        }
-
-        //        world.add_fact(fact);
-        //    }
-
-        //    foreach (Rule rule in this.rules)
-        //    {
-        //        world.add_rule(rule);
-        //    }
-
-        //    world.run();
-
-        //    List<FailedCheck> errors = new List<FailedCheck>();
-
-        //    for (int j = 0; j < this.checks.Count; j++)
-        //    {
-        //        bool successful = false;
-        //        Check c = this.checks[j] ;
-
-        //        for (int k = 0; k < c.queries.Count; k++)
-        //        {
-        //            HashSet<Fact> res = world.query_rule(c.queries[k]);
-        //            if (res.Any())
-        //            {
-        //                successful = true;
-        //                break;
-        //            }
-        //        }
-
-        //        if (!successful)
-        //        {
-        //            errors.Add(new FailedCheck.FailedBlock(i, j, symbols.print_check(this.checks[j])));
-        //        }
-        //    }
-
-        //    for (int j = 0; j < verifier_checks.Count; j++)
-        //    {
-        //        bool successful = false;
-        //        Check c = verifier_checks[j];
-
-        //        for (int k = 0; k < c.queries.Count; k++)
-        //        {
-        //            HashSet<Fact> res = world.query_rule(c.queries[k]);
-        //            if (res.Any())
-        //            {
-        //                successful = true;
-        //                break;
-        //            }
-        //        }
-
-        //        if (!successful)
-        //        {
-        //            errors.Add(new FailedCheck.FailedVerifier(j, symbols.print_check(verifier_checks[j])));
-        //        }
-        //    }
-
-        //    foreach (string name in queries.Keys)
-        //    {
-        //        HashSet<Fact> res = world.query_rule(queries[name]);
-        //        query_results[name].Add(this.index, res);
-        //    }
-
-        //    if (errors.Count == 0)
-        //    {
-        //        return new Right(null);
-        //    }
-        //    else
-        //    {
-        //        return new Left(new LogicError.FailedChecks(errors));
-        //    }
-        //}
-
-        /**
-         * pretty printing for a block
-         * @param symbol_table
-         * @return
-         */
-        public string print(SymbolTable symbol_table)
+        /// <summary>
+        /// pretty printing for a block
+        /// </summary>
+        /// <param name="symbol_table"></param>
+        /// <returns></returns>
+        public string Print(SymbolTable symbol_table)
         {
             StringBuilder s = new StringBuilder();
 
             s.Append("Block[");
-            s.Append(this.index);
+            s.Append(this.Index);
             s.Append("] {\n\t\tsymbols: ");
-            s.Append(this.symbols.Symbols);
+            s.Append(this.Symbols.Symbols);
             s.Append("\n\t\tcontext: ");
-            s.Append(this.context);
+            s.Append(this.Context);
             s.Append("\n\t\tfacts: [");
-            foreach (Fact f in this.facts)
+            foreach (Fact f in this.Facts)
             {
                 s.Append("\n\t\t\t");
                 s.Append(symbol_table.PrintFact(f));
             }
             s.Append("\n\t\t]\n\t\trules: [");
-            foreach (Rule r in this.rules)
+            foreach (Rule r in this.Rules)
             {
                 s.Append("\n\t\t\t");
                 s.Append(symbol_table.PrintRule(r));
             }
             s.Append("\n\t\t]\n\t\tchecks: [");
-            foreach (Check c in this.checks)
+            foreach (Check c in this.Checks)
             {
                 s.Append("\n\t\t\t");
                 s.Append(symbol_table.PrintCheck(c));
@@ -180,55 +97,55 @@ namespace Biscuit.Token
             return s.ToString();
         }
 
-        /**
-         * Serializes a Block to its Protobuf representation
-         * @return
-         */
-        public Format.Schema.Block serialize()
+        /// <summary>
+        /// Serializes a Block to its Protobuf representation
+        /// </summary>
+        /// <returns></returns>
+        public Format.Schema.Block Serialize()
         {
-            Format.Schema.Block b = new Format.Schema.Block()
+            Format.Schema.Block block = new Format.Schema.Block()
             {
-                Index = (uint)this.index,
+                Index = (uint)this.Index,
             };
 
-            b.Symbols.AddRange(this.symbols.Symbols);
-            
-            if (this.context.Any())
+            block.Symbols.AddRange(this.Symbols.Symbols);
+
+            if (this.Context.Any())
             {
-                b.Context = this.context;
-            }
-            
-            foreach(var fact in facts)
-            {
-                b.FactsV1.Add(fact.serialize());
+                block.Context = this.Context;
             }
 
-            
-            foreach (Rule rule in this.rules)
+            foreach (var fact in Facts)
             {
-                b.RulesV1.Add(rule.Serialize());
+                block.FactsV1.Add(fact.Serialize());
             }
 
-            foreach (Check check in this.checks)
+
+            foreach (Rule rule in this.Rules)
             {
-                b.ChecksV1.Add(check.Serialize());
+                block.RulesV1.Add(rule.Serialize());
             }
 
-            b.Version = SerializedBiscuit.MAX_SCHEMA_VERSION;
-            return b;
+            foreach (Check check in this.Checks)
+            {
+                block.ChecksV1.Add(check.Serialize());
+            }
+
+            block.Version = SerializedBiscuit.MAX_SCHEMA_VERSION;
+            return block;
         }
 
-        /**
-         * Deserializes a block from its Protobuf representation
-         * @param b
-         * @return
-         */
-        static public Either<FormatError, Block> deserialize(Format.Schema.Block b)
+        /// <summary>
+        /// Deserializes a block from its Protobuf representation
+        /// </summary>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        static public Either<FormatError, Block> Deserialize(Format.Schema.Block b)
         {
             uint version = b.Version;
             if (version > SerializedBiscuit.MAX_SCHEMA_VERSION)
             {
-                return new Left(new VersionError(SerializedBiscuit.MAX_SCHEMA_VERSION, version));
+                return new VersionError(SerializedBiscuit.MAX_SCHEMA_VERSION, version);
             }
 
             SymbolTable symbols = new SymbolTable();
@@ -245,11 +162,10 @@ namespace Biscuit.Token
             {
                 foreach (Format.Schema.FactV0 fact in b.FactsV0)
                 {
-                    Either<FormatError, Fact> res = Fact.deserializeV0(fact);
+                    Either<FormatError, Fact> res = Fact.DeserializeV0(fact);
                     if (res.IsLeft)
                     {
-                        FormatError e = res.Left;
-                        return new Left(e);
+                        return res.Left;
                     }
                     else
                     {
@@ -263,8 +179,7 @@ namespace Biscuit.Token
                     Either<FormatError, Rule> res = Rule.DeserializeV0(rule);
                     if (res.IsLeft)
                     {
-                        FormatError e = res.Left;
-                        return new Left(e);
+                        return res.Left;
                     }
                     else
                     {
@@ -278,8 +193,7 @@ namespace Biscuit.Token
                     Either<FormatError, Check> res = Check.DeserializeV0(caveat);
                     if (res.IsLeft)
                     {
-                        FormatError e = res.Left;
-                        return new Left(e);
+                        return res.Left;
                     }
                     else
                     {
@@ -291,11 +205,10 @@ namespace Biscuit.Token
             {
                 foreach (Format.Schema.FactV1 fact in b.FactsV1)
                 {
-                    Either<FormatError, Fact> res = Fact.deserializeV1(fact);
+                    Either<FormatError, Fact> res = Fact.DeserializeV1(fact);
                     if (res.IsLeft)
                     {
-                        FormatError e = res.Left;
-                        return new Left(e);
+                        return res.Left;
                     }
                     else
                     {
@@ -309,8 +222,7 @@ namespace Biscuit.Token
                     Either<FormatError, Rule> res = Rule.DeserializeV1(rule);
                     if (res.IsLeft)
                     {
-                        FormatError e = res.Left;
-                        return new Left(e);
+                        return res.Left;
                     }
                     else
                     {
@@ -324,8 +236,7 @@ namespace Biscuit.Token
                     Either<FormatError, Check> res = Check.DeserializeV1(check);
                     if (res.IsLeft)
                     {
-                        FormatError e = res.Left;
-                        return new Left(e);
+                        return res.Left;
                     }
                     else
                     {
@@ -337,41 +248,38 @@ namespace Biscuit.Token
             return new Right(new Block(b.Index, symbols, b.Context, facts, rules, checks));
         }
 
-        /**
-         * Deserializes a Block from a byte array
-         * @param slice
-         * @return
-         */
-        static public Either<FormatError, Block> from_bytes(byte[] slice)
+        /// <summary>
+        /// Deserializes a Block from a byte array
+        /// </summary>
+        /// <param name="slice"></param>
+        /// <returns></returns>
+        static public Either<FormatError, Block> FromBytes(byte[] slice)
         {
             try
             {
                 Format.Schema.Block data = Format.Schema.Block.Parser.ParseFrom(slice);
-                return Block.deserialize(data);
+                return Block.Deserialize(data);
             }
             catch (InvalidProtocolBufferException e)
             {
-                return new Left(new DeserializationError(e.ToString()));
+                return new DeserializationError(e.ToString());
             }
         }
 
-        public Either<FormatError, byte[]> to_bytes()
+        public Either<FormatError, byte[]> ToBytes()
         {
-            Format.Schema.Block b = this.serialize();
+            Format.Schema.Block b = this.Serialize();
             try
             {
-                using (MemoryStream stream = new MemoryStream())
-                    using(CodedOutputStream codedStream = new CodedOutputStream(stream))
-                {
-                    b.WriteTo(codedStream);
-                    codedStream.Flush();
-                    byte[] data = stream.ToArray();
-                    return new Right(data);
-                }                
+                using MemoryStream stream = new MemoryStream();
+                using CodedOutputStream codedStream = new CodedOutputStream(stream);
+                b.WriteTo(codedStream);
+                codedStream.Flush();
+                return stream.ToArray();
             }
             catch (IOException e)
             {
-                return new Left(new SerializationError(e.ToString()));
+                return new SerializationError(e.ToString());
             }
         }
     }

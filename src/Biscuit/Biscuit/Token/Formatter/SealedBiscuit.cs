@@ -25,41 +25,39 @@ namespace Biscuit.Token.Formatter
             try
             {
                 Format.Schema.SealedBiscuit data = Format.Schema.SealedBiscuit.Parser.ParseFrom(slice);
-                using (HMACSHA256 hmac = new HMACSHA256(secret))
+                using HMACSHA256 hmac = new HMACSHA256(secret);
+                byte[] authority = data.Authority.ToByteArray();
+
+                List<byte> toHash = new List<byte>(authority);
+
+                List<byte[]> blocks = new List<byte[]>();
+                foreach (ByteString block in data.Blocks)
                 {
-                    byte[] authority = data.Authority.ToByteArray();
-
-                    List<byte> toHash = new List<byte>(authority);
-
-                    List<byte[]> blocks = new List<byte[]>();
-                    foreach (ByteString block in data.Blocks)
-                    {
-                        byte[] byteBlock = block.ToByteArray();
-                        blocks.Add(byteBlock);
-                        toHash.AddRange(byteBlock);
-                    }
-
-                    byte[] calculated = hmac.ComputeHash(toHash.ToArray());
-                    byte[] signature = data.Signature.ToByteArray();
-
-                    if (calculated.Length != signature.Length)
-                    {
-                        return new InvalidFormat();
-                    }
-
-                    int result = 0;
-                    for (int i = 0; i < calculated.Length; i++)
-                    {
-                        result |= calculated[i] ^ signature[i];
-                    }
-
-                    if (result != 0)
-                    {
-                        return new SealedSignature();
-                    }
-
-                    return new SealedBiscuit(authority, blocks, signature);
+                    byte[] byteBlock = block.ToByteArray();
+                    blocks.Add(byteBlock);
+                    toHash.AddRange(byteBlock);
                 }
+
+                byte[] calculated = hmac.ComputeHash(toHash.ToArray());
+                byte[] signature = data.Signature.ToByteArray();
+
+                if (calculated.Length != signature.Length)
+                {
+                    return new InvalidFormat();
+                }
+
+                int result = 0;
+                for (int i = 0; i < calculated.Length; i++)
+                {
+                    result |= calculated[i] ^ signature[i];
+                }
+
+                if (result != 0)
+                {
+                    return new SealedSignature();
+                }
+
+                return new SealedBiscuit(authority, blocks, signature);
             }
             catch (Exception e)
             {
@@ -86,12 +84,10 @@ namespace Biscuit.Token.Formatter
 
             try
             {
-                using (MemoryStream stream = new MemoryStream())
-                {
-                    biscuit.WriteTo(stream);
-                    byte[] data = stream.ToArray();
-                    return data;
-                }
+                using MemoryStream stream = new MemoryStream();
+                biscuit.WriteTo(stream);
+                byte[] data = stream.ToArray();
+                return data;
             }
             catch (IOException e)
             {
@@ -111,36 +107,30 @@ namespace Biscuit.Token.Formatter
         {
             try
             {
-                using (HMACSHA256 hmac = new HMACSHA256(secret))
+                using HMACSHA256 hmac = new HMACSHA256(secret);
+                Format.Schema.Block b = authority.Serialize();
+                using MemoryStream stream = new MemoryStream();
+                b.WriteTo(stream);
+                byte[] authorityData = stream.ToArray();
+
+                List<byte> toHash = new List<byte>(authorityData);
+
+                List<byte[]> blocksData = new List<byte[]>();
+                foreach (Block bl in blocks)
                 {
-                    Format.Schema.Block b = authority.serialize();
-                    using (MemoryStream stream = new MemoryStream())
-                    {
-                        b.WriteTo(stream);
-                        byte[] authorityData = stream.ToArray();
-
-                        List<byte> toHash = new List<byte>(authorityData);
-
-                        List<byte[]> blocksData = new List<byte[]>();
-                        foreach (Block bl in blocks)
-                        {
-                            Format.Schema.Block b2 = bl.serialize();
-                            using (MemoryStream stream2 = new MemoryStream())
-                            {
-                                b2.WriteTo(stream2);
-                                toHash.AddRange(stream2.ToArray());
-                                blocksData.Add(stream2.ToArray());
-                            }
-                        }
-
-                        byte[] signature = hmac.ComputeHash(toHash.ToArray());// sha256_HMAC.doFinal();
-                        return new Right(new SealedBiscuit(authorityData, blocksData, signature));
-                    }
+                    Format.Schema.Block b2 = bl.Serialize();
+                    using MemoryStream stream2 = new MemoryStream();
+                    b2.WriteTo(stream2);
+                    toHash.AddRange(stream2.ToArray());
+                    blocksData.Add(stream2.ToArray());
                 }
+
+                byte[] signature = hmac.ComputeHash(toHash.ToArray());// sha256_HMAC.doFinal();
+                return new SealedBiscuit(authorityData, blocksData, signature);
             }
             catch (Exception e)
             {
-                return new Left(new SerializationError(e.ToString()));
+                return new SerializationError(e.ToString());
             }
         }
 
@@ -152,7 +142,7 @@ namespace Biscuit.Token.Formatter
             {
                 var dataToCompute = new List<byte>(this.Authority);
 
-                using (var sha = SHA256.Create())
+                using (SHA256 sha = SHA256.Create())
                 {
                     var computedHash = sha.ComputeHash(dataToCompute.ToArray());
                     l.Add(computedHash);
@@ -162,11 +152,9 @@ namespace Biscuit.Token.Formatter
                 {
                     dataToCompute.AddRange(block);
 
-                    using (var sha = SHA256.Create())
-                    {
-                        var computedHash = sha.ComputeHash(dataToCompute.ToArray());
-                        l.Add(computedHash);
-                    }
+                    using var sha = SHA256.Create();
+                    var computedHash = sha.ComputeHash(dataToCompute.ToArray());
+                    l.Add(computedHash);
                 }
             }
             catch (Exception e)

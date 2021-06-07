@@ -12,7 +12,7 @@ namespace Biscuit.Test.Token
     [TestClass]
     public class SamplesV1Test
     {
-        static byte[] rootData = Ristretto.StrUtils.hexToBytes("529e780f28d9181c968b0eab9977ed8494a27a4544c3adc1910f41bb3dc36958");
+        static readonly byte[] rootData = Ristretto.StrUtils.hexToBytes("529e780f28d9181c968b0eab9977ed8494a27a4544c3adc1910f41bb3dc36958");
 
         [TestMethod]
         public void Test1_Basic()
@@ -69,7 +69,7 @@ namespace Biscuit.Test.Token
             Assert.IsTrue(e is DeserializationError);
             DeserializationError errorDeserialized = (DeserializationError)e;
             Assert.IsTrue(errorDeserialized.e.Contains("Input must by 32 bytes"));
-            
+
         }
 
         [TestMethod]
@@ -157,7 +157,7 @@ namespace Biscuit.Test.Token
             v1.AddResource("file1");
             v1.AddOperation("read");
             v1.SetTime();
-            Console.WriteLine(v1.print_world());
+            Console.WriteLine(v1.PrintWorld());
 
             Error e = v1.Verify(new RunLimits(500, 100, TimeSpan.FromMilliseconds(500))).Left;
             Assert.AreEqual(

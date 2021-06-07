@@ -56,8 +56,8 @@ namespace Biscuit.Datalog.Expressions
 
         public Format.Schema.ExpressionV1 Serialize()
         {
-            Format.Schema.ExpressionV1  expression = new Format.Schema.ExpressionV1();
-            
+            Format.Schema.ExpressionV1 expression = new Format.Schema.ExpressionV1();
+
             var serializedOps = this.ops.Select(op => op.Serialize());
             expression.Ops.AddRange(serializedOps);
 
