@@ -16,7 +16,7 @@ namespace Biscuit.Token
         public Block Authority { get; }
         public List<Block> Blocks { get; }
         public SymbolTable Symbols { get; }
-        public List<byte[]> RevocationIdentifiers { get; }
+        public List<RevocationIdentifier> RevocationIdentifiers { get; }
 
         private readonly Option<SerializedBiscuit> container;
 
@@ -75,14 +75,14 @@ namespace Biscuit.Token
             else
             {
                 SerializedBiscuit s = container.Right;
-                List<byte[]> revocation_ids = s.RevocationIdentifiers();
+                List<RevocationIdentifier> revocation_ids = s.RevocationIdentifiers();
 
                 Option<SerializedBiscuit> c = Option.Some(s);
                 return new Right(new Biscuit(authority, blocks, symbols, c, revocation_ids));
             }
         }
 
-        Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, Option<SerializedBiscuit> container, List<byte[]> revocation_ids)
+        Biscuit(Block authority, List<Block> blocks, SymbolTable symbols, Option<SerializedBiscuit> container, List<RevocationIdentifier> revocation_ids)
         {
             this.Authority = authority;
             this.Blocks = blocks;
@@ -170,7 +170,7 @@ namespace Biscuit.Token
                 }
             }
 
-            List<byte[]> revocationIds = ser.RevocationIdentifiers();
+            List<RevocationIdentifier> revocationIds = ser.RevocationIdentifiers();
 
             return new Right(new Biscuit(authority, blocks, symbols, Option.Some(ser), revocationIds));
         }
@@ -264,7 +264,7 @@ namespace Biscuit.Token
                 }
             }
 
-            List<byte[]> revocation_ids = ser.RevocationIdentifiers();
+            List<RevocationIdentifier> revocation_ids = ser.RevocationIdentifiers();
 
             return new Biscuit(authority, blocks, symbols, Option<SerializedBiscuit>.None(), revocation_ids);
         }
@@ -344,11 +344,11 @@ namespace Biscuit.Token
                 }
             }
 
-            List<byte[]> revocation_ids = this.RevocationIdentifiers;
+            List<RevocationIdentifier> revocation_ids = this.RevocationIdentifiers;
             ulong rev = Symbols.Get("revocation_id").Get();
             for (int i = 0; i < revocation_ids.Count; i++)
             {
-                byte[] id = revocation_ids[i];
+                byte[] id = revocation_ids[i].Bytes ;
                 world.AddFact(new Fact(new Predicate(rev, Arrays.AsList<ID>(new ID.Integer(i), new ID.Bytes(id)))));
             }
 
@@ -525,7 +525,7 @@ namespace Biscuit.Token
             }
             blocks.Add(block);
 
-            List<byte[]> revocation_ids = container.RevocationIdentifiers();
+            List<RevocationIdentifier> revocation_ids = container.RevocationIdentifiers();
 
             return new Biscuit(copiedBiscuit.Authority, blocks, symbols, Option.Some(container), revocation_ids);
         }

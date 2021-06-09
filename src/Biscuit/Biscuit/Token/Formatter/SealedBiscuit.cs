@@ -3,6 +3,7 @@ using Google.Protobuf;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace Biscuit.Token.Formatter
@@ -134,9 +135,9 @@ namespace Biscuit.Token.Formatter
             }
         }
 
-        public List<byte[]> RevocationIdentifiers()
+        public List<RevocationIdentifier> RevocationIdentifiers()
         {
-            List<byte[]> l = new List<byte[]>();
+            List<byte[]> result = new List<byte[]>();
 
             try
             {
@@ -145,7 +146,7 @@ namespace Biscuit.Token.Formatter
                 using (SHA256 sha = SHA256.Create())
                 {
                     var computedHash = sha.ComputeHash(dataToCompute.ToArray());
-                    l.Add(computedHash);
+                    result.Add(computedHash);
                 }
 
                 foreach (byte[] block in this.Blocks)
@@ -154,7 +155,7 @@ namespace Biscuit.Token.Formatter
 
                     using var sha = SHA256.Create();
                     var computedHash = sha.ComputeHash(dataToCompute.ToArray());
-                    l.Add(computedHash);
+                    result.Add(computedHash);
                 }
             }
             catch (Exception e)
@@ -162,7 +163,7 @@ namespace Biscuit.Token.Formatter
                 Console.WriteLine(e.StackTrace.ToString());
             }
 
-            return l;
+            return result.Select(byteArray=> new RevocationIdentifier(byteArray)).ToList();
         }
     }
 }

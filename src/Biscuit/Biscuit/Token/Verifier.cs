@@ -162,11 +162,11 @@ namespace Biscuit.Token
                 token_checks.Add(block_checks);
             }
 
-            List<byte[]> revocation_ids = token.RevocationIdentifiers;
+            List<RevocationIdentifier> revocation_ids = token.RevocationIdentifiers;
             ulong rev = symbols.Get("revocation_id").Get();
             for (int i = 0; i < revocation_ids.Count; i++)
             {
-                byte[] id = revocation_ids[i];
+                byte[] id = revocation_ids[i].Bytes;
                 world.AddFact(new Fact(new Predicate(rev, Arrays.AsList<ID>(new ID.Integer(i), new ID.Bytes(id)))));
             }
 

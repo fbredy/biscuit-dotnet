@@ -193,7 +193,7 @@ namespace Biscuit.Token.Formatter
             return new Right(null);
         }
 
-        public List<byte[]> RevocationIdentifiers()
+        public List<RevocationIdentifier> RevocationIdentifiers()
         {
             List<byte[]> result = new List<byte[]>();
 
@@ -222,7 +222,7 @@ namespace Biscuit.Token.Formatter
                 Console.WriteLine(e.StackTrace.ToString());
             }
 
-            return result;
+            return result.Select(byteArray=> new RevocationIdentifier(byteArray)).ToList();
         }
 
         SerializedBiscuit(byte[] authority, List<byte[]> blocks, List<RistrettoElement> keys, TokenSignature signature)
