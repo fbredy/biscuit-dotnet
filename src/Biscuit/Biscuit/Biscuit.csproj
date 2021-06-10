@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.1.3</Version>
+    <Authors>fbredy</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/fbredy/biscuit-dotnet</PackageProjectUrl>
+    <Description>delegated, decentralized, capabilities based authorization token</Description>
+    <PackageTags>biscuit, delegated, decentralized, capabilities based authorization token,</PackageTags>
+    <PackageIcon>icone.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +20,13 @@
     <PackageReference Include="Google.Protobuf" Version="3.16.0" />
     <PackageReference Include="Google.Protobuf.Tools" Version="3.16.0" />
     <PackageReference Include="Ristretto" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\icone.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
