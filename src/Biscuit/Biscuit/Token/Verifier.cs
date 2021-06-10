@@ -444,7 +444,7 @@ namespace Biscuit.Token
                 Datalog.Check c = this.checks[j].Convert(symbols);
                 bool successful = false;
 
-                for (int k = 0; k < c.Queries.Count; k++)
+                for (int k = 0; k < c.Queries.Count && !successful; k++)
                 {
                     bool res = world.TestRule(c.Queries[k]);
 
@@ -456,7 +456,6 @@ namespace Biscuit.Token
                     if (res)
                     {
                         successful = true;
-                        break;
                     }
                 }
 

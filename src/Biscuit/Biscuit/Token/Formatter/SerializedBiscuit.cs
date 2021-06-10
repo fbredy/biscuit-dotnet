@@ -30,19 +30,13 @@ namespace Biscuit.Token.Formatter
             {
                 Format.Schema.Biscuit data = Format.Schema.Biscuit.Parser.ParseFrom(slice);
 
-                List<RistrettoElement> keys = new List<RistrettoElement>();
-                foreach (ByteString key in data.Keys)
-                {
-                    keys.Add(new CompressedRistretto(key.ToByteArray()).Decompress());
-                }
+                List<RistrettoElement> keys = data.Keys
+                    .Select(key => new CompressedRistretto(key.ToByteArray()).Decompress())
+                    .ToList();
 
                 byte[] authority = data.Authority.ToByteArray();
 
-                List<byte[]> blocks = new List<byte[]>();
-                foreach (ByteString block in data.Blocks)
-                {
-                    blocks.Add(block.ToByteArray());
-                }
+                List<byte[]> blocks = data.Blocks.Select(block => block.ToByteArray()).ToList();
 
                 Either<Error, TokenSignature> signatureRes = TokenSignature.Deserialize(data.Signature);
 
