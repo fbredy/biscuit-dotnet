@@ -22,7 +22,7 @@ namespace Biscuit.Crypto
 
         public KeyPair(string hex)
         {
-            byte[] b = StrUtils.hexToBytes(hex);
+            byte[] b = StrUtils.HexToBytes(hex);
             this.PrivateKey = Scalar.FromBytesModOrder(b);
             this.PublicKey = Constants.RISTRETTO_GENERATOR.Multiply(this.PrivateKey);
         }
@@ -40,7 +40,7 @@ namespace Biscuit.Crypto
 
         public string ToHex()
         {
-            return StrUtils.bytesToHex(this.ToBytes());
+            return StrUtils.BytesToHex(this.ToBytes());
         }
 
         public PublicKey ToPublicKey()

@@ -12,7 +12,7 @@ namespace Biscuit.Test.Token
     [TestClass]
     public class SamplesV1Test
     {
-        static readonly byte[] rootData = Ristretto.StrUtils.hexToBytes("529e780f28d9181c968b0eab9977ed8494a27a4544c3adc1910f41bb3dc36958");
+        static readonly byte[] rootData = Ristretto.StrUtils.HexToBytes("529e780f28d9181c968b0eab9977ed8494a27a4544c3adc1910f41bb3dc36958");
 
         [TestMethod]
         public void Test1_Basic()

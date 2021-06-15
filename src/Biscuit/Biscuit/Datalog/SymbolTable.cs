@@ -53,7 +53,7 @@ namespace Biscuit.Datalog
                     result = ((ID.Bool)value).Value.ToString();
                     break;
                 case ID.Bytes _:
-                    result = StrUtils.bytesToHex(((ID.Bytes)value).Value);
+                    result = StrUtils.BytesToHex(((ID.Bytes)value).Value);
                     break;
                 case ID.Date _:
                     {
@@ -140,7 +140,7 @@ namespace Biscuit.Datalog
                 }
                 else if (i is ID.Integer)
                 {
-                    return "" + ((ID.Integer)i).Value;
+                    return string.Empty + ((ID.Integer)i).Value;
                 }
                 else if (i is ID.Str)
                 {
@@ -148,7 +148,7 @@ namespace Biscuit.Datalog
                 }
                 else if (i is ID.Bytes)
                 {
-                    return "hex:" + StrUtils.bytesToHex(((ID.Bytes)i).Value);
+                    return "hex:" + StrUtils.BytesToHex(((ID.Bytes)i).Value);
                 }
                 else
                 {

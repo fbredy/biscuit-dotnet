@@ -19,7 +19,7 @@ namespace Biscuit.Crypto
 
         public PublicKey(string hex)
         {
-            byte[] data = StrUtils.hexToBytes(hex);
+            byte[] data = StrUtils.HexToBytes(hex);
             CompressedRistretto compressed = new CompressedRistretto(data);
             this.Key = compressed.Decompress();
         }
@@ -31,7 +31,7 @@ namespace Biscuit.Crypto
 
         public string ToHex()
         {
-            return StrUtils.bytesToHex(this.ToBytes());
+            return StrUtils.BytesToHex(this.ToBytes());
         }
     }
 }
